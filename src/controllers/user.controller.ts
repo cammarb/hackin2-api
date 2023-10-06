@@ -6,7 +6,9 @@ const prisma = new PrismaClient()
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
     const users = await prisma.user.findMany()
-    res.status(200).json({ message: 'Get All Users' })
+    res.status(200).json({
+      users,
+    })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
   }
@@ -26,7 +28,7 @@ export const getUser = async (req: Request, res: Response) => {
       email: user?.email,
       firstName: user?.firstName,
       lastName: user?.lastName,
-      role: user?.roleId,
+      roleId: user?.roleId,
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
@@ -35,9 +37,30 @@ export const getUser = async (req: Request, res: Response) => {
 
 export const editUser = async (req: Request, res: Response) => {
   try {
-    res.status(200).json({ message: 'Get All Users' })
+    const id: number = parseInt(req.params.id)
+    const { username, email, firstName, lastName, role } = req.body
+
+    const user: User | null = await prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        username: username,
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        roleId: role,
+      },
+    })
+    res.status(200).json({
+      username: user?.username,
+      email: user?.email,
+      firstName: user?.firstName,
+      lastName: user?.lastName,
+      roleId: user?.roleId,
+    })
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' })
+    res.status(500).json({ error: error })
   }
 }
 
