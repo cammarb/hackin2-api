@@ -4,8 +4,7 @@
 node_modules/
 
 # Prisma
-/prisma/client
-/prisma/migration
+prisma/client
 
 # TypeScript
 *.tsbuildinfo
