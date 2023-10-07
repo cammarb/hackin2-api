@@ -1,7 +1,7 @@
 import { User } from '@prisma/client'
 import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken'
 
-function generateAccessToken(user: User): string {
+const generateAccessToken = (user: User): string => {
   const payload: JwtPayload = { userId: user.id }
   const options: SignOptions = { expiresIn: '5m' }
   if (!process.env.JWT_ACCESS_SECRET)
@@ -11,7 +11,7 @@ function generateAccessToken(user: User): string {
   return jwt.sign(payload, accessSecret, options)
 }
 
-function generateRefreshToken(user: User, jti: string): string {
+const generateRefreshToken = (user: User, jti: string): string => {
   const payload: JwtPayload = { userId: user.id, jti }
   const options: SignOptions = {
     expiresIn: '8h',
@@ -23,10 +23,10 @@ function generateRefreshToken(user: User, jti: string): string {
   return jwt.sign(payload, refreshToken, options)
 }
 
-function generateTokens(
+const generateTokens = (
   user: User,
   jti: string
-): { accessToken: string; refreshToken: string } {
+): { accessToken: string; refreshToken: string } => {
   const accessToken = generateAccessToken(user)
   const refreshToken = generateRefreshToken(user, jti)
 
