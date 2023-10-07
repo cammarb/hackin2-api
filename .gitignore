@@ -8,7 +8,6 @@ prisma/client
 
 # TypeScript
 *.tsbuildinfo
-*.ts
 
 # macOS
 .DS_Store
