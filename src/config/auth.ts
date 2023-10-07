@@ -4,11 +4,11 @@ import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken'
 function generateAccessToken(user: User): string {
   const payload: JwtPayload = { userId: user.id }
   const options: SignOptions = { expiresIn: '5m' }
-  if (!process.env.JWT_REFRESH_SECRET)
+  if (!process.env.JWT_ACCESS_SECRET)
     throw new Error('JWT_REFRESH_SECRET is not defined')
 
-  const refreshToken: jwt.Secret = process.env.JWT_REFRESH_SECRET
-  return jwt.sign(payload, refreshToken, options)
+  const accessSecret: jwt.Secret = process.env.JWT_ACCESS_SECRET
+  return jwt.sign(payload, accessSecret, options)
 }
 
 function generateRefreshToken(user: User, jti: string): string {
