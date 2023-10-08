@@ -17,7 +17,7 @@ model User {
   username     String         @unique
   email        String         @unique
   password     String
-  roleId       Int            @unique @map("role_id")
+  roleId       Int            @map("role_id")
   role         Role           @relation(fields: [roleId], references: [id])
   RefreshToken RefreshToken[]
 }
