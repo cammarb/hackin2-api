@@ -5,9 +5,11 @@ node_modules/
 
 # Prisma
 prisma/client
+prisma/migrations/*/*.sql
 
 # TypeScript
 *.tsbuildinfo
+dist
 
 # macOS
 .DS_Store
