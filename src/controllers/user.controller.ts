@@ -53,6 +53,7 @@ export const getUser = async (req: Request, res: Response) => {
         id: id,
       },
     })
+    if (!user) res.status(404).json({ error: 'User not found' })
     res.status(200).json({
       id: user?.id,
       username: user?.username,
@@ -97,7 +98,14 @@ export const editUser = async (req: Request, res: Response) => {
 
 export const deleteUser = async (req: Request, res: Response) => {
   try {
-    res.status(200).json({ message: 'Get All Users' })
+    const id: number = parseInt(req.params.id)
+    const user: User | null = await prisma.user.delete({
+      where: {
+        id: id,
+      },
+    })
+    if (!user) res.sendStatus(404).json({ error: 'User not found' })
+    res.status(200).json({ message: `User with ${id} deleted successfully` })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
   }
