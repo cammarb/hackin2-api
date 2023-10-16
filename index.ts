@@ -3,7 +3,8 @@ import dotenv from 'dotenv'
 import path from 'path'
 import cors from 'cors'
 
-import router from './src/routes/user.routes'
+import userRouter from './src/routes/user.routes'
+import authRouter from './src/routes/auth.routes'
 
 dotenv.config()
 
@@ -17,7 +18,8 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Express + TypeScript Server')
 })
 
-app.use('/user', router)
+app.use('/user', userRouter)
+app.use('/login', authRouter)
 
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`)
