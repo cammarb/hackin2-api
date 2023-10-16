@@ -7,12 +7,12 @@ import {
   newUser,
 } from '../controllers/user.controller'
 
-const router: Router = express.Router()
+const userRouter: Router = express.Router()
 
-router.post('/register', newUser)
-router.get('/', getAllUsers)
-router.get('/:id', getUser)
-router.put('/:id/edit', editUser)
-router.delete('/:id/delete', deleteUser)
+userRouter.post('/register', newUser)
+userRouter.get('/', getAllUsers)
+userRouter.get('/:id', getUser)
+userRouter.put('/:id/edit', editUser)
+userRouter.delete('/:id/delete', deleteUser)
 
-export default router
+export default userRouter
