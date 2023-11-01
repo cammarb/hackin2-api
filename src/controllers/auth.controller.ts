@@ -75,7 +75,7 @@ const handleRefreshToken = async (req: Request, res: Response) => {
     return res.sendStatus(403)
   } else {
     jwt.verify(refreshToken, refreshTokenSecretKey, (err, decoded) => {
-      if (err || !decoded || user.username !== decoded.username) {
+      if (err || !decoded) {
         return res.sendStatus(403)
       }
 
