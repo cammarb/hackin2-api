@@ -85,4 +85,4 @@ const handleRefreshToken = async (req: Request, res: Response) => {
   }
 }
 
-export { handleLogin }
+export { handleLogin, handleRefreshToken }
