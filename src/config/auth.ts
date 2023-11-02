@@ -5,10 +5,10 @@ const generateAccessToken = (user: User): string => {
   const payload: JwtPayload = { username: user.username, role: user.roleId }
   const options: SignOptions = { expiresIn: '5m' }
 
-  if (!process.env.JWT_ACCESS_SECRET)
-    throw new Error('JWT_REFRESH_SECRET is not defined')
+  if (!process.env.ACCESS_TOKEN_SECRET)
+    throw new Error('ACCESS_TOKEN_SECRET is not defined')
 
-  const accessSecret: jwt.Secret = process.env.JWT_ACCESS_SECRET
+  const accessSecret: jwt.Secret = process.env.ACCESS_TOKEN_SECRET
 
   return jwt.sign(payload, accessSecret, options)
 }
@@ -19,10 +19,10 @@ const generateRefreshToken = (user: User): string => {
     expiresIn: '8h',
   }
 
-  if (!process.env.JWT_REFRESH_SECRET)
-    throw new Error('JWT_REFRESH_SECRET is not defined')
+  if (!process.env.REFRESH_TOKEN_SECRET)
+    throw new Error('REFRESH_TOKEN_SECRET is not defined')
 
-  const refreshToken: jwt.Secret = process.env.JWT_REFRESH_SECRET
+  const refreshToken: jwt.Secret = process.env.REFRESH_TOKEN_SECRET
 
   return jwt.sign(payload, refreshToken, options)
 }
