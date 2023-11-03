@@ -38,7 +38,7 @@ const handleLogin = async (req: Request, res: Response) => {
         },
       })
 
-      res.cookie('Refresh-Token', tokens.refreshToken, {
+      res.cookie('jwt', tokens.refreshToken, {
         httpOnly: true,
         sameSite: 'none',
         secure: true,
@@ -59,9 +59,9 @@ const handleLogin = async (req: Request, res: Response) => {
 }
 
 const handleRefreshToken = async (req: Request, res: Response) => {
-  const header = req.headers
-  if (!header.authorization) return res.status(401)
-  const refreshToken = header.authorization
+  const cookie = req.cookies
+  if (!cookie?.jwt) return res.status(401)
+  const refreshToken = cookie.jwt
 
   const user: User | null = await prisma.user.findFirst({
     where: {
@@ -80,14 +80,20 @@ const handleRefreshToken = async (req: Request, res: Response) => {
   if (!tokenSecretKey || !refreshTokenSecretKey) {
     return res.sendStatus(403)
   } else {
-    jwt.verify(refreshToken, refreshTokenSecretKey, (err, decoded) => {
-      if (err || !decoded) {
-        return res.sendStatus(403)
-      }
+    const decoded = jwt.verify(refreshToken, refreshTokenSecretKey)
 
-      const accessToken = generateAccessToken(user)
-      res.json({ accessToken })
-    })
+    jwt.verify(
+      refreshToken,
+      refreshTokenSecretKey,
+      (err: any, decoded: any) => {
+        if (err || !decoded) {
+          return res.sendStatus(403)
+        }
+
+        const accessToken = generateAccessToken(user)
+        res.json({ accessToken })
+      }
+    )
   }
 }
 
