@@ -7,6 +7,7 @@ const generateAccessToken = (user: User): string => {
     role: user.roleId,
   }
   const options: SignOptions = {
+    algorithm: 'RS256',
     expiresIn: '5m',
     issuer: 'https://hackin2.com',
   }
@@ -22,7 +23,9 @@ const generateAccessToken = (user: User): string => {
 const generateRefreshToken = (user: User): string => {
   const payload: JwtPayload = { username: user.username, role: user.roleId }
   const options: SignOptions = {
+    algorithm: 'RS256',
     expiresIn: '8h',
+    issuer: 'https://hackin2.com',
   }
 
   if (!process.env.REFRESH_TOKEN_SECRET)
