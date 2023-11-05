@@ -24,7 +24,7 @@ model User {
 
 model RefreshToken {
   id          String   @id @unique @default(uuid())
-  hashedToken String
+  hashedToken String   @unique
   userId      Int
   User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   revoked     Boolean  @default(false)
