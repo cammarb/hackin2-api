@@ -2,13 +2,15 @@ import { Request, Response } from 'express'
 import prisma from '../config/db'
 import { User } from '@prisma/client'
 import hashToken from '../config/hash'
+import * as EmailValidator from 'email-validator'
 
 export const newUser = async (req: Request, res: Response) => {
   const { username, email, firstName, lastName, password, roleId } = req.body
-  if (!username || !password)
-    return res
-      .status(400)
-      .json({ messaege: 'Username and password are required' })
+  if (!username || !password || !email || !firstName || !lastName || !roleId)
+    return res.status(400).json({ messaege: 'All the fields are required' })
+  // validate email
+  if (!EmailValidator.validate(email))
+    return res.status(400).json({ messaege: 'Enter a valid email' })
   // Find if the username or email already exists
   const user: User[] | null = await prisma.user.findMany({
     where: {
@@ -72,25 +74,29 @@ export const editUser = async (req: Request, res: Response) => {
     const id: number = parseInt(req.params.id)
     const { username, email, firstName, lastName, role } = req.body
 
-    const user: User | null = await prisma.user.update({
-      where: {
-        id: id,
-      },
-      data: {
-        username: username,
-        email: email,
-        firstName: firstName,
-        lastName: lastName,
-        roleId: role,
-      },
-    })
-    res.status(200).json({
-      username: user?.username,
-      email: user?.email,
-      firstName: user?.firstName,
-      lastName: user?.lastName,
-      roleId: user?.roleId,
-    })
+    if (!EmailValidator.validate(email))
+      return res.status(400).json({ messaege: 'Enter a valid email' })
+    else {
+      const user: User | null = await prisma.user.update({
+        where: {
+          id: id,
+        },
+        data: {
+          username: username,
+          email: email,
+          firstName: firstName,
+          lastName: lastName,
+          roleId: role,
+        },
+      })
+      res.status(200).json({
+        username: user?.username,
+        email: user?.email,
+        firstName: user?.firstName,
+        lastName: user?.lastName,
+        roleId: user?.roleId,
+      })
+    }
   } catch (error) {
     res.status(500).json({ error: error })
   }
