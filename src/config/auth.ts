@@ -2,8 +2,14 @@ import { User } from '@prisma/client'
 import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken'
 
 const generateAccessToken = (user: User): string => {
-  const payload: JwtPayload = { username: user.username, role: user.roleId }
-  const options: SignOptions = { expiresIn: '5m' }
+  const payload: JwtPayload = {
+    username: user.username,
+    role: user.roleId,
+  }
+  const options: SignOptions = {
+    expiresIn: '5m',
+    issuer: 'https://hackin2.com',
+  }
 
   if (!process.env.ACCESS_TOKEN_SECRET)
     throw new Error('ACCESS_TOKEN_SECRET is not defined')
