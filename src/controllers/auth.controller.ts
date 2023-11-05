@@ -28,7 +28,12 @@ const handleLogin = async (req: Request, res: Response) => {
   } else {
     const passwordMatch = await bcrypt.compare(password, user.password)
 
-    if (passwordMatch) {
+    if (!passwordMatch) {
+      res.status(401).json({
+        error: 'Authentication failed',
+        message: 'Invalid username or password',
+      })
+    } else {
       const tokens = generateTokens(user)
 
       const refreshToken: RefreshToken = await prisma.refreshToken.create({
@@ -49,30 +54,15 @@ const handleLogin = async (req: Request, res: Response) => {
         message: 'Login successful',
         data: `${tokens.accessToken}`,
       })
-    } else {
-      res.status(401).json({
-        error: 'Authentication failed',
-        message: 'Invalid username or password',
-      })
     }
   }
 }
 
 const handleRefreshToken = async (req: Request, res: Response) => {
   const cookie = req.cookies
-  if (!cookie?.jwt) return res.status(401)
-  const refreshToken = cookie.jwt
+  if (!cookie?.jwt) return res.status(401).json({ message: 'Unauthorized' })
 
-  const user: User | null = await prisma.user.findFirst({
-    where: {
-      RefreshToken: {
-        some: {
-          hashedToken: refreshToken,
-        },
-      },
-    },
-  })
-  if (!user) return res.sendStatus(403) // Forbidden
+  const refreshToken = cookie.jwt
 
   const tokenSecretKey = process.env.SECRET_KEY
   const refreshTokenSecretKey = process.env.REFRESH_TOKEN_SECRET_KEY
@@ -81,19 +71,49 @@ const handleRefreshToken = async (req: Request, res: Response) => {
     return res.sendStatus(403)
   } else {
     const decoded = jwt.verify(refreshToken, refreshTokenSecretKey)
+    if (!decoded) return res.sendStatus(403)
 
-    jwt.verify(
-      refreshToken,
-      refreshTokenSecretKey,
-      (err: any, decoded: any) => {
-        if (err || !decoded) {
-          return res.sendStatus(403)
-        }
+    const user: User | null = await prisma.user.findFirst({
+      where: {
+        RefreshToken: {
+          some: {
+            hashedToken: refreshToken,
+          },
+        },
+      },
+    })
+    if (!user) return res.sendStatus(403) // Forbidden
 
-        const accessToken = generateAccessToken(user)
-        res.json({ accessToken })
-      }
-    )
+    // revoke old refreshToken and add new refreshToken to db
+    const oldToken = await prisma.refreshToken.findUnique({
+      where: {
+        hashedToken: refreshToken,
+      },
+    })
+    const updatedToken = await prisma.refreshToken.update({
+      where: {
+        id: oldToken?.id,
+      },
+      data: {
+        revoked: true,
+      },
+    })
+
+    const newTokens = generateTokens(user)
+    const newRefreshToken: RefreshToken = await prisma.refreshToken.create({
+      data: {
+        hashedToken: newTokens.refreshToken,
+        userId: user.id,
+      },
+    })
+
+    res.cookie('jwt', newTokens.refreshToken, {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    })
+    res.json({ data: newTokens.accessToken })
   }
 }
 
