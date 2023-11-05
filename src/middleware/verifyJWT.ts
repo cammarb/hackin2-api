@@ -9,15 +9,14 @@ const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
   const token = authHeader.split(' ')[1]
   const secret = process.env.ACCESS_TOKEN_SECRET
 
-  if (secret) {
-    try {
-      const decoded = jwt.verify(token, secret)
-      next()
-    } catch (err: any) {
-      res.status(401).json({ Unauthorized: err?.message })
-    }
-  } else {
+  if (!secret) {
     res.status(401).json({ error: 'Verification failed' })
+  } else {
+    jwt.verify(token, secret, (err, decoded) => {
+      if (err) return res.sendStatus(403)
+
+      next()
+    })
   }
 }
 
