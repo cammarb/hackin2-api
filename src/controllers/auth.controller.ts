@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import bcrypt from 'bcrypt'
 import prisma from '../config/db'
 import { RefreshToken, User } from '@prisma/client'
-import { generateAccessToken, generateTokens } from '../config/auth'
+import { generateTokens } from '../config/auth'
 import jwt from 'jsonwebtoken'
 
 const handleLogin = async (req: Request, res: Response) => {
