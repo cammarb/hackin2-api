@@ -5,7 +5,6 @@ import cors from 'cors'
 
 import userRouter from './src/routes/user.routes'
 import authRouter from './src/routes/auth.routes'
-import refreshRouter from './src/routes/refresh.routes'
 
 dotenv.config()
 
@@ -20,8 +19,7 @@ app.get('/', (req: Request, res: Response) => {
 })
 
 app.use('/user', userRouter)
-app.use('/login', authRouter)
-app.use('/refresh', refreshRouter)
+app.use('/auth', authRouter)
 
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`)

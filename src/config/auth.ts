@@ -1,5 +1,6 @@
 import { User } from '@prisma/client'
 import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken'
+import crypto from 'crypto'
 
 const generateAccessToken = (user: User): string => {
   const payload: JwtPayload = {
@@ -15,7 +16,10 @@ const generateAccessToken = (user: User): string => {
   if (!process.env.ACCESS_TOKEN_SECRET)
     throw new Error('ACCESS_TOKEN_SECRET is not defined')
 
-  const accessSecret: jwt.Secret = process.env.ACCESS_TOKEN_SECRET
+  // const accessSecret: jwt.Secret = process.env.ACCESS_TOKEN_SECRET
+  const accessSecret: jwt.Secret = crypto.createPrivateKey(
+    process.env.ACCESS_TOKEN_SECRET
+  )
 
   return jwt.sign(payload, accessSecret, options)
 }
