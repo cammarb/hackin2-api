@@ -3,7 +3,8 @@ import bcrypt from 'bcrypt'
 import prisma from '../config/db'
 import { RefreshToken, User } from '@prisma/client'
 import { generateTokens } from '../config/auth'
-import jwt from 'jsonwebtoken'
+import jwt, { JwtPayload } from 'jsonwebtoken'
+import fs from 'fs'
 
 const handleLogin = async (req: Request, res: Response) => {
   const { username, password } = req.body
@@ -52,69 +53,70 @@ const handleLogin = async (req: Request, res: Response) => {
 
       res.status(200).json({
         message: 'Login successful',
-        data: `${tokens.accessToken}`,
+        data: {
+          token: `${tokens.accessToken}`,
+        },
       })
     }
   }
 }
 
 const handleRefreshToken = async (req: Request, res: Response) => {
-  const cookie = req.cookies
-  if (!cookie?.jwt) return res.status(401).json({ message: 'Unauthorized' })
+  const jwtCookie = req.cookies['jwt']
+  if (!jwtCookie) return res.status(401).json({ message: 'Unauthorized' })
 
-  const refreshToken = cookie.jwt
+  const tokenSecretKey = fs.readFileSync(`${process.env.PUBKEY}`, 'utf8')
 
-  const tokenSecretKey = process.env.SECRET_KEY
-  const refreshTokenSecretKey = process.env.REFRESH_TOKEN_SECRET_KEY
+  if (!tokenSecretKey) return res.sendStatus(403)
+  const decoded: JwtPayload = jwt.verify(
+    jwtCookie,
+    tokenSecretKey
+  ) as JwtPayload
 
-  if (!tokenSecretKey || !refreshTokenSecretKey) {
-    return res.sendStatus(403)
-  } else {
-    const decoded = jwt.verify(refreshToken, refreshTokenSecretKey)
-    if (!decoded) return res.sendStatus(403)
+  if (!decoded) return res.sendStatus(403)
 
-    const user: User | null = await prisma.user.findFirst({
-      where: {
-        RefreshToken: {
-          some: {
-            hashedToken: refreshToken,
-          },
-        },
-      },
-    })
-    if (!user) return res.sendStatus(403) // Forbidden
+  const user: User | null = await prisma.user.findUnique({
+    where: {
+      username: decoded.username,
+    },
+  })
+  if (!user) return res.sendStatus(403) // Forbidden
 
-    // revoke old refreshToken and add new refreshToken to db
-    const oldToken = await prisma.refreshToken.findUnique({
-      where: {
-        hashedToken: refreshToken,
-      },
-    })
-    const updatedToken = await prisma.refreshToken.update({
-      where: {
-        id: oldToken?.id,
-      },
-      data: {
-        revoked: true,
-      },
-    })
+  // revoke old refreshToken and add new refreshToken to db
+  const oldToken = await prisma.refreshToken.findUnique({
+    where: {
+      hashedToken: jwtCookie,
+    },
+  })
+  const updatedToken = await prisma.refreshToken.update({
+    where: {
+      hashedToken: oldToken?.hashedToken,
+    },
+    data: {
+      revoked: true,
+    },
+  })
 
-    const newTokens = generateTokens(user)
-    const newRefreshToken: RefreshToken = await prisma.refreshToken.create({
-      data: {
-        hashedToken: newTokens.refreshToken,
-        userId: user.id,
-      },
-    })
+  const newTokens = generateTokens(user)
+  const newRefreshToken: RefreshToken = await prisma.refreshToken.create({
+    data: {
+      hashedToken: newTokens.refreshToken,
+      userId: user.id,
+    },
+  })
 
-    res.cookie('jwt', newTokens.refreshToken, {
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true,
-      maxAge: 24 * 60 * 60 * 1000,
-    })
-    res.json({ data: newTokens.accessToken })
-  }
+  res.cookie('jwt', newTokens.refreshToken, {
+    httpOnly: true,
+    sameSite: 'none',
+    secure: true,
+    maxAge: 24 * 60 * 60 * 1000,
+  })
+  res.status(200).json({
+    message: 'Refresh successful',
+    data: {
+      token: newTokens.accessToken,
+    },
+  })
 }
 
 export { handleLogin, handleRefreshToken }
