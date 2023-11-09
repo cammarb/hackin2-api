@@ -1,4 +1,5 @@
 .env
+*.pem
 
 # Node.js
 node_modules/
