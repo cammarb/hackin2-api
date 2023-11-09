@@ -1,6 +1,7 @@
 import { User } from '@prisma/client'
 import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken'
 import crypto from 'crypto'
+import fs from 'fs'
 
 const generateAccessToken = (user: User): string => {
   const payload: JwtPayload = {
@@ -13,13 +14,11 @@ const generateAccessToken = (user: User): string => {
     issuer: 'https://hackin2.com',
   }
 
-  if (!process.env.ACCESS_TOKEN_SECRET)
-    throw new Error('ACCESS_TOKEN_SECRET is not defined')
+  if (!process.env.PRIVKEY) throw new Error('key is not defined')
 
-  // const accessSecret: jwt.Secret = process.env.ACCESS_TOKEN_SECRET
-  const accessSecret: jwt.Secret = crypto.createPrivateKey(
-    process.env.ACCESS_TOKEN_SECRET
-  )
+  const accessSecret: jwt.Secret = fs.readFileSync(`${process.env.PRIVKEY}`, {
+    encoding: 'utf-8',
+  })
 
   return jwt.sign(payload, accessSecret, options)
 }
@@ -29,15 +28,16 @@ const generateRefreshToken = (user: User): string => {
   const options: SignOptions = {
     algorithm: 'RS256',
     expiresIn: '8h',
-    issuer: 'https://hackin2.com',
+    issuer: process.env.ISSUER,
   }
 
-  if (!process.env.REFRESH_TOKEN_SECRET)
-    throw new Error('REFRESH_TOKEN_SECRET is not defined')
+  if (!process.env.PRIVKEY) throw new Error('key is not defined')
 
-  const refreshToken: jwt.Secret = process.env.REFRESH_TOKEN_SECRET
+  const refreshSecret: jwt.Secret = fs.readFileSync(`${process.env.PRIVKEY}`, {
+    encoding: 'utf-8',
+  })
 
-  return jwt.sign(payload, refreshToken, options)
+  return jwt.sign(payload, refreshSecret, options)
 }
 
 const generateTokens = (
