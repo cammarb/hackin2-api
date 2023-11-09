@@ -1,6 +1,5 @@
 import { User } from '@prisma/client'
 import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken'
-import crypto from 'crypto'
 import fs from 'fs'
 
 const generateAccessToken = (user: User): string => {
@@ -11,7 +10,7 @@ const generateAccessToken = (user: User): string => {
   const options: SignOptions = {
     algorithm: 'RS256',
     expiresIn: '5m',
-    issuer: 'https://hackin2.com',
+    issuer: process.env.ISSUER,
   }
 
   if (!process.env.PRIVKEY) throw new Error('key is not defined')

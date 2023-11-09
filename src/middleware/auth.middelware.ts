@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import jwt, { JwtPayload } from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import fs from 'fs'
 
 const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
