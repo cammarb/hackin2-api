@@ -12,8 +12,8 @@ const userRouter: Router = express.Router()
 
 userRouter.post('/register', newUser)
 userRouter.get('/', verifyJWT, getAllUsers)
-userRouter.get('/:id', getUser)
-userRouter.put('/:id/edit', editUser)
-userRouter.delete('/:id/delete', deleteUser)
+userRouter.get('/:id', verifyJWT, getUser)
+userRouter.put('/:id/edit', verifyJWT, editUser)
+userRouter.delete('/:id/delete', verifyJWT, deleteUser)
 
 export default userRouter

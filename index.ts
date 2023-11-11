@@ -12,7 +12,13 @@ const app: Express = express()
 const port = process.env.PORT
 
 app.use(cookieParser())
-app.use(cors())
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST'], // Allow only specified HTTP methods
+    credentials: true, // Allow credentials (cookies, authorization headers)
+  })
+)
 app.use(express.json())
 
 app.get('/', (req: Request, res: Response) => {

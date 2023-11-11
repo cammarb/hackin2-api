@@ -9,7 +9,12 @@ import fs from 'fs'
 const handleLogin = async (req: Request, res: Response) => {
   const { username, password } = req.body
 
-  if (!username || !password)
+  if (
+    !username ||
+    !password ||
+    typeof username !== 'string' ||
+    typeof password !== 'string'
+  )
     res.status(400).json({
       error: 'Bad Request',
       message: 'Both username and password are required',
@@ -119,4 +124,14 @@ const handleRefreshToken = async (req: Request, res: Response) => {
   })
 }
 
-export { handleLogin, handleRefreshToken }
+const handleLogOut = (req: Request, res: Response) => {
+  const jwtCookie = req.cookies['jwt']
+  const jwtHeader = req.headers['authorization']
+
+  if (!jwtCookie || !jwtHeader) return res.sendStatus(204) // No cookie or header
+  res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true })
+  res.removeHeader('authorization')
+  res.sendStatus(200).json({ message: 'Logout successfull' })
+}
+
+export { handleLogin, handleRefreshToken, handleLogOut }
