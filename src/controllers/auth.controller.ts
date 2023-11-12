@@ -57,10 +57,8 @@ const handleLogin = async (req: Request, res: Response) => {
       })
 
       res.status(200).json({
-        message: 'Login successful',
-        data: {
-          token: `${tokens.accessToken}`,
-        },
+        user: user.username,
+        token: `${tokens.accessToken}`,
       })
     }
   }

@@ -49,10 +49,10 @@ export const getAllUsers = async (req: Request, res: Response) => {
 
 export const getUser = async (req: Request, res: Response) => {
   try {
-    const id: number = parseInt(req.params.id)
+    const username: string = req.params.username
     const user: User | null = await prisma.user.findUnique({
       where: {
-        id: id,
+        username: username,
       },
     })
     if (!user) res.status(404).json({ error: 'User not found' })

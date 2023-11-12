@@ -12,7 +12,7 @@ const userRouter: Router = express.Router()
 
 userRouter.post('/register', newUser)
 userRouter.get('/', verifyJWT, getAllUsers)
-userRouter.get('/:id', verifyJWT, getUser)
+userRouter.get('/:username', verifyJWT, getUser)
 userRouter.put('/:id/edit', verifyJWT, editUser)
 userRouter.delete('/:id/delete', verifyJWT, deleteUser)
 
