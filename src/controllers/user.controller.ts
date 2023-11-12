@@ -17,7 +17,7 @@ export const newUser = async (req: Request, res: Response) => {
       OR: [{ username: username }, { email: email }],
     },
   })
-  if (user.length > 0) return res.sendStatus(409) // Conflict
+  if (user.length > 0) return res.sendStatus(409) // Conflict - if there are more users with that username or email, throw an error
   try {
     const hashedPassword = await hashToken(password)
     const user: User = await prisma.user.create({
@@ -71,7 +71,7 @@ export const getUser = async (req: Request, res: Response) => {
 
 export const editUser = async (req: Request, res: Response) => {
   try {
-    const id: number = parseInt(req.params.id)
+    const user_name: string = req.params.username
     const { username, email, firstName, lastName, role } = req.body
 
     if (!EmailValidator.validate(email))
@@ -79,7 +79,7 @@ export const editUser = async (req: Request, res: Response) => {
     else {
       const user: User | null = await prisma.user.update({
         where: {
-          id: id,
+          username: user_name,
         },
         data: {
           username: username,
@@ -104,14 +104,14 @@ export const editUser = async (req: Request, res: Response) => {
 
 export const deleteUser = async (req: Request, res: Response) => {
   try {
-    const id: number = parseInt(req.params.id)
+    const username: string = req.params.username
     const user: User | null = await prisma.user.delete({
       where: {
-        id: id,
+        username: username,
       },
     })
     if (!user) res.sendStatus(404).json({ error: 'User not found' })
-    res.status(200).json({ message: `User with ${id} deleted successfully` })
+    res.status(200).json({ message: `User with ${username} deleted successfully` })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
   }
