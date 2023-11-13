@@ -27,7 +27,7 @@ export const newUser = async (req: Request, res: Response) => {
         username: username,
         email: email,
         password: hashedPassword,
-        roleId: roleId,
+        roleId: parseInt(roleId),
       },
     })
     res.status(201).json({ success: 'User created successfully' })
@@ -50,9 +50,12 @@ export const getAllUsers = async (req: Request, res: Response) => {
 export const getUser = async (req: Request, res: Response) => {
   try {
     const username: string = req.params.username
+    const roleId: string = req.params.roleId
+
     const user: User | null = await prisma.user.findUnique({
       where: {
         username: username,
+        roleId: parseInt(roleId),
       },
     })
     if (!user) res.status(404).json({ error: 'User not found' })
@@ -71,18 +74,19 @@ export const getUser = async (req: Request, res: Response) => {
 
 export const editUser = async (req: Request, res: Response) => {
   try {
-    const user_name: string = req.params.username
-    const { username, email, firstName, lastName, role } = req.body
+    const username: string = req.params.username
+    const roleId: string = req.params.roleId
+    const { email, firstName, lastName, role } = req.body
 
     if (!EmailValidator.validate(email))
       return res.status(400).json({ messaege: 'Enter a valid email' })
     else {
       const user: User | null = await prisma.user.update({
         where: {
-          username: user_name,
+          username: username,
+          roleId: parseInt(roleId),
         },
         data: {
-          username: username,
           email: email,
           firstName: firstName,
           lastName: lastName,
@@ -111,7 +115,9 @@ export const deleteUser = async (req: Request, res: Response) => {
       },
     })
     if (!user) res.sendStatus(404).json({ error: 'User not found' })
-    res.status(200).json({ message: `User with ${username} deleted successfully` })
+    res
+      .status(200)
+      .json({ message: `User with ${username} deleted successfully` })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
   }
