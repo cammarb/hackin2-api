@@ -115,10 +115,8 @@ const handleRefreshToken = async (req: Request, res: Response) => {
     maxAge: 24 * 60 * 60 * 1000,
   })
   res.status(200).json({
-    message: 'Refresh successful',
-    data: {
-      token: newTokens.accessToken,
-    },
+    user: user.username,
+    token: `${newTokens.accessToken}`,
   })
 }
 
@@ -126,10 +124,18 @@ const handleLogOut = (req: Request, res: Response) => {
   const jwtCookie = req.cookies['jwt']
   const jwtHeader = req.headers['authorization']
 
-  if (!jwtCookie || !jwtHeader) return res.sendStatus(204) // No cookie or header
-  res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true })
-  res.removeHeader('authorization')
-  res.sendStatus(200).json({ message: 'Logout successfull' })
+  if (!jwtCookie || !jwtHeader) {
+    return res.sendStatus(204)
+  }
+
+  try {
+    res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true })
+    res.removeHeader('authorization')
+    res.sendStatus(204)
+  } catch (error) {
+    console.error('Logout error:', error)
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
 }
 
 export { handleLogin, handleRefreshToken, handleLogOut }
