@@ -8,16 +8,16 @@ export const newUser = async (req: Request, res: Response) => {
   const { username, email, firstName, lastName, password, roleId } = req.body
   if (!username || !password || !email || !firstName || !lastName || !roleId)
     return res.status(400).json({ messaege: 'All the fields are required' })
-  // validate email
+
   if (!EmailValidator.validate(email))
     return res.status(400).json({ messaege: 'Enter a valid email' })
-  // Find if the username or email already exists
+
   const user: User[] | null = await prisma.user.findMany({
     where: {
       OR: [{ username: username }, { email: email }],
     },
   })
-  if (user.length > 0) return res.sendStatus(409) // Conflict - if there are more users with that username or email, throw an error
+  if (user.length > 0) return res.sendStatus(409)
   try {
     const hashedPassword = await hashToken(password)
     const user: User = await prisma.user.create({
