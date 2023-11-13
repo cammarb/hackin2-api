@@ -9,7 +9,7 @@ const generateAccessToken = (user: User): string => {
   }
   const options: SignOptions = {
     algorithm: 'RS256',
-    expiresIn: '1m',
+    expiresIn: '30s',
     issuer: process.env.ISSUER,
   }
 
