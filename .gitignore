@@ -12,6 +12,10 @@ prisma/migrations/*/*.sql
 *.tsbuildinfo
 dist
 
+# Tests
+jest.config.js
+coverage/
+
 # macOS
 .DS_Store
 
