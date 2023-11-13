@@ -1,9 +1,12 @@
 import request from 'supertest'
 import app from '../../src/app'
+import { verifyJWT } from '../../src/middleware/auth.middelware'
+
+jest.mock('../../src/middleware/auth.middleware')
 
 describe('User routes', () => {
   test('Get all users', async () => {
-    const res = await request(app).get('/users')
+    const res = await request(app).get('/users').expect(200)
 
     expect(res.body.users).toEqual(
       expect.arrayContaining([
@@ -18,5 +21,6 @@ describe('User routes', () => {
         },
       ])
     )
+    expect(verifyJWT).toHaveBeenCalled()
   })
 })
