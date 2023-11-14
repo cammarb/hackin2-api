@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from 'express'
 import fs from 'fs'
 import jwt from 'jsonwebtoken'
+import { publicKey } from '../app'
 
 const verifyJWT = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers['authorization']
-  const secret = await fs.promises.readFile(`${process.env.PUBKEY}`, 'utf8')
+  const secret = publicKey
 
   if (!authHeader || !secret) return res.sendStatus(401)
 

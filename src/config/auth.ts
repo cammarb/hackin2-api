@@ -1,6 +1,7 @@
 import { User } from '@prisma/client'
 import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken'
 import fs from 'fs'
+import { privateKey } from '../app'
 
 const generateAccessToken = (user: User): string => {
   const payload: JwtPayload = {
@@ -13,9 +14,7 @@ const generateAccessToken = (user: User): string => {
     issuer: process.env.ISSUER,
   }
 
-  const accessSecret: jwt.Secret = fs.readFileSync(`${process.env.PRIVKEY}`, {
-    encoding: 'utf-8',
-  })
+  const accessSecret: jwt.Secret = privateKey
 
   return jwt.sign(payload, accessSecret, options)
 }
@@ -28,9 +27,7 @@ const generateRefreshToken = (user: User): string => {
     issuer: process.env.ISSUER,
   }
 
-  const refreshSecret: jwt.Secret = fs.readFileSync(`${process.env.PRIVKEY}`, {
-    encoding: 'utf-8',
-  })
+  const refreshSecret: jwt.Secret = privateKey
 
   return jwt.sign(payload, refreshSecret, options)
 }
