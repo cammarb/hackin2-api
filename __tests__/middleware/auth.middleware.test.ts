@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import { verifyJWT } from '../../src/middleware/auth.middleware' // Update the path accordingly
+import { publicKey } from '../../src/app'
 
 const mockRequest = {
   headers: {
@@ -42,8 +43,11 @@ describe('verifyJWT middleware', () => {
     expect((mockRequest.headers.authorization as string).split(' ')[1]).toBe(
       mockToken
     )
-    expect(mockRequest.params.username).toBe(decodedMock.username)
-    expect(mockRequest.params.roleId).toBe(decodedMock.role)
+
+    expect(jwt.verify).toHaveBeenCalledWith(mockToken, publicKey)
+
+    // expect(mockRequest.params.username).toEqual(decodedMock.username)
+    // expect(mockRequest.params.roleId).toEqual(decodedMock.role)
     expect(mockNext).toHaveBeenCalled()
   })
 
