@@ -15,17 +15,12 @@ const verifyJWT = async (req: Request, res: Response, next: NextFunction) => {
       username: string
       role: string
     }
+    if (!decoded) res.sendStatus(401)
     req.params.username = decoded.username
     req.params.roleId = decoded.role
     next()
   } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError) {
-      return res.sendStatus(401)
-    } else if (error instanceof jwt.TokenExpiredError) {
-      return res.status(401).send('Token expired')
-    } else {
-      return res.sendStatus(403)
-    }
+    return res.sendStatus(403)
   }
 }
 
