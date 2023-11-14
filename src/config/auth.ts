@@ -1,7 +1,7 @@
 import { User } from '@prisma/client'
 import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken'
 import fs from 'fs'
-import { privateKey } from '../app'
+import { issuer, privateKey } from '../app'
 
 const generateAccessToken = (user: User): string => {
   const payload: JwtPayload = {
@@ -11,7 +11,7 @@ const generateAccessToken = (user: User): string => {
   const options: SignOptions = {
     algorithm: 'RS256',
     expiresIn: '30s',
-    issuer: process.env.ISSUER,
+    issuer: issuer,
   }
 
   const accessSecret: jwt.Secret = privateKey
@@ -24,7 +24,7 @@ const generateRefreshToken = (user: User): string => {
   const options: SignOptions = {
     algorithm: 'RS256',
     expiresIn: '8h',
-    issuer: process.env.ISSUER,
+    issuer: issuer,
   }
 
   const refreshSecret: jwt.Secret = privateKey
@@ -35,7 +35,7 @@ const generateRefreshToken = (user: User): string => {
 const generateTokens = (
   user: User
 ): { accessToken: string; refreshToken: string } => {
-  if (!process.env.PRIVKEY || !process.env.ISSUER)
+  if (!privateKey || !issuer)
     throw new Error('secretOrPrivateKey must have a value')
 
   const accessToken = generateAccessToken(user)
