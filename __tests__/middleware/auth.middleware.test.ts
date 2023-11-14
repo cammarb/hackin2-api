@@ -1,7 +1,20 @@
 import { Request, Response, NextFunction } from 'express'
-import * as fs from 'fs/promises'
-import * as jwt from 'jsonwebtoken'
+import fs from 'fs/promises'
+import jwt from 'jsonwebtoken'
 import { verifyJWT } from '../../src/middleware/auth.middleware'
+import { generateKeyPairSync } from 'crypto'
+
+const { privateKey, publicKey } = generateKeyPairSync('rsa', {
+  modulusLength: 2048,
+  publicKeyEncoding: {
+    type: 'spki',
+    format: 'pem',
+  },
+  privateKeyEncoding: {
+    type: 'pkcs8',
+    format: 'pem',
+  },
+})
 
 jest.mock('fs/promises')
 
@@ -18,26 +31,19 @@ describe('JWT Middleware Tests', () => {
     const res: Response = { sendStatus: jest.fn() } as unknown as Response
     const next: NextFunction = jest.fn() as NextFunction
 
-    const verifyMock = jest.spyOn(jwt, 'verify').mockImplementation(
-      jest.fn((_token, _secretOrPublicKey, _options, callback) => {
+    jest
+      .spyOn(jwt, 'verify')
+      .mockImplementation((_token, _secretOrPublicKey, _options, callback) => {
         if (callback) {
           return callback(null, { username: 'test', role: '1' })
         } else {
           throw new Error('Callback function is not defined')
         }
       })
-    )
-
-    jest.spyOn(fs, 'readFile').mockResolvedValue('your_public_key')
 
     await verifyJWT(req, res, next)
 
-    expect(verifyMock).toHaveBeenCalledWith(
-      'valid_token',
-      'your_public_key',
-      undefined,
-      expect.any(Function)
-    )
+    expect(jwt.verify).toHaveBeenCalledWith()
 
     expect(req.params.username).toEqual('test')
     expect(req.params.roleId).toEqual('1')
