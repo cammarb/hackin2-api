@@ -46,8 +46,6 @@ describe('generateAccessToken', () => {
 
 describe('generateRefreshToken', () => {
   test('Should generate the Refresh Token with valid private key', () => {
-    ;(fs.readFileSync as jest.Mock).mockReturnValue(process.env.PRIVKEY)
-
     const refreshToken = generateRefreshToken(user)
 
     expect(typeof refreshToken).toBe('string')
