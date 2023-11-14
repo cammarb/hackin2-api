@@ -1,28 +1,10 @@
+import { issuer, privateKey } from '../../src/app'
 import {
   generateAccessToken,
   generateRefreshToken,
   generateTokens,
 } from '../../src/config/auth'
-import fs from 'fs'
 import { User } from '@prisma/client'
-import { generateKeyPairSync } from 'crypto'
-
-jest.mock('fs')
-
-const { privateKey, publicKey } = generateKeyPairSync('rsa', {
-  modulusLength: 2048,
-  publicKeyEncoding: {
-    type: 'spki',
-    format: 'pem',
-  },
-  privateKeyEncoding: {
-    type: 'pkcs8',
-    format: 'pem',
-  },
-})
-
-process.env.PRIVKEY = privateKey
-process.env.ISSUER = 'exampleIssuer'
 
 const user: User = {
   id: 1,
@@ -33,7 +15,6 @@ const user: User = {
   password: 'hashed-password',
   roleId: 1,
 }
-;(fs.readFileSync as jest.Mock).mockReturnValue(process.env.PRIVKEY)
 
 describe('generateAccessToken', () => {
   test('Should generate the Access Token with valid private key', () => {
@@ -55,8 +36,6 @@ describe('generateRefreshToken', () => {
 
 describe('generateToken', () => {
   test('Should generate the Tokens with valid private key', () => {
-    ;(fs.readFileSync as jest.Mock).mockReturnValue(process.env.PRIVKEY)
-
     const { accessToken, refreshToken } = generateTokens(user)
 
     expect(typeof accessToken).toBe('string')
@@ -66,8 +45,8 @@ describe('generateToken', () => {
     expect(refreshToken.length).toBeGreaterThan(0)
   })
   test('Throws an error if key or issuer is not defined', () => {
-    process.env.PRIVKEY = ''
-    process.env.ISSUER = ''
+    issuer === ''
+    privateKey === ''
 
     expect(() => generateTokens(user)).toThrow(
       'secretOrPrivateKey must have a value'
