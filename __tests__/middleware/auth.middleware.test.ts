@@ -1,43 +1,73 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
-import { verifyJWT } from '../../src/middleware/auth.middleware'
-import { publicKey } from '../../src/app'
+import { verifyJWT } from '../../src/middleware/auth.middleware' // Update the path accordingly
 
-jest.mock('jsonwebtoken')
+const mockRequest = {
+  headers: {
+    authorization: 'Bearer mockToken',
+  },
+  params: {} as Record<string, string>,
+} as Request & { [key: string]: any }
+const mockResponse = {
+  sendStatus: jest.fn(),
+} as unknown as Response
+const mockNext = jest.fn() as NextFunction
 
-describe('JWT Middleware Tests', () => {
-  it('should verify the token and set params in request', async () => {
-    const req: Request = {
-      headers: { authorization: 'Bearer valid_token' },
-      params: {},
-    } as Request
-    const res: Response = { sendStatus: jest.fn() } as unknown as Response
-    const next: NextFunction = jest.fn() as NextFunction
+jest.mock('../../src/app', () => ({
+  publicKey: 'mockPublicKey',
+}))
+
+jest.mock('jsonwebtoken', () => ({
+  verify: jest.fn(),
+}))
+
+describe('verifyJWT middleware', () => {
+  it('should call next() if token is valid', async () => {
+    const mockToken = 'mockToken'
+    const decodedMock = {
+      username: 'mockUsername',
+      role: 'mockRole',
+    }
 
     ;(jwt.verify as jest.Mock).mockImplementationOnce(
-      (_token, _secretOrPublicKey, _options, callback) => {
-        const payload = { username: 'test', role: '1' }
-        if (callback) {
-          process.nextTick(() => callback(null, payload))
-        } else {
-          return payload
-        }
+      (token, secret, callback) => {
+        callback(null, decodedMock)
       }
     )
 
-    await verifyJWT(req, res, next)
+    await verifyJWT(mockRequest, mockResponse, mockNext)
 
-    expect(req.headers.authorization).toEqual('Bearer valid_token')
-    expect(jwt.verify).toHaveBeenCalledWith(
-      'valid_token',
-      publicKey,
-      undefined,
-      expect.any(Function)
+    expect((mockRequest.headers.authorization as string).split).toBeDefined()
+
+    expect((mockRequest.headers.authorization as string).split(' ')[1]).toBe(
+      mockToken
+    )
+    expect(mockRequest.params.username).toBe(decodedMock.username)
+    expect(mockRequest.params.roleId).toBe(decodedMock.role)
+    expect(mockNext).toHaveBeenCalled()
+  })
+
+  it('should send 403 status if token is invalid', async () => {
+    const mockToken = 'invalidToken'
+
+    ;(jwt.verify as jest.Mock).mockImplementationOnce(
+      (token, secret, callback) => {
+        callback(new Error('Invalid token'))
+      }
     )
 
-    expect(req.params.username).toEqual('test')
-    expect(req.params.role).toEqual('1')
+    await verifyJWT(mockRequest, mockResponse, mockNext)
 
-    expect(next).toHaveBeenCalled()
+    expect(mockResponse.sendStatus).toHaveBeenCalledWith(403)
+    expect(mockNext).not.toHaveBeenCalled()
+  })
+
+  it('should send 401 status if authorization header or secret is missing', async () => {
+    jest.clearAllMocks()
+
+    await verifyJWT(mockRequest, mockResponse, mockNext)
+
+    expect(mockResponse.sendStatus).toHaveBeenCalledWith(401)
+    expect(mockNext).not.toHaveBeenCalled()
   })
 })
