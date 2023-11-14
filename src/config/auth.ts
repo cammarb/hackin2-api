@@ -39,7 +39,7 @@ const generateTokens = (
   user: User
 ): { accessToken: string; refreshToken: string } => {
   if (!process.env.PRIVKEY || !process.env.ISSUER)
-    throw new Error('key or issuer is not defined')
+    throw new Error('secretOrPrivateKey must have a value')
 
   const accessToken = generateAccessToken(user)
   const refreshToken = generateRefreshToken(user)

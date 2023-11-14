@@ -65,4 +65,12 @@ describe('generateToken', () => {
     expect(typeof refreshToken).toBe('string')
     expect(refreshToken.length).toBeGreaterThan(0)
   })
+  test('Throws an error if key or issuer is not defined', () => {
+    process.env.PRIVKEY = ''
+    process.env.ISSUER = ''
+
+    expect(() => generateTokens(user)).toThrow(
+      'secretOrPrivateKey must have a value'
+    )
+  })
 })
