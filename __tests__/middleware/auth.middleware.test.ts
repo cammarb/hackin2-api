@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import { verifyJWT } from '../../src/middleware/auth.middleware'
+import { publicKey } from '../../src/app'
+
+jest.mock('jsonwebtoken')
 
 describe('JWT Middleware Tests', () => {
   it('should verify the token and set params in request', async () => {
@@ -11,22 +14,23 @@ describe('JWT Middleware Tests', () => {
     const res: Response = { sendStatus: jest.fn() } as unknown as Response
     const next: NextFunction = jest.fn() as NextFunction
 
-    const mockedVerify = jest
-      .spyOn(jwt, 'verify')
-      .mockImplementationOnce((token, publicKey, options, callback) => {
+    ;(jwt.verify as jest.Mock).mockImplementationOnce(
+      (_token, _secretOrPublicKey, _options, callback) => {
+        const payload = { username: 'test', role: '1' }
         if (callback) {
-          callback(null, { username: 'test', role: '1' })
+          process.nextTick(() => callback(null, payload))
         } else {
-          throw new Error('Callback function is not defined')
+          return payload
         }
-      })
+      }
+    )
 
     await verifyJWT(req, res, next)
 
     expect(req.headers.authorization).toEqual('Bearer valid_token')
-    expect(mockedVerify).toHaveBeenCalledWith(
+    expect(jwt.verify).toHaveBeenCalledWith(
       'valid_token',
-      'your_public_key',
+      publicKey,
       undefined,
       expect.any(Function)
     )
