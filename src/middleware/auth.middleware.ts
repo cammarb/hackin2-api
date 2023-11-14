@@ -1,10 +1,9 @@
 import { Request, Response, NextFunction } from 'express'
-import fs from 'fs'
 import jwt from 'jsonwebtoken'
 import { publicKey } from '../app'
 
 const verifyJWT = async (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers['authorization']
+  const authHeader = req.headers && req.headers['authorization']
   const secret = publicKey
 
   if (!authHeader || !secret) return res.sendStatus(401)
@@ -16,12 +15,17 @@ const verifyJWT = async (req: Request, res: Response, next: NextFunction) => {
       username: string
       role: string
     }
-
     req.params.username = decoded.username
     req.params.roleId = decoded.role
     next()
   } catch (error) {
-    return res.sendStatus(403)
+    if (error instanceof jwt.JsonWebTokenError) {
+      return res.sendStatus(401)
+    } else if (error instanceof jwt.TokenExpiredError) {
+      return res.status(401).send('Token expired')
+    } else {
+      return res.sendStatus(403)
+    }
   }
 }
 
