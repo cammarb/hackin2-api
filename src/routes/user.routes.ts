@@ -6,7 +6,7 @@ import {
   deleteUser,
   newUser,
 } from '../controllers/user.controller'
-import { verifyJWT } from '../middleware/auth.middelware'
+import { verifyJWT } from '../middleware/auth.middleware'
 
 const userRouter: Router = express.Router()
 
