@@ -13,8 +13,6 @@ const generateAccessToken = (user: User): string => {
     issuer: process.env.ISSUER,
   }
 
-  if (!process.env.PRIVKEY) throw new Error('key is not defined')
-
   const accessSecret: jwt.Secret = fs.readFileSync(`${process.env.PRIVKEY}`, {
     encoding: 'utf-8',
   })
@@ -30,8 +28,6 @@ const generateRefreshToken = (user: User): string => {
     issuer: process.env.ISSUER,
   }
 
-  if (!process.env.PRIVKEY) throw new Error('key is not defined')
-
   const refreshSecret: jwt.Secret = fs.readFileSync(`${process.env.PRIVKEY}`, {
     encoding: 'utf-8',
   })
@@ -42,6 +38,9 @@ const generateRefreshToken = (user: User): string => {
 const generateTokens = (
   user: User
 ): { accessToken: string; refreshToken: string } => {
+  if (!process.env.PRIVKEY || !process.env.ISSUER)
+    throw new Error('key or issuer is not defined')
+
   const accessToken = generateAccessToken(user)
   const refreshToken = generateRefreshToken(user)
 
