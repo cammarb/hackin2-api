@@ -20,7 +20,7 @@ const publicKey = fs.readFileSync(`${process.env.PUBKEY}`, {
 const issuer = process.env.ISSUER
 const origin = process.env.ORIGIN
 
-app.use(cookieParser())
+app.disable('x-powered-by')
 app.use(
   cors({
     origin: origin,
@@ -29,6 +29,7 @@ app.use(
   })
 )
 app.use(helmet)
+app.use(cookieParser())
 app.use(express.json())
 
 app.use('/user', userRouter)
