@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import jwt, { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import { publicKey } from '../app'
 
 const verifyJWT = async (req: Request, res: Response, next: NextFunction) => {
