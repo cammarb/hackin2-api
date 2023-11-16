@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import jwt from 'jsonwebtoken'
+import jwt, { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken'
 import { publicKey } from '../app'
 
 const verifyJWT = async (req: Request, res: Response, next: NextFunction) => {
@@ -15,12 +15,15 @@ const verifyJWT = async (req: Request, res: Response, next: NextFunction) => {
       username: string
       role: string
     }
-    if (!decoded) res.sendStatus(401)
     req.params.username = decoded.username
     req.params.roleId = decoded.role
     next()
-  } catch (error) {
-    return res.sendStatus(403)
+  } catch (error: any) {
+    if (error.name === 'TokenExpiredError') {
+      res.sendStatus(403)
+    } else if (error.name === 'JsonWebTokenError') {
+      res.sendStatus(401)
+    } else res.sendStatus(500)
   }
 }
 
