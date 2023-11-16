@@ -28,7 +28,7 @@ app.use(
     credentials: true, // Allow credentials (cookies, authorization headers)
   })
 )
-app.use(helmet)
+app.use(helmet())
 app.use(cookieParser())
 app.use(express.json())
 
