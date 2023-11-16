@@ -38,6 +38,8 @@ describe('verifyJWT middleware', () => {
 
     await verifyJWT(mockRequest, mockResponse, mockNext)
 
+    console.log(mockResponse)
+
     expect((mockRequest.headers.authorization as string).split).toBeDefined()
 
     expect((mockRequest.headers.authorization as string).split(' ')[1]).toBe(
@@ -46,19 +48,13 @@ describe('verifyJWT middleware', () => {
 
     expect(jwt.verify).toHaveBeenCalledWith(mockToken, publicKey)
 
-    // expect(mockRequest.params.username).toEqual(decodedMock.username)
-    // expect(mockRequest.params.roleId).toEqual(decodedMock.role)
-    // expect(mockNext).toHaveBeenCalled()
+    expect(mockRequest.params.username).toEqual(decodedMock.username)
+    expect(mockRequest.params.roleId).toEqual(decodedMock.role)
+    expect(mockNext).toHaveBeenCalled()
   })
 
-  it('should send 403 status if token is invalid', async () => {
-    const mockToken = 'invalidToken'
-
-    ;(jwt.verify as jest.Mock).mockImplementationOnce(
-      (token, secret, callback) => {
-        callback(new Error('Invalid token'))
-      }
-    )
+  it('should send 403 status if token is expired', async () => {
+    const mockToken = 'expiredToken'
 
     await verifyJWT(mockRequest, mockResponse, mockNext)
 
