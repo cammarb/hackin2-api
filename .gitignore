@@ -1,3 +1,39 @@
-node_modules
-# Keep environment variables out of version control
 .env
+*.pem
+
+# Node.js
+node_modules/
+
+# Prisma
+prisma/client
+prisma/migrations/*/*.sql
+
+# TypeScript
+*.tsbuildinfo
+dist
+
+# Tests
+jest.config.js
+coverage/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+
+# IDE and Editor-specific files
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.vscode/
+.vscode/
