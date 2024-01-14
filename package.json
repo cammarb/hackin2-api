@@ -8,6 +8,9 @@
     "dev": "nodemon ./src/server.ts",
     "build": "tsc"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "keywords": [],
   "author": "Camila Martinez",
   "license": "ISC",
