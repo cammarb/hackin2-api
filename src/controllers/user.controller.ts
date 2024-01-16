@@ -17,7 +17,7 @@ export const newUser = async (req: Request, res: Response) => {
       OR: [{ username: username }, { email: email }],
     },
   })
-  if (user.length > 0) return res.sendStatus(409)
+  if (typeof user === null) return res.sendStatus(409)
   try {
     const hashedPassword = await hashToken(password)
     const user: User = await prisma.user.create({
