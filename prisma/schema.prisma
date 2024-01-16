@@ -17,9 +17,13 @@ model User {
   username     String         @unique
   email        String         @unique
   password     String
-  roleId       String         @map("role_id")
-  role         Role           @relation(fields: [roleId], references: [id])
+  companyId    String?
+  roleId       String
   RefreshToken RefreshToken[]
+  userProfile  UserProfile?
+  role         Role           @relation(fields: [roleId], references: [id])
+  company      Company?       @relation(fields: [companyId], references: [id])
+  Gig          Gig[]
 }
 
 model RefreshToken {
@@ -38,4 +42,58 @@ model Role {
   description String?
 
   users User[]
+}
+
+model UserProfile {
+  id                String          @id @unique @default(uuid())
+  qualifications    Qualification[]
+  skills            String[]
+  expertiseAreas    String[]
+  yearsOfExperience Int?
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String          @unique
+}
+
+model Qualification {
+  id              String       @id @unique @default(uuid())
+  qualification   String
+  institutionName String
+  startDate       DateTime
+  endDate         DateTime?
+  userProfileId   String
+  userProfile     UserProfile? @relation(fields: [userProfileId], references: [id])
+}
+
+model Company {
+  id                 String @id @unique @default(uuid())
+  companyName        String
+  companyURL         String
+  companyLogo        String
+  companyDescription String
+  userId             String @unique
+  Gig                Gig[]
+  User               User[]
+}
+
+model GigType {
+  id          String  @id @unique @default(uuid())
+  name        String  @unique
+  description String?
+
+  gig Gig[]
+}
+
+model Gig {
+  id               Int      @id @default(autoincrement())
+  description      String
+  gigType          GigType  @relation(fields: [gigTypeId], references: [id])
+  requirements     String[]
+  paymentDetails   Float
+  startDate        DateTime
+  endDate          DateTime
+  postedById       String
+  postedBy         Company  @relation(fields: [postedById], references: [userId])
+  menteeAssignedId String?
+  menteeAssigned   User?    @relation(fields: [menteeAssignedId], references: [id])
+  gigTypeId        String
 }
