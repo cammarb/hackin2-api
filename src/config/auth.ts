@@ -10,7 +10,7 @@ const generateAccessToken = (user: User): string => {
   }
   const options: SignOptions = {
     algorithm: 'RS256',
-    expiresIn: '30s',
+    expiresIn: '5m',
     issuer: issuer,
   }
 
