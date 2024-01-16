@@ -5,6 +5,7 @@ import fs from 'fs'
 
 import userRouter from './routes/user.routes'
 import authRouter from './routes/auth.routes'
+import roleRouter from './routes/roles.routes'
 import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
 
@@ -34,6 +35,7 @@ app.use(express.json())
 
 app.use('/user', userRouter)
 app.use('/auth', authRouter)
+app.use('/roles', roleRouter)
 
 export default app
 export { privateKey, publicKey, issuer }

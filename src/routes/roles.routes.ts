@@ -16,3 +16,5 @@ roleRouter.get('/all', verifyJWT, checkAdmin, getAllRoles)
 roleRouter.get('/:id', verifyJWT, checkAdmin, getRole)
 roleRouter.put('/:id/edit', verifyJWT, checkAdmin, editRole)
 roleRouter.delete('/:id/delete', verifyJWT, checkAdmin, deleteRole)
+
+export default roleRouter

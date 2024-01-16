@@ -15,7 +15,7 @@ const checkAdmin = async (req: Request, res: Response, next: NextFunction) => {
 
   try {
     const roleName = role?.name
-    if (roleName == 'admin') next()
+    if (roleName == 'Admin') next()
   } catch (error: any) {
     res.sendStatus(403)
   }
