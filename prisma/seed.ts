@@ -36,6 +36,34 @@ async function main() {
     },
   })
   console.log({ admin, manager, enterprise, user })
+
+  const adminUser1 = await prisma.user.upsert({
+    where: { username: 'camila.martinez' },
+    update: {},
+    create: {
+      firstName: 'Camila',
+      lastName: 'Martinez',
+      username: 'camila.martinez',
+      email: 'camila.martinez@code.berlin',
+      password: 'Welcome2Hackin2!', // Default password. On first login we can change the password
+      roleId: admin.id,
+    },
+  })
+
+  const adminUser2 = await prisma.user.upsert({
+    where: { username: 'stefanie.keichel' },
+    update: {},
+    create: {
+      firstName: 'Stefanie',
+      lastName: 'Keichel',
+      username: 'stefanie.keichel',
+      email: 'stefanie.keichel@code.berlin',
+      password: 'Welcome2Hackin2!', // Default password. On first login we can change the password
+      roleId: admin.id,
+    },
+  })
+
+  console.log({ adminUser1, adminUser2 })
 }
 main()
   .then(async () => {
