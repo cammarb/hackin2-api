@@ -5,7 +5,7 @@
   "main": "server.ts",
   "scripts": {
     "test": "jest --coverage",
-    "dev": "nodemon ./src/server.ts",
+    "dev": "npx prisma db push && npx prisma db seed && nodemon ./src/server.ts",
     "build": "tsc"
   },
   "prisma": {
