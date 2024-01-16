@@ -40,6 +40,7 @@ async function main() {
 
   const password = 'Welcome2Hackin2!' // Default password. On first login we can change the password
   const hashedPassword = await hashToken(password)
+  console.log(hashedPassword)
   const adminUser1 = await prisma.user.upsert({
     where: { username: 'camila.martinez' },
     update: {},
