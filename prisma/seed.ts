@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import hashToken from '../src/config/hash'
 
 const prisma = new PrismaClient()
 
@@ -37,6 +38,8 @@ async function main() {
   })
   console.log({ admin, manager, enterprise, user })
 
+  const password = 'Welcome2Hackin2!' // Default password. On first login we can change the password
+  const hashedPassword = await hashToken(password)
   const adminUser1 = await prisma.user.upsert({
     where: { username: 'camila.martinez' },
     update: {},
@@ -45,7 +48,7 @@ async function main() {
       lastName: 'Martinez',
       username: 'camila.martinez',
       email: 'camila.martinez@code.berlin',
-      password: 'Welcome2Hackin2!', // Default password. On first login we can change the password
+      password: hashedPassword,
       roleId: admin.id,
     },
   })
@@ -58,7 +61,7 @@ async function main() {
       lastName: 'Keichel',
       username: 'stefanie.keichel',
       email: 'stefanie.keichel@code.berlin',
-      password: 'Welcome2Hackin2!', // Default password. On first login we can change the password
+      password: hashedPassword,
       roleId: admin.id,
     },
   })
