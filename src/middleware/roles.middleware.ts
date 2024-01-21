@@ -5,6 +5,7 @@ import prisma from '../config/db'
 const checkAdmin = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const username = req.params.username
+    const role = req.params.role
 
     if (!username) {
       return res.status(400).json({ error: 'payload not provided' })
@@ -21,7 +22,7 @@ const checkAdmin = async (req: Request, res: Response, next: NextFunction) => {
 
     const userRole = user.role
 
-    if (userRole === 'ADMIN') {
+    if (role === userRole && userRole === 'ADMIN') {
       return next()
     } else {
       return res.status(403).json({ error: 'Permission denied' })
