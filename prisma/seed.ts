@@ -7,40 +7,6 @@ async function main() {
   const password = 'Welcome2Hackin2!' // Default password. On first login we can change the password
   const hashedPassword = await hashToken(password)
 
-  const admin = await prisma.role.upsert({
-    where: { name: 'Admin' },
-    update: {},
-    create: {
-      name: 'Admin',
-      description: 'Administrator. Manages everything',
-    },
-  })
-  const manager = await prisma.role.upsert({
-    where: { name: 'Manager' },
-    update: {},
-    create: {
-      name: 'Manager',
-      description: 'Manage most aspects of the site',
-    },
-  })
-  const enterprise = await prisma.role.upsert({
-    where: { name: 'Enterprise' },
-    update: {},
-    create: {
-      name: 'Enterprise',
-      description: 'Enterprise owner',
-    },
-  })
-  const user = await prisma.role.upsert({
-    where: { name: 'User' },
-    update: {},
-    create: {
-      name: 'User',
-      description: 'Average aspiring Social Engineer',
-    },
-  })
-  console.log({ admin, manager, enterprise, user })
-
   console.log(hashedPassword)
   const adminUser1 = await prisma.user.upsert({
     where: { username: 'camila.martinez' },
@@ -51,7 +17,7 @@ async function main() {
       username: 'camila.martinez',
       email: 'camila.martinez@code.berlin',
       password: hashedPassword,
-      roleId: admin.id,
+      role: 'ADMIN',
     },
   })
 
@@ -64,7 +30,7 @@ async function main() {
       username: 'stefanie.keichel',
       email: 'stefanie.keichel@code.berlin',
       password: hashedPassword,
-      roleId: admin.id,
+      role: 'ADMIN',
     },
   })
 

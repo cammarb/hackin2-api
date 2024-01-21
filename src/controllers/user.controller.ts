@@ -1,12 +1,12 @@
 import { Request, Response } from 'express'
 import prisma from '../config/db'
-import { User } from '@prisma/client'
+import { Role, User } from '@prisma/client'
 import hashToken from '../config/hash'
 import * as EmailValidator from 'email-validator'
 
 export const newUser = async (req: Request, res: Response) => {
-  const { username, email, firstName, lastName, password, roleId } = req.body
-  if (!username || !password || !email || !firstName || !lastName || !roleId)
+  const { username, email, firstName, lastName, password, role } = req.body
+  if (!username || !password || !email || !firstName || !lastName || !role)
     return res.status(400).json({ messaege: 'All the fields are required' })
 
   if (!EmailValidator.validate(email))
@@ -27,7 +27,7 @@ export const newUser = async (req: Request, res: Response) => {
         username: username,
         email: email,
         password: hashedPassword,
-        roleId: roleId,
+        role: role,
       },
     })
     res.status(201).json({ success: 'User created successfully' })
@@ -50,12 +50,12 @@ export const getAllUsers = async (req: Request, res: Response) => {
 export const getUser = async (req: Request, res: Response) => {
   try {
     const username: string = req.params.username
-    const roleId: string = req.params.roleId
+    const roleName: Role = req.params.role as Role
 
     const user: User | null = await prisma.user.findUnique({
       where: {
         username: username,
-        roleId: roleId,
+        role: roleName,
       },
     })
     if (!user) res.status(404).json({ error: 'User not found' })
@@ -65,7 +65,7 @@ export const getUser = async (req: Request, res: Response) => {
       email: user?.email,
       firstName: user?.firstName,
       lastName: user?.lastName,
-      roleId: user?.roleId,
+      role: user?.role,
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
@@ -75,7 +75,7 @@ export const getUser = async (req: Request, res: Response) => {
 export const editUser = async (req: Request, res: Response) => {
   try {
     const username: string = req.params.username
-    const roleId: string = req.params.roleId
+    const roleName: Role = req.params.role as Role
     const { email, firstName, lastName, role } = req.body
 
     if (!EmailValidator.validate(email))
@@ -84,13 +84,13 @@ export const editUser = async (req: Request, res: Response) => {
       const user: User | null = await prisma.user.update({
         where: {
           username: username,
-          roleId: roleId,
+          role: roleName,
         },
         data: {
           email: email,
           firstName: firstName,
           lastName: lastName,
-          roleId: role,
+          role: roleName,
         },
       })
       res.status(200).json({
@@ -98,7 +98,7 @@ export const editUser = async (req: Request, res: Response) => {
         email: user?.email,
         firstName: user?.firstName,
         lastName: user?.lastName,
-        roleId: user?.roleId,
+        role: user?.role,
       })
     }
   } catch (error) {

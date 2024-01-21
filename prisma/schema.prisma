@@ -18,10 +18,9 @@ model User {
   email        String         @unique
   password     String
   companyId    String?
-  roleId       String
+  role         Role           @default(USER)
   RefreshToken RefreshToken[]
   userProfile  UserProfile?
-  role         Role           @relation(fields: [roleId], references: [id])
   company      Company?       @relation(fields: [companyId], references: [id])
   Gig          Gig[]
 }
@@ -34,14 +33,6 @@ model RefreshToken {
   revoked     Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-}
-
-model Role {
-  id          String  @id @unique @default(uuid())
-  name        String  @unique
-  description String?
-
-  users User[]
 }
 
 model UserProfile {
@@ -88,7 +79,7 @@ model Gig {
   description      String
   gigType          GigType  @relation(fields: [gigTypeId], references: [id])
   requirements     String[]
-  paymentDetails   Float
+  paymentDetails   Decimal
   startDate        DateTime
   endDate          DateTime
   postedById       String
@@ -96,4 +87,10 @@ model Gig {
   menteeAssignedId String?
   menteeAssigned   User?    @relation(fields: [menteeAssignedId], references: [id])
   gigTypeId        String
+}
+
+enum Role {
+  USER
+  ADMIN
+  MANAGER // Manages a company profile
 }
