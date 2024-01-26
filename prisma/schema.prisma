@@ -10,6 +10,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
 model User {
   id           String         @id @unique @default(uuid())
   firstName    String
@@ -23,6 +27,8 @@ model User {
   userProfile  UserProfile?
   company      Company?       @relation(fields: [companyId], references: [id])
   Gig          Gig[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 }
 
 model RefreshToken {
@@ -36,13 +42,28 @@ model RefreshToken {
 }
 
 model UserProfile {
-  id                String          @id @unique @default(uuid())
+  id                String                @id @unique @default(uuid())
   qualifications    Qualification[]
-  skills            String[]
-  expertiseAreas    String[]
+  skills            SkillsOnUserProfile[]
   yearsOfExperience Int?
-  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId            String          @unique
+  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String                @unique
+}
+
+model Skill {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  UserProfiles SkillsOnUserProfile[]
+}
+
+model SkillsOnUserProfile {
+  userProfile   UserProfile @relation(fields: [userProfileId], references: [id])
+  userProfileId String
+  Skill         Skill       @relation(fields: [skillId], references: [id])
+  skillId       Int
+
+  @@id([userProfileId, skillId])
 }
 
 model Qualification {
@@ -75,7 +96,8 @@ model GigType {
 }
 
 model Gig {
-  id               Int      @id @default(autoincrement())
+  id               String   @id @unique @default(uuid())
+  title            String   @unique
   description      String
   gigType          GigType  @relation(fields: [gigTypeId], references: [id])
   requirements     String[]
