@@ -35,7 +35,40 @@ async function main() {
   })
 
   console.log({ adminUser1, adminUser2 })
+
+  const skills = [
+    'Lockpicking',
+    'Social Engineering',
+    'Surveillance',
+    'Access Control Systems',
+    'Intrusion Techniques',
+    'Tactical Skills',
+    'Wireless Exploitation',
+    'Alarm Systems',
+    'Device Manipulation',
+    'Evasion',
+    'Risk Assessment',
+    'Documentation',
+    'Ethical/Legal Awareness',
+    'Adaptability',
+    'Communication',
+    'Physical Fitness',
+    'Team Collaboration',
+  ]
+
+  for (const skill of skills) {
+    await prisma.skill.upsert({
+      where: {
+        name: skill,
+      },
+      update: {},
+      create: {
+        name: skill,
+      },
+    })
+  }
 }
+
 main()
   .then(async () => {
     await prisma.$disconnect()
