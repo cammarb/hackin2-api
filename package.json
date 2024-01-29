@@ -2,7 +2,9 @@
   "name": "hackin2-api",
   "version": "1.0.0",
   "description": "API for the Hackin2 Platform.",
-  "repository": {"url": "https://github.com/Hackin2-Company/Hackin2-API"},
+  "repository": {
+    "url": "https://github.com/Hackin2-Company/Hackin2-API"
+  },
   "main": "server.ts",
   "scripts": {
     "test": "jest --coverage",
@@ -41,6 +43,7 @@
     "esbuild-register": "^3.5.0",
     "jest": "^29.7.0",
     "nodemon": "^3.0.1",
+    "prettier": "3.2.4",
     "prisma": "^5.3.1",
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.1",
