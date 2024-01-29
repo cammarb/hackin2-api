@@ -8,8 +8,8 @@ Repository for the Hackin2 API, built using Express.js with Typescript. The API 
 - [Features](#features)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
   - [Configuration](#configuration)
+  - [Installation](#installation)
 - [API Documentation](#api-documentation)
 - [License](#license)
 
@@ -35,7 +35,37 @@ To run the API locally, you need the following prerequisites:
 - git
 - Node.js (version >= 16)
 - npm
-- Postgresql
+- Docker
+
+### Configuration
+
+1. Generate private/public keys (Soon to be automated in Docker)
+
+```bash
+openssl genrsa -out {the_name_of_your_private_key.pem} 2048
+```
+
+```bash
+openssl rsa -pubout -in {the_name_of_your_private_key.pem} -out {the_name_of_your_public_key.pem}
+```
+
+2. Create .env file
+
+Before running the API, you need to set up the configuration.
+Copy the .env.example file and rename it to .env, then fill in the appropriate values for the environment variables:
+
+```
+PORT=8000
+DATABASE_USER=postgres
+DATABASE_PASSWORD=postgres
+DATABASE_DB=hackin2db
+DATABASE_PORT=5432
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/hackin2db
+ORIGIN='http://localhost:PORT'
+ISSUER='https://hackin2.com'
+PUBKEY=public_key.pem
+PRIVKEY=private_key.pem
+```
 
 ### Installation
 
@@ -52,33 +82,10 @@ cd hackin2-api
 npm install
 ```
 
-3. Use database migration
+3. Run docker-compose
 
-Before running the script, a database needs to be created separetly
-
-```bash
-npm prisma db pull
-```
-
-4. Generate private/public keys
+This will create the containers for the API and the database for a development enviroment. ***Production configuration: TBD***
 
 ```bash
-openssl genrsa -out {the_name_of_your_private_key.pem} 2048
-```
-
-```bash
-openssl rsa -pubout -in {the_name_of_your_private_key.pem} -out {the_name_of_your_public_key.pem}
-```
-
-### Configuration
-
-Before running the API, you need to set up the configuration.
-Copy the .env.example file and rename it to .env, then fill in the appropriate values for the environment variables:
-
-```
-PORT=8000
-DATABASE_URL=your_database_connection_string
-ISSUER=https://hackin2.com
-PUBKEY=public_key.pem
-PRIVKEY=private_key.pem
+docker-compose -f docker-compose.dev.yml up
 ```
