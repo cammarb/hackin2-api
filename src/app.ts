@@ -33,6 +33,9 @@ app.use(helmet())
 app.use(cookieParser())
 app.use(express.json())
 
+app.use('/', (req, res)=>{
+  res.send("Welcome to the Hackin2 API.")
+})
 app.use('/user', userRouter)
 app.use('/auth', authRouter)
 app.use('/roles', roleRouter)

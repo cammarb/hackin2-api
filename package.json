@@ -2,10 +2,11 @@
   "name": "hackin2-api",
   "version": "1.0.0",
   "description": "API for the Hackin2 Platform.",
+  "repository": {"url": "https://github.com/Hackin2-Company/Hackin2-API"},
   "main": "server.ts",
   "scripts": {
     "test": "jest --coverage",
-    "dev": "npx prisma db push && npx prisma db seed && nodemon ./src/server.ts",
+    "dev": "npx prisma db push && nodemon ./src/server.ts",
     "build": "tsc"
   },
   "prisma": {
