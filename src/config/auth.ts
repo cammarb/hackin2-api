@@ -6,11 +6,11 @@ import { issuer, privateKey } from '../app'
 const generateAccessToken = (user: User): string => {
   const payload: JwtPayload = {
     username: user.username,
-    role: user.roleId,
+    role: user.role,
   }
   const options: SignOptions = {
     algorithm: 'RS256',
-    expiresIn: '30s',
+    expiresIn: '5m',
     issuer: issuer,
   }
 
@@ -20,7 +20,7 @@ const generateAccessToken = (user: User): string => {
 }
 
 const generateRefreshToken = (user: User): string => {
-  const payload: JwtPayload = { username: user.username, role: user.roleId }
+  const payload: JwtPayload = { username: user.username, role: user.role }
   const options: SignOptions = {
     algorithm: 'RS256',
     expiresIn: '8h',

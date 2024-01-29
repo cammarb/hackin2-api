@@ -1,24 +1,71 @@
-import { Role } from '@prisma/client'
 import { Request, Response, NextFunction } from 'express'
+import { User } from '@prisma/client'
 import prisma from '../config/db'
 
 const checkAdmin = async (req: Request, res: Response, next: NextFunction) => {
-  const roleId = req.params.roleId
-
-  if (!roleId) return res.sendStatus(401)
-  const role: Role | null = await prisma.role.findUnique({
-    where: {
-      id: roleId,
-    },
-  })
-  if (!role) res.status(404).json({ error: 'Role not found' })
-
   try {
-    const roleName = role?.name
-    if (roleName == 'Admin') next()
-  } catch (error: any) {
-    res.sendStatus(403)
+    const username = req.params.username
+    const role = req.params.role
+
+    if (!username) {
+      return res.status(400).json({ error: 'payload not provided' })
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { username: username },
+      select: { role: true },
+    })
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    const userRole = user.role
+
+    if (role === userRole && userRole === 'ADMIN') {
+      return next()
+    } else {
+      return res.status(403).json({ error: 'Permission denied' })
+    }
+  } catch (error) {
+    console.error('Error in role middleware:', error)
+    return res.status(500).json({ error: 'Internal server error' })
   }
 }
 
-export { checkAdmin }
+const checkManager = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const username = req.params.username
+    const role = req.params.role
+
+    if (!username) {
+      return res.status(400).json({ error: 'payload not provided' })
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { username: username },
+      select: { role: true },
+    })
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    const userRole = user.role
+
+    if (role === userRole && userRole === 'MANAGER') {
+      return next()
+    } else if (role === userRole && userRole === 'ADMIN') {
+      return next()
+    } else return res.status(403).json({ error: 'Permission denied' })
+  } catch (error) {
+    console.error('Error in role middleware:', error)
+    return res.status(500).json({ error: 'Internal server error' })
+  }
+}
+
+export { checkAdmin, checkManager }

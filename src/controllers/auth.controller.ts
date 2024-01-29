@@ -131,7 +131,7 @@ const handleLogOut = (req: Request, res: Response) => {
   try {
     res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true })
     res.removeHeader('authorization')
-    res.sendStatus(204)
+    res.sendStatus(204).json({ message: 'Log Out successful.' })
   } catch (error) {
     console.error('Logout error:', error)
     res.status(500).json({ error: 'Internal Server Error' })

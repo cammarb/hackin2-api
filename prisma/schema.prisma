@@ -10,6 +10,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
 model User {
   id           String         @id @unique @default(uuid())
   firstName    String
@@ -17,9 +21,14 @@ model User {
   username     String         @unique
   email        String         @unique
   password     String
-  roleId       String         @map("role_id")
-  role         Role           @relation(fields: [roleId], references: [id])
+  companyId    String?
+  role         Role           @default(USER)
   RefreshToken RefreshToken[]
+  userProfile  UserProfile?
+  company      Company?       @relation(fields: [companyId], references: [id])
+  Gig          Gig[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 }
 
 model RefreshToken {
@@ -32,10 +41,78 @@ model RefreshToken {
   updatedAt   DateTime @updatedAt
 }
 
-model Role {
+model UserProfile {
+  id                String                @id @unique @default(uuid())
+  qualifications    Qualification[]
+  skills            SkillsOnUserProfile[]
+  yearsOfExperience Int?
+  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String                @unique
+}
+
+model Skill {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  UserProfiles SkillsOnUserProfile[]
+}
+
+model SkillsOnUserProfile {
+  userProfile   UserProfile @relation(fields: [userProfileId], references: [id])
+  userProfileId String
+  Skill         Skill       @relation(fields: [skillId], references: [id])
+  skillId       Int
+
+  @@id([userProfileId, skillId])
+}
+
+model Qualification {
+  id              String       @id @unique @default(uuid())
+  qualification   String
+  institutionName String
+  startDate       DateTime
+  endDate         DateTime?
+  userProfileId   String
+  userProfile     UserProfile? @relation(fields: [userProfileId], references: [id])
+}
+
+model Company {
+  id                 String @id @unique @default(uuid())
+  companyName        String
+  companyURL         String
+  companyLogo        String
+  companyDescription String
+  userId             String @unique
+  Gig                Gig[]
+  User               User[]
+}
+
+model GigType {
   id          String  @id @unique @default(uuid())
   name        String  @unique
   description String?
 
-  users User[]
+  gig Gig[]
+}
+
+model Gig {
+  id               String   @id @unique @default(uuid())
+  title            String   @unique
+  description      String
+  gigType          GigType  @relation(fields: [gigTypeId], references: [id])
+  requirements     String[]
+  paymentDetails   Decimal
+  startDate        DateTime
+  endDate          DateTime
+  postedById       String
+  postedBy         Company  @relation(fields: [postedById], references: [userId])
+  menteeAssignedId String?
+  menteeAssigned   User?    @relation(fields: [menteeAssignedId], references: [id])
+  gigTypeId        String
+}
+
+enum Role {
+  USER
+  ADMIN
+  MANAGER // Manages a company profile
 }

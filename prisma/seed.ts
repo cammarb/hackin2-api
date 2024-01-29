@@ -1,42 +1,13 @@
 import { PrismaClient } from '@prisma/client'
+import hashToken from '../src/config/hash'
 
 const prisma = new PrismaClient()
 
 async function main() {
-  const admin = await prisma.role.upsert({
-    where: { name: 'Admin' },
-    update: {},
-    create: {
-      name: 'Admin',
-      description: 'Administrator. Manages everything',
-    },
-  })
-  const manager = await prisma.role.upsert({
-    where: { name: 'Manager' },
-    update: {},
-    create: {
-      name: 'Manager',
-      description: 'Manage most aspects of the site',
-    },
-  })
-  const enterprise = await prisma.role.upsert({
-    where: { name: 'Enterprise' },
-    update: {},
-    create: {
-      name: 'Enterprise',
-      description: 'Enterprise owner',
-    },
-  })
-  const user = await prisma.role.upsert({
-    where: { name: 'User' },
-    update: {},
-    create: {
-      name: 'User',
-      description: 'Average aspiring Social Engineer',
-    },
-  })
-  console.log({ admin, manager, enterprise, user })
+  const password = 'Welcome2Hackin2!' // Default password. On first login we can change the password
+  const hashedPassword = await hashToken(password)
 
+  console.log(hashedPassword)
   const adminUser1 = await prisma.user.upsert({
     where: { username: 'camila.martinez' },
     update: {},
@@ -45,8 +16,8 @@ async function main() {
       lastName: 'Martinez',
       username: 'camila.martinez',
       email: 'camila.martinez@code.berlin',
-      password: 'Welcome2Hackin2!', // Default password. On first login we can change the password
-      roleId: admin.id,
+      password: hashedPassword,
+      role: 'ADMIN',
     },
   })
 
@@ -58,13 +29,46 @@ async function main() {
       lastName: 'Keichel',
       username: 'stefanie.keichel',
       email: 'stefanie.keichel@code.berlin',
-      password: 'Welcome2Hackin2!', // Default password. On first login we can change the password
-      roleId: admin.id,
+      password: hashedPassword,
+      role: 'ADMIN',
     },
   })
 
   console.log({ adminUser1, adminUser2 })
+
+  const skills = [
+    'Lockpicking',
+    'Social Engineering',
+    'Surveillance',
+    'Access Control Systems',
+    'Intrusion Techniques',
+    'Tactical Skills',
+    'Wireless Exploitation',
+    'Alarm Systems',
+    'Device Manipulation',
+    'Evasion',
+    'Risk Assessment',
+    'Documentation',
+    'Ethical/Legal Awareness',
+    'Adaptability',
+    'Communication',
+    'Physical Fitness',
+    'Team Collaboration',
+  ]
+
+  for (const skill of skills) {
+    await prisma.skill.upsert({
+      where: {
+        name: skill,
+      },
+      update: {},
+      create: {
+        name: skill,
+      },
+    })
+  }
 }
+
 main()
   .then(async () => {
     await prisma.$disconnect()
