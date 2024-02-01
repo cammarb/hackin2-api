@@ -29,6 +29,7 @@ model User {
   Gig          Gig[]
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+  UserRole     UserRole[]
 }
 
 model RefreshToken {
@@ -78,13 +79,29 @@ model Qualification {
 
 model Company {
   id                 String @id @unique @default(uuid())
-  companyName        String
+  companyName        String @unique
   companyURL         String
   companyLogo        String
   companyDescription String
-  userId             String @unique
   Gig                Gig[]
   User               User[]
+
+  // User roles within a company
+  userRoles UserRole[]
+}
+
+// User role within a company
+model UserRole {
+  id        String @id @unique @default(uuid())
+  userId    String
+  companyId String
+  role      Role
+
+  user    User    @relation(fields: [userId], references: [id])
+  company Company @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model GigType {
@@ -105,14 +122,15 @@ model Gig {
   startDate        DateTime
   endDate          DateTime
   postedById       String
-  postedBy         Company  @relation(fields: [postedById], references: [userId])
+  postedBy         Company  @relation(fields: [postedById], references: [id])
   menteeAssignedId String?
   menteeAssigned   User?    @relation(fields: [menteeAssignedId], references: [id])
   gigTypeId        String
 }
 
 enum Role {
-  USER
-  ADMIN
-  MANAGER // Manages a company profile
+  ADMIN // Hackin2 overall Admins
+  OWNER // Owner role in a company
+  MANAGER // Manager role a company profile
+  USER // Regular user
 }

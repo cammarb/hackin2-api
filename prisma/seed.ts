@@ -36,6 +36,17 @@ async function main() {
 
   console.log({ adminUser1, adminUser2 })
 
+  const company = await prisma.company.upsert({
+    where: { companyName: 'Hackin2'},
+    update: {},
+    create: {
+      companyName: 'Hackin2',
+      companyURL: 'https://hackin2.com',
+      companyLogo: 'Hackin2',
+      companyDescription: 'Hackin2 - The pioneering bug bounty program for physical penetration testing'
+    }
+  })
+
   const skills = [
     'Lockpicking',
     'Social Engineering',
