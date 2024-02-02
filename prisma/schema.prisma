@@ -135,12 +135,7 @@ model GigPost {
 enum Role {
   ADMIN // Hackin2 overall Admins
   OWNER // Owner of a company
-  USER // User not part of a company
-}
-
-enum CompanyRole {
-  OWNER // User that creates the company profile
-  ADMIN
-  MEMBER // Regular members
-  GUEST // Externals invited
+  MANAGER // Elevated permissions in a company
+  GUEST
+  USER
 }
