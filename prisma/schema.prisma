@@ -15,21 +15,22 @@ generator erd {
 }
 
 model User {
-  id           String         @id @unique @default(uuid())
-  firstName    String
-  lastName     String
-  username     String         @unique
-  email        String         @unique
-  password     String
-  companyId    String?
-  role         Role           @default(USER)
-  RefreshToken RefreshToken[]
-  userProfile  UserProfile?
-  company      Company?       @relation(fields: [companyId], references: [id])
-  Gig          Gig[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  UserRole     UserRole[]
+  id          String       @id @unique @default(uuid())
+  firstName   String
+  lastName    String
+  username    String       @unique
+  email       String       @unique
+  password    String
+  userProfile UserProfile?
+  role        Role         @default(USER)
+
+  RefreshTokens RefreshToken[]
+
+  Gig    Gig[]
+  Member CompanyMember[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model RefreshToken {
@@ -78,20 +79,16 @@ model Qualification {
 }
 
 model Company {
-  id                 String @id @unique @default(uuid())
-  companyName        String @unique
+  id                 String          @id @unique @default(uuid())
+  companyName        String          @unique
   companyURL         String
   companyLogo        String
   companyDescription String
-  Gig                Gig[]
-  User               User[]
-
-  // User roles within a company
-  userRoles UserRole[]
+  members            CompanyMember[]
 }
 
-// User role within a company
-model UserRole {
+// Users within a company
+model CompanyMember {
   id        String @id @unique @default(uuid())
   userId    String
   companyId String
@@ -102,6 +99,8 @@ model UserRole {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  Gig Gig[]
 }
 
 model GigType {
@@ -113,24 +112,35 @@ model GigType {
 }
 
 model Gig {
-  id               String   @id @unique @default(uuid())
-  title            String   @unique
-  description      String
-  gigType          GigType  @relation(fields: [gigTypeId], references: [id])
-  requirements     String[]
-  paymentDetails   Decimal
-  startDate        DateTime
-  endDate          DateTime
-  postedById       String
-  postedBy         Company  @relation(fields: [postedById], references: [id])
-  menteeAssignedId String?
-  menteeAssigned   User?    @relation(fields: [menteeAssignedId], references: [id])
+  id             String   @id @unique @default(uuid())
+  title          String   @unique
+  description    String
+  requirements   String[]
+  paymentDetails Decimal
+  startDate      DateTime
+  endDate        DateTime
+
   gigTypeId        String
+  gigType          GigType       @relation(fields: [gigTypeId], references: [id])
+  postedById       String
+  postedBy         CompanyMember @relation(fields: [postedById], references: [id])
+  menteeAssignedId String?
+  menteeAssigned   User?         @relation(fields: [menteeAssignedId], references: [id])
+}
+
+model GigPost {
+  id String @id @unique @default(uuid())
 }
 
 enum Role {
   ADMIN // Hackin2 overall Admins
-  OWNER // Owner role in a company
-  MANAGER // Manager role a company profile
-  USER // Regular user
+  OWNER // Owner of a company
+  USER // User not part of a company
+}
+
+enum CompanyRole {
+  OWNER // User that creates the company profile
+  ADMIN
+  MEMBER // Regular members
+  GUEST // Externals invited
 }
