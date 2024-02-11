@@ -2,39 +2,6 @@ import { Request, Response } from 'express'
 import prisma from '../config/db'
 import { Role, User } from '@prisma/client'
 import hashToken from '../config/hash'
-import * as EmailValidator from 'email-validator'
-
-export const newUser = async (req: Request, res: Response) => {
-  const { username, email, firstName, lastName, password, role } = req.body
-  if (!username || !password || !email || !firstName || !lastName || !role)
-    return res.status(400).json({ messaege: 'All the fields are required' })
-
-  if (!EmailValidator.validate(email))
-    return res.status(400).json({ messaege: 'Enter a valid email' })
-
-  const user: User[] | null = await prisma.user.findMany({
-    where: {
-      OR: [{ username: username }, { email: email }],
-    },
-  })
-  if (typeof user === null) return res.sendStatus(409)
-  try {
-    const hashedPassword = await hashToken(password)
-    const user: User = await prisma.user.create({
-      data: {
-        firstName: firstName,
-        lastName: lastName,
-        username: username,
-        email: email,
-        password: hashedPassword,
-        role: role,
-      },
-    })
-    res.status(201).json({ success: 'User created successfully' })
-  } catch (err: Error | any) {
-    res.status(500).json({ message: err?.message })
-  }
-}
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {

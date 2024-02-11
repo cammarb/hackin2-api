@@ -10,7 +10,7 @@ import { verifyJWT } from '../middleware/auth.middleware'
 
 const userRouter: Router = express.Router()
 
-userRouter.post('/register', newUser)
+
 userRouter.get('/', verifyJWT, getAllUsers)
 userRouter.get('/account', verifyJWT, getUser)
 userRouter.put('/account/edit', verifyJWT, editUser)
