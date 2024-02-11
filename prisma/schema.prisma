@@ -15,22 +15,25 @@ generator erd {
 }
 
 model User {
-  id          String       @id @unique @default(uuid())
-  firstName   String
-  lastName    String
-  username    String       @unique
-  email       String       @unique
-  password    String
+  id        String  @id @unique @default(uuid())
+  firstName String
+  lastName  String
+  username  String  @unique
+  email     String  @unique
+  password  String
+  mfa       Boolean @default(false)
+
+  userType    UserType     @default(PENTESTER)
   userProfile UserProfile?
-  role        Role         @default(USER)
 
   RefreshTokens RefreshToken[]
 
-  Gig    Gig[]
-  Member CompanyMember[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  applications Application[]
+  Member       CompanyMember[]
+  Gig          Gig[]
 }
 
 model RefreshToken {
@@ -50,6 +53,33 @@ model UserProfile {
   yearsOfExperience Int?
   user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId            String                @unique
+}
+
+model Application {
+  id                String            @id @unique @default(uuid())
+  userId            String            @unique
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bountyPostId      String            @unique
+  bountyPost        BountyPost        @relation(fields: [bountyPostId], references: [id], onDelete: Cascade)
+  applicationStatus ApplicationStatus @default(SUBMITED)
+}
+
+model BountyPost {
+  id         String           @id @unique @default(uuid())
+  postStatus BountyPostStatus @default(CLOSED)
+
+  Application Application[]
+}
+
+enum ApplicationStatus {
+  SUBMITED
+  ACCEPTED
+  REJECTED
+}
+
+enum BountyPostStatus {
+  OPEN
+  CLOSED
 }
 
 model Skill {
@@ -92,7 +122,7 @@ model CompanyMember {
   id        String @id @unique @default(uuid())
   userId    String
   companyId String
-  role      Role
+  role      Role   @relation(fields: [roleId], references: [id])
 
   user    User    @relation(fields: [userId], references: [id])
   company Company @relation(fields: [companyId], references: [id])
@@ -100,7 +130,8 @@ model CompanyMember {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Gig Gig[]
+  Gig    Gig[]
+  roleId String
 }
 
 model GigType {
@@ -132,10 +163,28 @@ model GigPost {
   id String @id @unique @default(uuid())
 }
 
-enum Role {
-  ADMIN // Hackin2 overall Admins
-  OWNER // Owner of a company
-  MANAGER // Elevated permissions in a company
-  GUEST
-  USER
+enum UserType {
+  ENTERPRISE
+  PENTESTER
 }
+
+model Role {
+  id            String          @id @unique @default(uuid())
+  name          String          @unique
+  permissions   Permission[]
+  CompanyMember CompanyMember[]
+}
+
+// OWNER // Owner of a company
+// MANAGER // Elevated permissions in a company
+// MEMBER 
+
+model Permission {
+  id          String  @id @unique @default(uuid())
+  name        String  @unique
+  description String
+  Role        Role?   @relation(fields: [roleId], references: [id])
+  roleId      String?
+}
+
+// READ, CREATE, WRITE, DELETE
