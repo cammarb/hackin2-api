@@ -24,7 +24,7 @@ model User {
   mfa           Boolean        @default(false)
   RefreshTokens RefreshToken[]
 
-  userType    UserType     @default(PENTESTER)
+  userType    UserType
   userProfile UserProfile?
 
   createdAt DateTime @default(now())

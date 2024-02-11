@@ -31,7 +31,7 @@ export const newUser = async (req: Request, res: Response) => {
         username: username,
         email: email,
         password: hashedPassword,
-        role: role,
+        userType: "PENTESTER",
       },
     })
     res.status(201).json({ success: 'User created successfully' })

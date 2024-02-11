@@ -3,6 +3,7 @@ import {
   handleLogOut,
   handleLogin,
   handleRefreshToken,
+  newUser,
 } from '../controllers/auth.controller'
 const authRouter: Router = express.Router()
 

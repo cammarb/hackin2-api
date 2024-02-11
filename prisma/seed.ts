@@ -4,7 +4,7 @@ import hashToken from '../src/config/hash'
 const prisma = new PrismaClient()
 
 async function main() {
-  const password = 'Welcome2Hackin2!' // Default password. On first login we can change the password  
+  const password = 'Welcome2Hackin2!' // Default password. On first login we can change the password
   let hashedPassword = await hashToken(password)
 
   const adminUser1 = await prisma.user.upsert({
@@ -16,7 +16,7 @@ async function main() {
       username: 'camila.martinez',
       email: 'camila.martinez@code.berlin',
       password: hashedPassword,
-      role: 'ADMIN',
+      userType: 'ENTERPRISE',
     },
   })
 
@@ -29,22 +29,30 @@ async function main() {
       username: 'stefanie.keichel',
       email: 'stefanie.keichel@code.berlin',
       password: hashedPassword,
-      role: 'ADMIN',
+      userType: 'ENTERPRISE',
     },
   })
 
   console.log({ adminUser1, adminUser2 })
 
-  const company = await prisma.company.upsert({
-    where: { companyName: 'Hackin2'},
-    update: {},
-    create: {
-      companyName: 'Hackin2',
-      companyURL: 'https://hackin2.com',
-      companyLogo: 'Hackin2',
-      companyDescription: 'Hackin2 - The pioneering bug bounty program for physical penetration testing'
-    }
-  })
+  // const company = await prisma.company.upsert({
+  //   where: { companyName: 'Hackin2' },
+  //   update: {},
+  //   create: {
+  //     companyName: 'Hackin2',
+  //     companyURL: 'https://hackin2.com',
+  //     companyLogo: 'Hackin2',
+  //     companyDescription:
+  //       'Hackin2 - The pioneering bug bounty program for physical penetration testing',
+  //     members: [
+  //       {
+  //         userId: adminUser1.id,
+  //         companyId: company.id, // Assuming you have the company ID available
+  //         roleId: '', // Assuming you have the role ID for admin
+  //       },
+  //     ],
+  //   },
+  // })
 
   const skills = [
     'Lockpicking',

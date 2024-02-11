@@ -8,7 +8,7 @@ import userRouter from './routes/user.routes'
 import authRouter from './routes/auth.routes'
 import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
-import gigRouter from './routes/gig.routes'
+import gigRouter from './routes/bounty.routes'
 
 dotenv.config()
 
