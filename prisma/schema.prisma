@@ -15,25 +15,24 @@ generator erd {
 }
 
 model User {
-  id        String  @id @unique @default(uuid())
-  firstName String
-  lastName  String
-  username  String  @unique
-  email     String  @unique
-  password  String
-  mfa       Boolean @default(false)
+  id            String         @id @unique @default(uuid())
+  firstName     String
+  lastName      String
+  username      String         @unique
+  email         String         @unique
+  password      String
+  mfa           Boolean        @default(false)
+  RefreshTokens RefreshToken[]
 
   userType    UserType     @default(PENTESTER)
   userProfile UserProfile?
 
-  RefreshTokens RefreshToken[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  applications Application[]
-  Member       CompanyMember[]
-  Gig          Gig[]
+  CompanyMember CompanyMember[]
+  Application   Application[]
+  BountyUser    BountyUser[]
 }
 
 model RefreshToken {
@@ -64,24 +63,6 @@ model Application {
   applicationStatus ApplicationStatus @default(SUBMITED)
 }
 
-model BountyPost {
-  id         String           @id @unique @default(uuid())
-  postStatus BountyPostStatus @default(CLOSED)
-
-  Application Application[]
-}
-
-enum ApplicationStatus {
-  SUBMITED
-  ACCEPTED
-  REJECTED
-}
-
-enum BountyPostStatus {
-  OPEN
-  CLOSED
-}
-
 model Skill {
   id   Int    @id @default(autoincrement())
   name String @unique
@@ -99,13 +80,18 @@ model SkillsOnUserProfile {
 }
 
 model Qualification {
-  id              String       @id @unique @default(uuid())
-  qualification   String
-  institutionName String
-  startDate       DateTime
-  endDate         DateTime?
-  userProfileId   String
-  userProfile     UserProfile? @relation(fields: [userProfileId], references: [id])
+  id                String            @id @unique @default(uuid())
+  title             String
+  institution       String
+  completionDate    DateTime?
+  qualificationType QualificationType
+  userProfileId     String
+  userProfile       UserProfile?      @relation(fields: [userProfileId], references: [id])
+}
+
+enum QualificationType {
+  DEGREE
+  COURSE
 }
 
 model Company {
@@ -115,59 +101,98 @@ model Company {
   companyLogo        String
   companyDescription String
   members            CompanyMember[]
+  levels             Level[]
 }
 
 // Users within a company
 model CompanyMember {
-  id        String @id @unique @default(uuid())
-  userId    String
-  companyId String
-  role      Role   @relation(fields: [roleId], references: [id])
+  userId    String  @unique
+  user      User    @relation(fields: [userId], references: [id])
+  companyId String  @unique
+  company   Company @relation(fields: [companyId], references: [id])
 
-  user    User    @relation(fields: [userId], references: [id])
-  company Company @relation(fields: [companyId], references: [id])
+  roleId String
+  role   Role   @relation(fields: [roleId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Gig    Gig[]
-  roleId String
+  bounty Bounty[]
+
+  @@id([userId, companyId])
 }
 
-model GigType {
-  id          String  @id @unique @default(uuid())
-  name        String  @unique
+model BountyType {
+  id          String   @id @unique @default(uuid())
+  name        String   @unique
   description String?
-
-  gig Gig[]
+  Bounty      Bounty[]
 }
 
-model Gig {
-  id             String   @id @unique @default(uuid())
-  title          String   @unique
+model Bounty {
+  id             String       @id @unique @default(uuid())
+  title          String       @unique
   description    String
   requirements   String[]
   paymentDetails Decimal
   startDate      DateTime
   endDate        DateTime
+  status         BountyStatus @default(IN_PROGRESS)
 
-  gigTypeId        String
-  gigType          GigType       @relation(fields: [gigTypeId], references: [id])
-  postedById       String
-  postedBy         CompanyMember @relation(fields: [postedById], references: [id])
-  menteeAssignedId String?
-  menteeAssigned   User?         @relation(fields: [menteeAssignedId], references: [id])
+  bountyTypeId String
+  bountyType   BountyType @relation(fields: [bountyTypeId], references: [id])
+
+  CompanyMember          CompanyMember? @relation(fields: [companyMemberUserId, companyMemberCompanyId], references: [userId, companyId])
+  companyMemberUserId    String?
+  companyMemberCompanyId String?
+  BountyPost             BountyPost?
+  BountyUser             BountyUser?
+  Finding                Finding?
 }
 
-model GigPost {
-  id String @id @unique @default(uuid())
+model BountyPost {
+  id         String           @id @unique @default(uuid())
+  bountyId   String           @unique
+  bounty     Bounty           @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  postStatus BountyPostStatus @default(CLOSED)
+
+  Application Application[]
 }
 
-enum UserType {
-  ENTERPRISE
-  PENTESTER
+model Level {
+  id        String    @id @unique @default(uuid())
+  name      String
+  reward    Int
+  Company   Company?  @relation(fields: [companyId], references: [id])
+  companyId String?
+  Finding   Finding[]
 }
 
+model BountyUser {
+  userId   String @unique
+  user     User   @relation(fields: [userId], references: [id])
+  bountyId String @unique
+  bounty   Bounty @relation(fields: [bountyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, bountyId])
+}
+
+model Finding {
+  id          String @id @unique @default(uuid())
+  bountyId    String @unique
+  bounty      Bounty @relation(fields: [bountyId], references: [id])
+  title       String
+  description String
+  level       Level  @relation(fields: [levelId], references: [id])
+  levelId     String
+}
+
+// OWNER : Owner of a company. C,R,U,D
+// MANAGER : Elevated permissions in a company. C,R,U
+// MEMBER : Read access. R
 model Role {
   id            String          @id @unique @default(uuid())
   name          String          @unique
@@ -175,10 +200,7 @@ model Role {
   CompanyMember CompanyMember[]
 }
 
-// OWNER // Owner of a company
-// MANAGER // Elevated permissions in a company
-// MEMBER 
-
+// CREATE, READ, UPDATE, DELETE
 model Permission {
   id          String  @id @unique @default(uuid())
   name        String  @unique
@@ -187,4 +209,23 @@ model Permission {
   roleId      String?
 }
 
-// READ, CREATE, WRITE, DELETE
+enum UserType {
+  ENTERPRISE
+  PENTESTER
+}
+
+enum BountyStatus {
+  IN_PROGRESS
+  FINISHED
+}
+
+enum BountyPostStatus {
+  OPEN
+  CLOSED
+}
+
+enum ApplicationStatus {
+  SUBMITED
+  ACCEPTED
+  REJECTED
+}
