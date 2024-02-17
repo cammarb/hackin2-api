@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, User } from '@prisma/client'
 import hashToken from '../src/config/hash'
 
 const prisma = new PrismaClient()
@@ -17,6 +17,9 @@ async function main() {
       email: 'camila.martinez@code.berlin',
       password: hashedPassword,
       userType: 'ENTERPRISE',
+      userProfile: {
+        create: {},
+      },
     },
   })
 
@@ -30,29 +33,13 @@ async function main() {
       email: 'stefanie.keichel@code.berlin',
       password: hashedPassword,
       userType: 'ENTERPRISE',
+      userProfile: {
+        create: {},
+      },
     },
   })
 
   console.log({ adminUser1, adminUser2 })
-
-  // const company = await prisma.company.upsert({
-  //   where: { companyName: 'Hackin2' },
-  //   update: {},
-  //   create: {
-  //     companyName: 'Hackin2',
-  //     companyURL: 'https://hackin2.com',
-  //     companyLogo: 'Hackin2',
-  //     companyDescription:
-  //       'Hackin2 - The pioneering bug bounty program for physical penetration testing',
-  //     members: [
-  //       {
-  //         userId: adminUser1.id,
-  //         companyId: company.id, // Assuming you have the company ID available
-  //         roleId: '', // Assuming you have the role ID for admin
-  //       },
-  //     ],
-  //   },
-  // })
 
   const skills = [
     'Lockpicking',

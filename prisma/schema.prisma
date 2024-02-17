@@ -23,9 +23,8 @@ model User {
   password      String
   mfa           Boolean        @default(false)
   RefreshTokens RefreshToken[]
-
-  userType    UserType
-  userProfile UserProfile?
+  userType      UserType
+  userProfile   UserProfile?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -46,12 +45,14 @@ model RefreshToken {
 }
 
 model UserProfile {
-  id                String                @id @unique @default(uuid())
+  id                String                @id @default(uuid())
   qualifications    Qualification[]
   skills            SkillsOnUserProfile[]
   yearsOfExperience Int?
   user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId            String                @unique
+
+  @@unique([id, userId])
 }
 
 model Application {
@@ -71,7 +72,7 @@ model Skill {
 }
 
 model SkillsOnUserProfile {
-  userProfile   UserProfile @relation(fields: [userProfileId], references: [id])
+  userProfile   UserProfile @relation(fields: [userProfileId], references: [userId])
   userProfileId String
   Skill         Skill       @relation(fields: [skillId], references: [id])
   skillId       Int
@@ -86,7 +87,7 @@ model Qualification {
   completionDate    DateTime?
   qualificationType QualificationType
   userProfileId     String
-  userProfile       UserProfile?      @relation(fields: [userProfileId], references: [id])
+  userProfile       UserProfile?      @relation(fields: [userProfileId], references: [userId])
 }
 
 enum QualificationType {
