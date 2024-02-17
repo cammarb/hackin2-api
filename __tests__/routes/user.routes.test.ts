@@ -1,7 +1,7 @@
 import request from 'supertest'
 import app from '../../src/app'
 import { verifyJWT } from '../../src/middleware/auth.middleware'
-import userRouter from '../../src/routes/user.routes'
+import userRouter from '../../src/routes/api/v1/pentester/user.routes'
 import { getAllUsers } from '../../src/controllers/user.controller'
 
 jest.mock('../../src/middleware/auth.middleware')

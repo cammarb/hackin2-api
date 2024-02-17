@@ -4,7 +4,7 @@ import {
   handleLogin,
   handleRefreshToken,
   newUser,
-} from '../controllers/auth.controller'
+} from '../../../../controllers/auth.controller'
 const authRouter: Router = express.Router()
 
 authRouter.post('/register', newUser)

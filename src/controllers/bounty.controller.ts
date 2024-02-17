@@ -1,13 +1,13 @@
 import { Request, Response } from 'express'
 import prisma from '../config/db'
-import { Role, Gig } from '@prisma/client'
+import { Role, Bounty } from '@prisma/client'
 import { checkAdmin } from '../middleware/roles.middleware'
 
-export const newGig = async (req: Request, res: Response) => {
+export const newBounty = async (req: Request, res: Response) => {
   const {
     title,
     description,
-    gigTypeId,
+    bountyTypeId,
     requirements,
     paymentDetails,
     startDate,
@@ -18,7 +18,7 @@ export const newGig = async (req: Request, res: Response) => {
   if (
     !title ||
     !description ||
-    !gigTypeId ||
+    !bountyTypeId ||
     !requirements ||
     !paymentDetails ||
     !startDate ||
@@ -27,18 +27,18 @@ export const newGig = async (req: Request, res: Response) => {
   )
     return res.status(400).json({ messaege: 'All the fields are required' })
 
-  const gig: Gig | null = await prisma.gig.findUnique({
+  const bounty: Bounty | null = await prisma.bounty.findUnique({
     where: {
       title: title,
     },
   })
-  if (gig !== null) return res.sendStatus(409)
+  if (bounty !== null) return res.sendStatus(409)
   try {
-    const gig: Gig = await prisma.gig.create({
+    const bounty: Bounty = await prisma.bounty.create({
       data: {
         title: title,
         description: description,
-        gigTypeId: gigTypeId,
+        bountyTypeId: bountyTypeId,
         requirements: { set: requirements },
         paymentDetails: paymentDetails,
         startDate: startDate,
@@ -46,57 +46,57 @@ export const newGig = async (req: Request, res: Response) => {
         postedById: postedById,
       },
     })
-    res.status(201).json({ success: 'Gig created successfully' })
+    res.status(201).json({ success: 'Bounty created successfully' })
   } catch (err: Error | any) {
     res.status(500).json({ message: err?.message })
   }
 }
 
-export const getAllGigs = async (req: Request, res: Response) => {
+export const getAllBountys = async (req: Request, res: Response) => {
   try {
-    const gigs: Gig[] = await prisma.gig.findMany()
+    const bountys: Bounty[] = await prisma.bounty.findMany()
     res.status(200).json({
-      gigs,
+      bountys,
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
   }
 }
 
-export const getGig = async (req: Request, res: Response) => {
+export const getBounty = async (req: Request, res: Response) => {
   try {
-    const gigId: string = req.params.gigId
+    const bountyId: string = req.params.bountyId
 
-    const gig: Gig | null = await prisma.gig.findUnique({
+    const bounty: Bounty | null = await prisma.bounty.findUnique({
       where: {
-        id: gigId,
+        id: bountyId,
       },
     })
-    if (!gig) res.status(404).json({ error: 'Gig not found' })
+    if (!bounty) res.status(404).json({ error: 'Bounty not found' })
     res.status(200).json({
-      id: gig?.id,
-      title: gig?.title,
-      description: gig?.description,
-      gigTypeId: gig?.gigTypeId,
-      requirements: gig?.requirements,
-      paymentDetails: gig?.paymentDetails,
-      startDate: gig?.startDate,
-      endDate: gig?.endDate,
-      postedById: gig?.postedById,
-      menteeAssignedId: gig?.menteeAssignedId,
+      id: bounty?.id,
+      title: bounty?.title,
+      description: bounty?.description,
+      bountyTypeId: bounty?.bountyTypeId,
+      requirements: bounty?.requirements,
+      paymentDetails: bounty?.paymentDetails,
+      startDate: bounty?.startDate,
+      endDate: bounty?.endDate,
+      postedById: bounty?.postedById,
+      menteeAssignedId: bounty?.menteeAssignedId,
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
   }
 }
 
-export const editGig = async (req: Request, res: Response) => {
+export const editBounty = async (req: Request, res: Response) => {
   try {
-    const gigId = req.params.id
+    const bountyId = req.params.id
     const {
       title,
       description,
-      gigTypeId,
+      bountyTypeId,
       requirements,
       paymentDetails,
       startDate,
@@ -108,7 +108,7 @@ export const editGig = async (req: Request, res: Response) => {
     if (
       !title ||
       !description ||
-      !gigTypeId ||
+      !bountyTypeId ||
       !requirements ||
       !paymentDetails ||
       !startDate ||
@@ -117,14 +117,14 @@ export const editGig = async (req: Request, res: Response) => {
     )
       return res.status(400).json({ messaege: 'All the fields are required' })
     else {
-      const gig: Gig | null = await prisma.gig.update({
+      const bounty: Bounty | null = await prisma.bounty.update({
         where: {
-          id: gigId,
+          id: bountyId,
         },
         data: {
           title: title,
           description: description,
-          gigTypeId: gigTypeId,
+          bountyTypeId: bountyTypeId,
           requirements: requirements,
           paymentDetails: paymentDetails,
           startDate: startDate,
@@ -134,16 +134,16 @@ export const editGig = async (req: Request, res: Response) => {
         },
       })
       res.status(200).json({
-        id: gig?.id,
-        title: gig?.title,
-        description: gig?.description,
-        gigTypeId: gig?.gigTypeId,
-        requirements: gig?.requirements,
-        paymentDetails: gig?.paymentDetails,
-        startDate: gig?.startDate,
-        endDate: gig?.endDate,
-        postedById: gig?.postedById,
-        menteeAssignedId: gig?.menteeAssignedId,
+        id: bounty?.id,
+        title: bounty?.title,
+        description: bounty?.description,
+        bountyTypeId: bounty?.bountyTypeId,
+        requirements: bounty?.requirements,
+        paymentDetails: bounty?.paymentDetails,
+        startDate: bounty?.startDate,
+        endDate: bounty?.endDate,
+        postedById: bounty?.postedById,
+        menteeAssignedId: bounty?.menteeAssignedId,
       })
     }
   } catch (error) {
@@ -151,16 +151,16 @@ export const editGig = async (req: Request, res: Response) => {
   }
 }
 
-export const deleteGig = async (req: Request, res: Response) => {
+export const deleteBounty = async (req: Request, res: Response) => {
   try {
     const id: string = req.params.id
-    const gig: Gig | null = await prisma.gig.delete({
+    const bounty: Bounty | null = await prisma.bounty.delete({
       where: {
         id: id,
       },
     })
-    if (!gig) res.sendStatus(404).json({ error: 'Gig not found' })
-    res.status(200).json({ message: `Gig with id: ${id} deleted successfully` })
+    if (!bounty) res.sendStatus(404).json({ error: 'Bounty not found' })
+    res.status(200).json({ message: `Bounty with id: ${id} deleted successfully` })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
   }

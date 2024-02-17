@@ -6,7 +6,7 @@ import { issuer, privateKey } from '../app'
 const generateAccessToken = (user: User): string => {
   const payload: JwtPayload = {
     username: user.username,
-    role: user.role,
+    userType: user.userType,
   }
   const options: SignOptions = {
     algorithm: 'RS256',
@@ -20,7 +20,7 @@ const generateAccessToken = (user: User): string => {
 }
 
 const generateRefreshToken = (user: User): string => {
-  const payload: JwtPayload = { username: user.username, role: user.role }
+  const payload: JwtPayload = { username: user.username, userType: user.userType }
   const options: SignOptions = {
     algorithm: 'RS256',
     expiresIn: '8h',
@@ -32,11 +32,8 @@ const generateRefreshToken = (user: User): string => {
   return jwt.sign(payload, refreshSecret, options)
 }
 
-const generateTokens = (
-  user: User
-): { accessToken: string; refreshToken: string } => {
-  if (!privateKey || !issuer)
-    throw new Error('secretOrPrivateKey must have a value')
+const generateTokens = (user: User): { accessToken: string; refreshToken: string } => {
+  if (!privateKey || !issuer) throw new Error('secretOrPrivateKey must have a value')
 
   const accessToken = generateAccessToken(user)
   const refreshToken = generateRefreshToken(user)

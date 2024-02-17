@@ -1,15 +1,8 @@
 import express, { Router } from 'express'
-import {
-  getAllUsers,
-  getUser,
-  editUser,
-  deleteUser,
-  newUser,
-} from '../controllers/user.controller'
-import { verifyJWT } from '../middleware/auth.middleware'
+import { getAllUsers, getUser, editUser, deleteUser } from '../../../../controllers/user.controller'
+import { verifyJWT } from '../../../../middleware/auth.middleware'
 
 const userRouter: Router = express.Router()
-
 
 userRouter.get('/', verifyJWT, getAllUsers)
 userRouter.get('/account', verifyJWT, getUser)

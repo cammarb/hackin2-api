@@ -4,11 +4,12 @@ import cors from 'cors'
 import fs from 'fs'
 import morgan from 'morgan'
 
-import userRouter from './routes/user.routes'
-import authRouter from './routes/auth.routes'
+import userRouter from './routes/api/v1/pentester/user.routes'
+import authRouter from './routes/api/v1/auth/auth.routes'
 import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
-import gigRouter from './routes/bounty.routes'
+import bountyRouter from './routes/api/v1/company/bounty.routes'
+import apiRouter from './routes/api/v1/api.routes'
 
 dotenv.config()
 
@@ -35,12 +36,7 @@ app.use(cookieParser())
 app.use(express.json())
 app.use(morgan('tiny'))
 
-app.get('/', (req, res) => {
-  res.send('Welcome to the Hackin2 API.')
-})
-app.use('/user', userRouter)
-app.use('/auth', authRouter)
-app.use('/gig', gigRouter)
+app.use('/api/v1', apiRouter)
 
 export default app
 export { privateKey, publicKey, issuer }
