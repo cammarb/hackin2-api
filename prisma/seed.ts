@@ -1,9 +1,23 @@
-import { PrismaClient, User } from '@prisma/client'
+import { PrismaClient, Role, User } from '@prisma/client'
 import hashToken from '../src/config/hash'
 
 const prisma = new PrismaClient()
 
 async function main() {
+  const roles = ['OWNER', 'MANAGER', 'MEMBER']
+
+  for (const role of roles) {
+    await prisma.role.upsert({
+      where: {
+        name: role,
+      },
+      update: {},
+      create: {
+        name: role,
+      },
+    })
+  }
+
   const password = 'Welcome2Hackin2!' // Default password. On first login we can change the password
   let hashedPassword = await hashToken(password)
 
@@ -38,6 +52,32 @@ async function main() {
       },
     },
   })
+  const ownerRole: { id: string } | null = await prisma.role.findFirst({
+    where: {
+      name: 'OWNER',
+    },
+    select: {
+      id: true,
+    },
+  })
+  if (ownerRole) {
+    const company = await prisma.company.upsert({
+      where: { companyName: 'Hackin2' },
+      update: {},
+      create: {
+        companyName: 'Hackin2',
+        companyURL: 'hackin2.com',
+        companyLogo: 'logo.png',
+        companyDescription: 'Description',
+        members: {
+          create: {
+            userId: adminUser1.id,
+            roleId: ownerRole?.id,
+          },
+        },
+      },
+    })
+  }
 
   console.log({ adminUser1, adminUser2 })
 
