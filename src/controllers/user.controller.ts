@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import prisma from '../config/db'
-import { User, UserProfile, UserType } from '@prisma/client'
+import { User, Role } from '@prisma/client'
 import * as EmailValidator from 'email-validator'
 
 export const getAllUsers = async (req: Request, res: Response) => {
@@ -17,12 +17,12 @@ export const getAllUsers = async (req: Request, res: Response) => {
 export const getUser = async (req: Request, res: Response) => {
   try {
     const username: string = req.params.username
-    const userType: UserType = req.params.userType as UserType
+    const role: Role = req.params.role as Role
 
     const user: User | null = await prisma.user.findUnique({
       where: {
         username: username,
-        userType: userType,
+        role: role,
       },
     })
     if (!user) res.status(404).json({ error: 'User not found' })
@@ -32,7 +32,7 @@ export const getUser = async (req: Request, res: Response) => {
       email: user?.email,
       firstName: user?.firstName,
       lastName: user?.lastName,
-      userType: user?.userType,
+      role: user?.role,
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
@@ -42,7 +42,7 @@ export const getUser = async (req: Request, res: Response) => {
 export const editUser = async (req: Request, res: Response) => {
   try {
     const username: string = req.params.username
-    const userType: UserType = req.params.userType as UserType
+    // const role: Role = req.params.role as Role
 
     const { email, firstName, lastName, role } = req.body
 
@@ -52,7 +52,7 @@ export const editUser = async (req: Request, res: Response) => {
       const user: User | null = await prisma.user.update({
         where: {
           username: username,
-          userType: userType,
+          role: role,
         },
         data: {
           email: email,
@@ -89,19 +89,19 @@ export const deleteUser = async (req: Request, res: Response) => {
 
 export const getProfile = async (req: Request, res: Response) => {
   try {
-    const username: string = req.params.username
-    const userType: UserType = req.params.userType as UserType
+    // const username: string = req.params.username
+    // const role: Role = req.params.role as Role
 
-    const profile = await prisma.user.findUnique({
-      where: {
-        username: username,
-        userType: userType,
-      },
-      select: {
-        userProfile: true,
-      },
-    })
-    if (!profile) res.status(404).json({ error: 'User not found' })
+    // const profile = await prisma.user.findUnique({
+    //   where: {
+    //     username: username,
+    //     role: role,
+    //   },
+    //   select: {
+    //     userProfile: true,
+    //   },
+    // })
+    // if (!profile) res.status(404).json({ error: 'User not found' })
     // const profile: UserProfile | null = await prisma.userProfile.findUnique({
     //   where: {
     //     id: profileId,
@@ -110,7 +110,7 @@ export const getProfile = async (req: Request, res: Response) => {
     // if (!profile) res.status(404).json({ error: 'Profile not found' })
 
     res.status(200).json({
-      profile: profile?.userProfile,
+      profile: ' profile?.userProfile',
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
@@ -119,41 +119,41 @@ export const getProfile = async (req: Request, res: Response) => {
 
 export const editProfile = async (req: Request, res: Response) => {
   try {
-    const { yearsOfExperience, qualifications, skills } = req.body
+    // const { yearsOfExperience, qualifications, skills } = req.body
 
-    const username: string = req.params.username
-    const userType: UserType = req.params.userType as UserType
+    // const username: string = req.params.username
+    // const role: Role = req.params.role as Role
 
-    const profile = await prisma.user.findUnique({
-      where: {
-        username: username,
-        userType: userType,
-      },
-      select: {
-        userProfile: true,
-      },
-    })
-    if (!profile) res.status(404).json({ error: 'User not found' })
+    // const profile = await prisma.user.findUnique({
+    //   where: {
+    //     username: username,
+    //     role: role,
+    //   },
+    //   select: {
+    //     userProfile: true,
+    //   },
+    // })
+    // if (!profile) res.status(404).json({ error: 'User not found' })
 
-    const userProfile: UserProfile | null = await prisma.userProfile.update({
-      where: {
-        id: profile?.userProfile?.id,
-      },
-      data: {
-        yearsOfExperience: yearsOfExperience,
-        qualifications: qualifications,
-        skills: skills,
-      },
-    })
+    // const userProfile: UserProfile | null = await prisma.userProfile.update({
+    //   where: {
+    //     id: profile?.userProfile?.id,
+    //   },
+    //   data: {
+    //     yearsOfExperience: yearsOfExperience,
+    //     qualifications: qualifications,
+    //     skills: skills,
+    //   },
+    // })
+    // res.status(200).json({
+    //   id: userProfile.id,
+    //   yearsOfExperience: yearsOfExperience,
+    //   qualifications: qualifications,
+    //   skills: skills,
+    // })
+
     res.status(200).json({
-      id: userProfile.id,
-      yearsOfExperience: yearsOfExperience,
-      qualifications: qualifications,
-      skills: skills,
-    })
-
-    res.status(200).json({
-      profile: profile,
+      profile: 'profile',
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })

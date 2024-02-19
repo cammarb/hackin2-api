@@ -1,6 +1,6 @@
 import request from 'supertest'
 import express, { Express } from 'express'
-import authRouter from '../../src/routes/api/v1/auth/auth.routes'
+import authRouter from '../../src/routes/auth.routes'
 import {
   handleLogin,
   handleLogOut,

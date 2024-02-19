@@ -4,12 +4,9 @@ import cors from 'cors'
 import fs from 'fs'
 import morgan from 'morgan'
 
-import userRouter from './routes/api/v1/pentester/user.routes'
-import authRouter from './routes/api/v1/auth/auth.routes'
 import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
-import bountyRouter from './routes/api/v1/company/bounty.routes'
-import apiRouter from './routes/api/v1/api.routes'
+import apiRouter from './routes/api.routes'
 
 dotenv.config()
 

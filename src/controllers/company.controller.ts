@@ -1,83 +1,100 @@
 import { Request, Response } from 'express'
-import { Company, CompanyMember, User, UserType } from '@prisma/client'
+import { Company, CompanyMember, Role, User } from '@prisma/client'
 import prisma from '../config/db'
+import hashToken from '../config/hash'
 
-export const getCompany = async (req: Request, res: Response) => {
+export const getCompany = async (req: Request | any, res: Response) => {
   try {
-    const username: string = req.params.username
-    const userType: UserType = req.params.userType as UserType
-
-    const user: { id: string } | null = await prisma.user.findUnique({
+    const companyId = req.companyId
+    const company = await prisma.company.findUnique({
       where: {
-        username: username,
-        userType: userType,
+        id: companyId,
       },
       select: {
-        id: true,
+        name: true,
       },
     })
-    if (!user) res.status(404).json({ error: 'User not found' })
-
-    const company: Company | null = await prisma.company.findFirst({
-      where: {
-        members: {
-          some: {
-            userId: user?.id,
-          },
-        },
-      },
-    })
-
     res.status(200).json({
-      company: company,
+      message: `Welcome to Company ${company?.name}.`,
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
   }
 }
 
-export const editCompany = async (req: Request, res: Response) => {
+export const editCompany = async (req: Request | any, res: Response) => {
   try {
-    const { companyName, companyLogo, companyURL, companyDescription } = req.body
+    const companyId = req.companyId
+    const { newName, newOwner } = req.body
 
-    const username: string = req.params.username
-    const userType: UserType = req.params.userType as UserType
-
-    const user: { id: string } | null = await prisma.user.findUnique({
+    const company: Company | null = await prisma.company.update({
       where: {
-        username: username,
-        userType: userType,
-      },
-      select: {
-        id: true,
-      },
-    })
-    if (!user) res.status(404).json({ error: 'User not found' })
-
-    const company: Company | null = await prisma.companyMember
-      .findUnique({
-        where: {
-          userId: user?.id,
-        },
-      })
-      .company()
-
-    const updateCompany: Company | null = await prisma.company.update({
-      where: {
-        id: company?.id,
+        id: companyId,
       },
       data: {
-        companyName: companyName,
-        companyLogo: companyLogo,
-        companyURL: companyURL,
-        companyDescription: companyDescription,
+        name: newName,
+        ownerId: newOwner,
       },
     })
 
     res.status(200).json({
-      company: updateCompany,
+      company,
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
+  }
+}
+
+export const getCompanyMembers = async (req: Request | any, res: Response) => {
+  try {
+    const companyId = req.companyId
+    const company = await prisma.company.findUnique({
+      where: {
+        id: companyId,
+      },
+      select: {
+        CompanyMember: true,
+      },
+    })
+    res.status(200).json({
+      Members: company?.CompanyMember,
+    })
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+}
+
+export const inviteCompanyMembers = async (req: Request | any, res: Response) => {
+  try {
+    const companyId = req.companyId
+    console.log(companyId)
+    const memberEmail = req.body.email
+    const username = memberEmail.split('@')[0]
+    const password = await hashToken('test')
+
+    const user = await prisma.user.create({
+      data: {
+        username: username,
+        email: memberEmail,
+        firstName: '',
+        lastName: '',
+        password: password,
+        role: 'ENTERPRISE',
+      },
+      select: {
+        id: true,
+        email: true,
+      },
+    })
+    const companyMember: CompanyMember = await prisma.companyMember.create({
+      data: {
+        companyId: companyId,
+        companyRole: 'MEMBER',
+        userId: user.id,
+      },
+    })
+    res.status(200).json({ message: `Invitation sent to ${user.email}.` })
+  } catch (error) {
+    res.status(500).json({ message: 'Internal Server Error', error: error })
   }
 }

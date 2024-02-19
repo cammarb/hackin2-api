@@ -14,24 +14,33 @@ generator erd {
   provider = "prisma-erd-generator"
 }
 
-model User {
-  id            String         @id @unique @default(uuid())
-  firstName     String
-  lastName      String
-  username      String         @unique
-  email         String         @unique
-  password      String
-  mfa           Boolean        @default(false)
-  RefreshTokens RefreshToken[]
-  userType      UserType
-  userProfile   UserProfile?
+enum Role {
+  PENTESTER
+  ENTERPRISE
+}
 
+enum CompanyRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model User {
+  id        String   @id @unique @default(uuid())
+  firstName String
+  lastName  String
+  username  String   @unique
+  email     String   @unique
+  password  String
+  mfa       Boolean  @default(false)
+  confirmed Boolean  @default(false) // User must confirm the account through email
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  role      Role
 
-  CompanyMember CompanyMember[]
-  Application   Application[]
-  BountyUser    BountyUser[]
+  RefreshToken  RefreshToken[]
+  Company       Company?
+  CompanyMember CompanyMember?
 }
 
 model RefreshToken {
@@ -44,189 +53,21 @@ model RefreshToken {
   updatedAt   DateTime @updatedAt
 }
 
-model UserProfile {
-  id                String                @id @default(uuid())
-  qualifications    Qualification[]
-  skills            SkillsOnUserProfile[]
-  yearsOfExperience Int?
-  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId            String                @unique
-
-  @@unique([id, userId])
-}
-
-model Application {
-  id                String            @id @unique @default(uuid())
-  userId            String            @unique
-  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bountyPostId      String            @unique
-  bountyPost        BountyPost        @relation(fields: [bountyPostId], references: [id], onDelete: Cascade)
-  applicationStatus ApplicationStatus @default(SUBMITED)
-}
-
-model Skill {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-
-  UserProfiles SkillsOnUserProfile[]
-}
-
-model SkillsOnUserProfile {
-  userProfile   UserProfile @relation(fields: [userProfileId], references: [userId])
-  userProfileId String
-  Skill         Skill       @relation(fields: [skillId], references: [id])
-  skillId       Int
-
-  @@id([userProfileId, skillId])
-}
-
-model Qualification {
-  id                String            @id @unique @default(uuid())
-  title             String
-  institution       String
-  completionDate    DateTime?
-  qualificationType QualificationType
-  userProfileId     String
-  userProfile       UserProfile?      @relation(fields: [userProfileId], references: [userId])
-}
-
-enum QualificationType {
-  DEGREE
-  COURSE
-}
-
 model Company {
-  id                 String          @id @unique @default(uuid())
-  companyName        String          @unique
-  companyURL         String
-  companyLogo        String
-  companyDescription String
-  members            CompanyMember[]
-  levels             Level[]
-}
+  id      String @id @unique @default(uuid())
+  name    String @unique
+  ownerId String @unique
+  Owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
-// Users within a company
-model CompanyMember {
-  userId    String  @unique
-  user      User    @relation(fields: [userId], references: [id])
-  companyId String  @unique
-  company   Company @relation(fields: [companyId], references: [id])
-
-  roleId String
-  role   Role   @relation(fields: [roleId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  bounty Bounty[]
-
-  @@id([userId, companyId])
-}
-
-model BountyType {
-  id          String   @id @unique @default(uuid())
-  name        String   @unique
-  description String?
-  Bounty      Bounty[]
-}
-
-model Bounty {
-  id             String       @id @unique @default(uuid())
-  title          String       @unique
-  description    String
-  requirements   String[]
-  paymentDetails Decimal
-  startDate      DateTime
-  endDate        DateTime
-  status         BountyStatus @default(IN_PROGRESS)
-
-  bountyTypeId String
-  bountyType   BountyType @relation(fields: [bountyTypeId], references: [id])
-
-  CompanyMember          CompanyMember? @relation(fields: [companyMemberUserId, companyMemberCompanyId], references: [userId, companyId])
-  companyMemberUserId    String?
-  companyMemberCompanyId String?
-  BountyPost             BountyPost?
-  BountyUser             BountyUser?
-  Finding                Finding?
-}
-
-model BountyPost {
-  id         String           @id @unique @default(uuid())
-  bountyId   String           @unique
-  bounty     Bounty           @relation(fields: [bountyId], references: [id], onDelete: Cascade)
-  postStatus BountyPostStatus @default(CLOSED)
-
-  Application Application[]
-}
-
-model Level {
-  id        String    @id @unique @default(uuid())
-  name      String
-  reward    Int
-  Company   Company?  @relation(fields: [companyId], references: [id])
-  companyId String?
-  Finding   Finding[]
-}
-
-model BountyUser {
-  userId   String @unique
-  user     User   @relation(fields: [userId], references: [id])
-  bountyId String @unique
-  bounty   Bounty @relation(fields: [bountyId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@id([userId, bountyId])
-}
-
-model Finding {
-  id          String @id @unique @default(uuid())
-  bountyId    String @unique
-  bounty      Bounty @relation(fields: [bountyId], references: [id])
-  title       String
-  description String
-  level       Level  @relation(fields: [levelId], references: [id])
-  levelId     String
-}
-
-// OWNER : Owner of a company. C,R,U,D
-// MANAGER : Elevated permissions in a company. C,R,U
-// MEMBER : Read access. R
-model Role {
-  id            String          @id @unique @default(uuid())
-  name          String          @unique
-  permissions   Permission[]
   CompanyMember CompanyMember[]
 }
 
-// CREATE, READ, UPDATE, DELETE
-model Permission {
-  id          String  @id @unique @default(uuid())
-  name        String  @unique
-  description String
-  Role        Role?   @relation(fields: [roleId], references: [id])
-  roleId      String?
-}
+model CompanyMember {
+  userId      String      @unique
+  User        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId   String
+  Company     Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyRole CompanyRole
 
-enum UserType {
-  ENTERPRISE
-  PENTESTER
-}
-
-enum BountyStatus {
-  IN_PROGRESS
-  FINISHED
-}
-
-enum BountyPostStatus {
-  OPEN
-  CLOSED
-}
-
-enum ApplicationStatus {
-  SUBMITED
-  ACCEPTED
-  REJECTED
+  @@id([userId, companyId])
 }
