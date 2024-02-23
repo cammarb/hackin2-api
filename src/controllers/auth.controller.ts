@@ -48,7 +48,12 @@ export const handleRegistration = async (req: Request, res: Response) => {
 const handleLogin = async (req: Request, res: Response) => {
   const { username, password } = req.body
 
-  if (!username || !password || typeof username !== 'string' || typeof password !== 'string')
+  if (
+    !username ||
+    !password ||
+    typeof username !== 'string' ||
+    typeof password !== 'string'
+  )
     res.status(400).json({
       error: 'Bad Request',
       message: 'Both username and password are required',
@@ -105,7 +110,10 @@ const handleRefreshToken = async (req: Request, res: Response) => {
   const tokenSecretKey = fs.readFileSync(`${process.env.PUBKEY}`, 'utf8')
 
   if (!tokenSecretKey) return res.sendStatus(403)
-  const decoded: JwtPayload = jwt.verify(jwtCookie, tokenSecretKey) as JwtPayload
+  const decoded: JwtPayload = jwt.verify(
+    jwtCookie,
+    tokenSecretKey,
+  ) as JwtPayload
 
   if (!decoded) return res.sendStatus(403)
 
@@ -172,7 +180,6 @@ const handleLogOut = async (req: Request, res: Response) => {
     })
     res.sendStatus(204).json({ message: 'Log Out successful.' })
   } catch (error) {
-    console.error('Logout error:', error)
     res.status(500).json({ error: 'Internal Server Error' })
   }
 }
