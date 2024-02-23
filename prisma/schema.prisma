@@ -10,9 +10,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-generator erd {
-  provider = "prisma-erd-generator"
-}
+// generator erd {
+//   provider = "prisma-erd-generator"
+// }
 
 enum Role {
   PENTESTER
@@ -60,6 +60,7 @@ model Company {
   Owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   CompanyMember CompanyMember[]
+  Program       Program[]
 }
 
 model CompanyMember {
@@ -70,4 +71,20 @@ model CompanyMember {
   companyRole CompanyRole
 
   @@id([userId, companyId])
+}
+
+model Program {
+  id        String  @id @unique @default(uuid())
+  name      String  @unique
+  companyId String
+  Company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  Bounty Bounty[]
+}
+
+model Bounty {
+  id        String   @id @unique @default(uuid())
+  title     String
+  Program   Program? @relation(fields: [programId], references: [id], onDelete: Cascade)
+  programId String?
 }
