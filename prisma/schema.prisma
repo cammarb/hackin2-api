@@ -83,8 +83,8 @@ model Program {
 }
 
 model Bounty {
-  id        String   @id @unique @default(uuid())
+  id        String  @id @unique @default(uuid())
   title     String
-  Program   Program? @relation(fields: [programId], references: [id], onDelete: Cascade)
-  programId String?
+  programId String
+  Program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
 }
