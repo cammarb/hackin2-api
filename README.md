@@ -9,7 +9,7 @@ Repository for the Hackin2 API, built using Express.js with Typescript. The API 
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation and Configuration](#installation-and-configuration)
-  - [Running the code](#run)
+  - [Running the code](#running-the-code)
 - [API Documentation](#api-documentation)
 - [License](#license)
 
