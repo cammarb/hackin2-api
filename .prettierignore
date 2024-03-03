@@ -1,0 +1,20 @@
+# .prettierignore
+
+# Ignore build output
+/dist
+
+# Ignore Node.js modules
+/node_modules
+
+# Ignore coverage reports
+/coverage
+
+# Ignore logs
+/logs
+
+# Ignore generated Prisma files
+/*.prisma
+
+# Ignore compiled TypeScript files
+/*.js
+/*.js.map

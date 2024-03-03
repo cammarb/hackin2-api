@@ -10,32 +10,92 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// generator erd {
+//   provider = "prisma-erd-generator"
+// }
+
+enum Role {
+  PENTESTER
+  ENTERPRISE
+}
+
+enum CompanyRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
 model User {
-  id           Int            @id @default(autoincrement())
-  firstName    String
-  lastName     String
-  username     String         @unique
-  email        String         @unique
-  password     String
-  roleId       Int            @map("role_id")
-  role         Role           @relation(fields: [roleId], references: [id])
-  RefreshToken RefreshToken[]
+  id        String   @id @unique @default(uuid())
+  firstName String
+  lastName  String
+  username  String   @unique
+  email     String   @unique
+  password  String
+  mfa       Boolean  @default(false)
+  confirmed Boolean  @default(false) // User must confirm the account through email
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  role      Role
+
+  RefreshToken  RefreshToken[]
+  Company       Company?
+  CompanyMember CompanyMember?
 }
 
 model RefreshToken {
   id          String   @id @unique @default(uuid())
   hashedToken String   @unique
-  userId      Int
+  userId      String
   User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   revoked     Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-model Role {
-  id          Int     @id @default(autoincrement())
-  name        String
-  description String?
+model Company {
+  id      String @id @unique @default(uuid())
+  name    String @unique
+  ownerId String @unique
+  Owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
-  users User[]
+  CompanyMember CompanyMember[]
+  Program       Program[]
+}
+
+model CompanyMember {
+  userId      String          @unique
+  User        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId   String
+  Company     Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyRole CompanyRole
+  Programs    ProgramMember[]
+
+  @@id([userId, companyId])
+}
+
+model Program {
+  id        String  @id @unique @default(uuid())
+  name      String  @unique
+  companyId String
+  Company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  Bounty  Bounty[]
+  Members ProgramMember[]
+}
+
+model ProgramMember {
+  programId       String
+  Program         Program       @relation(fields: [programId], references: [id])
+  companyMemberId String
+  CompanyMember   CompanyMember @relation(fields: [companyMemberId], references: [userId])
+
+  @@id([programId, companyMemberId])
+}
+
+model Bounty {
+  id        String  @id @unique @default(uuid())
+  title     String
+  programId String
+  Program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
 }

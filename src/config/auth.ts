@@ -1,47 +1,43 @@
 import { User } from '@prisma/client'
 import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken'
-import fs from 'fs'
+import { issuer, privateKey } from '../app'
 
 const generateAccessToken = (user: User): string => {
   const payload: JwtPayload = {
     username: user.username,
-    role: user.roleId,
+    role: user.role,
   }
+
   const options: SignOptions = {
     algorithm: 'RS256',
     expiresIn: '5m',
-    issuer: process.env.ISSUER,
+    issuer: issuer,
   }
 
-  if (!process.env.PRIVKEY) throw new Error('key is not defined')
-
-  const accessSecret: jwt.Secret = fs.readFileSync(`${process.env.PRIVKEY}`, {
-    encoding: 'utf-8',
-  })
+  const accessSecret: jwt.Secret = privateKey
 
   return jwt.sign(payload, accessSecret, options)
 }
 
 const generateRefreshToken = (user: User): string => {
-  const payload: JwtPayload = { username: user.username, role: user.roleId }
+  const payload: JwtPayload = {
+    username: user.username,
+    role: user.role,
+  }
   const options: SignOptions = {
     algorithm: 'RS256',
     expiresIn: '8h',
-    issuer: process.env.ISSUER,
+    issuer: issuer,
   }
 
-  if (!process.env.PRIVKEY) throw new Error('key is not defined')
-
-  const refreshSecret: jwt.Secret = fs.readFileSync(`${process.env.PRIVKEY}`, {
-    encoding: 'utf-8',
-  })
+  const refreshSecret: jwt.Secret = privateKey
 
   return jwt.sign(payload, refreshSecret, options)
 }
 
-const generateTokens = (
-  user: User
-): { accessToken: string; refreshToken: string } => {
+const generateTokens = (user: User): { accessToken: string; refreshToken: string } => {
+  if (!privateKey || !issuer) throw new Error('secretOrPrivateKey must have a value')
+
   const accessToken = generateAccessToken(user)
   const refreshToken = generateRefreshToken(user)
 

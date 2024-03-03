@@ -1,40 +1,7 @@
 import { Request, Response } from 'express'
 import prisma from '../config/db'
-import { User } from '@prisma/client'
-import hashToken from '../config/hash'
+import { User, Role } from '@prisma/client'
 import * as EmailValidator from 'email-validator'
-
-export const newUser = async (req: Request, res: Response) => {
-  const { username, email, firstName, lastName, password, roleId } = req.body
-  if (!username || !password || !email || !firstName || !lastName || !roleId)
-    return res.status(400).json({ messaege: 'All the fields are required' })
-  // validate email
-  if (!EmailValidator.validate(email))
-    return res.status(400).json({ messaege: 'Enter a valid email' })
-  // Find if the username or email already exists
-  const user: User[] | null = await prisma.user.findMany({
-    where: {
-      OR: [{ username: username }, { email: email }],
-    },
-  })
-  if (user.length > 0) return res.sendStatus(409) // Conflict
-  try {
-    const hashedPassword = await hashToken(password)
-    const user: User = await prisma.user.create({
-      data: {
-        firstName: firstName,
-        lastName: lastName,
-        username: username,
-        email: email,
-        password: hashedPassword,
-        roleId: roleId,
-      },
-    })
-    res.status(201).json({ success: 'User created successfully' })
-  } catch (err: Error | any) {
-    res.status(500).json({ message: err?.message })
-  }
-}
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
@@ -49,10 +16,13 @@ export const getAllUsers = async (req: Request, res: Response) => {
 
 export const getUser = async (req: Request, res: Response) => {
   try {
-    const id: number = parseInt(req.params.id)
+    const username: string = req.params.username
+    const role: Role = req.params.role as Role
+
     const user: User | null = await prisma.user.findUnique({
       where: {
-        id: id,
+        username: username,
+        role: role,
       },
     })
     if (!user) res.status(404).json({ error: 'User not found' })
@@ -62,7 +32,7 @@ export const getUser = async (req: Request, res: Response) => {
       email: user?.email,
       firstName: user?.firstName,
       lastName: user?.lastName,
-      roleId: user?.roleId,
+      role: user?.role,
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
@@ -71,22 +41,23 @@ export const getUser = async (req: Request, res: Response) => {
 
 export const editUser = async (req: Request, res: Response) => {
   try {
-    const id: number = parseInt(req.params.id)
-    const { username, email, firstName, lastName, role } = req.body
+    const username: string = req.params.username
+    // const role: Role = req.params.role as Role
+
+    const { email, firstName, lastName, role } = req.body
 
     if (!EmailValidator.validate(email))
       return res.status(400).json({ messaege: 'Enter a valid email' })
     else {
       const user: User | null = await prisma.user.update({
         where: {
-          id: id,
+          username: username,
+          role: role,
         },
         data: {
-          username: username,
           email: email,
           firstName: firstName,
           lastName: lastName,
-          roleId: role,
         },
       })
       res.status(200).json({
@@ -94,7 +65,6 @@ export const editUser = async (req: Request, res: Response) => {
         email: user?.email,
         firstName: user?.firstName,
         lastName: user?.lastName,
-        roleId: user?.roleId,
       })
     }
   } catch (error) {
@@ -104,14 +74,87 @@ export const editUser = async (req: Request, res: Response) => {
 
 export const deleteUser = async (req: Request, res: Response) => {
   try {
-    const id: number = parseInt(req.params.id)
+    const username: string = req.params.username
     const user: User | null = await prisma.user.delete({
       where: {
-        id: id,
+        username: username,
       },
     })
     if (!user) res.sendStatus(404).json({ error: 'User not found' })
-    res.status(200).json({ message: `User with ${id} deleted successfully` })
+    res.status(200).json({ message: `User with ${username} deleted successfully` })
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+}
+
+export const getProfile = async (req: Request, res: Response) => {
+  try {
+    // const username: string = req.params.username
+    // const role: Role = req.params.role as Role
+
+    // const profile = await prisma.user.findUnique({
+    //   where: {
+    //     username: username,
+    //     role: role,
+    //   },
+    //   select: {
+    //     userProfile: true,
+    //   },
+    // })
+    // if (!profile) res.status(404).json({ error: 'User not found' })
+    // const profile: UserProfile | null = await prisma.userProfile.findUnique({
+    //   where: {
+    //     id: profileId,
+    //   },
+    // })
+    // if (!profile) res.status(404).json({ error: 'Profile not found' })
+
+    res.status(200).json({
+      profile: ' profile?.userProfile',
+    })
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+}
+
+export const editProfile = async (req: Request, res: Response) => {
+  try {
+    // const { yearsOfExperience, qualifications, skills } = req.body
+
+    // const username: string = req.params.username
+    // const role: Role = req.params.role as Role
+
+    // const profile = await prisma.user.findUnique({
+    //   where: {
+    //     username: username,
+    //     role: role,
+    //   },
+    //   select: {
+    //     userProfile: true,
+    //   },
+    // })
+    // if (!profile) res.status(404).json({ error: 'User not found' })
+
+    // const userProfile: UserProfile | null = await prisma.userProfile.update({
+    //   where: {
+    //     id: profile?.userProfile?.id,
+    //   },
+    //   data: {
+    //     yearsOfExperience: yearsOfExperience,
+    //     qualifications: qualifications,
+    //     skills: skills,
+    //   },
+    // })
+    // res.status(200).json({
+    //   id: userProfile.id,
+    //   yearsOfExperience: yearsOfExperience,
+    //   qualifications: qualifications,
+    //   skills: skills,
+    // })
+
+    res.status(200).json({
+      profile: 'profile',
+    })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
   }
