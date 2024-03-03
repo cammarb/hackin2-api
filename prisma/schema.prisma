@@ -64,11 +64,12 @@ model Company {
 }
 
 model CompanyMember {
-  userId      String      @unique
-  User        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String          @unique
+  User        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   companyId   String
-  Company     Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  Company     Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
   companyRole CompanyRole
+  Programs    ProgramMember[]
 
   @@id([userId, companyId])
 }
@@ -79,7 +80,17 @@ model Program {
   companyId String
   Company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  Bounty Bounty[]
+  Bounty  Bounty[]
+  Members ProgramMember[]
+}
+
+model ProgramMember {
+  programId       String
+  Program         Program       @relation(fields: [programId], references: [id])
+  companyMemberId String
+  CompanyMember   CompanyMember @relation(fields: [companyMemberId], references: [userId])
+
+  @@id([programId, companyMemberId])
 }
 
 model Bounty {
