@@ -1,39 +1,13 @@
-import express, { Application, Express, Request, Response } from 'express'
+import express from 'express'
 import dotenv from 'dotenv'
-import cors from 'cors'
-import fs from 'fs'
-import morgan from 'morgan'
-
-import cookieParser from 'cookie-parser'
-import helmet from 'helmet'
-import apiRouter from './routes/api.routes'
+import createServer from './utilts/server'
+import log from './utilts/logger'
 
 dotenv.config()
 
-const app: Application = express()
-const privateKey = fs.readFileSync(`${process.env.PRIVKEY}`, {
-  encoding: 'utf-8',
+const app = createServer()
+const port = 8000
+
+app.listen(port, () => {
+  log.info(`Server is running at http://localhost:${port}`)
 })
-const publicKey = fs.readFileSync(`${process.env.PUBKEY}`, {
-  encoding: 'utf-8',
-})
-const issuer = process.env.ISSUER
-const origin = process.env.ORIGIN
-
-app.disable('x-powered-by')
-app.use(
-  cors({
-    origin: origin,
-    methods: ['GET', 'POST', 'PUT'], // Allow only specified HTTP methods
-    credentials: true, // Allow credentials (cookies, authorization headers)
-  }),
-)
-app.use(helmet())
-app.use(cookieParser())
-app.use(express.json())
-app.use(morgan('tiny'))
-
-app.use('/api/v1', apiRouter)
-
-export default app
-export { privateKey, publicKey, issuer }

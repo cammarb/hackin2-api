@@ -1,8 +1,12 @@
 import { Request, Response, NextFunction } from 'express'
 import { CompanyMember, CompanyRole, User } from '@prisma/client'
-import prisma from '../config/db'
+import prisma from '../utilts/client'
 
-const checkEnterprise = async (req: Request | any, res: Response, next: NextFunction) => {
+const checkEnterprise = async (
+  req: Request | any,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const username = req.username
     const role = req.role
@@ -22,9 +26,10 @@ const checkEnterprise = async (req: Request | any, res: Response, next: NextFunc
 
     const userRole = user.role
     if (role === userRole && userRole === 'ENTERPRISE') {
-      const companyMember: CompanyMember | null = await prisma.companyMember.findUnique({
-        where: { userId: user.id },
-      })
+      const companyMember: CompanyMember | null =
+        await prisma.companyMember.findUnique({
+          where: { userId: user.id },
+        })
       if (!companyMember) {
         return res.status(404).json({ error: 'Member not found' })
       }
@@ -42,7 +47,8 @@ const checkEnterprise = async (req: Request | any, res: Response, next: NextFunc
 }
 
 const allowedRoles =
-  (roles: string[]) => async (req: Request | any, res: Response, next: NextFunction) => {
+  (roles: string[]) =>
+  async (req: Request | any, res: Response, next: NextFunction) => {
     try {
       const userId = req.userId
       const companyId = req.companyId
