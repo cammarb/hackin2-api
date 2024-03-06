@@ -1,5 +1,5 @@
 import { PrismaClient, Role, User } from '@prisma/client'
-import hashToken from '../src/config/hash'
+import hashToken from '../src/utilts/hash'
 
 const prisma = new PrismaClient()
 

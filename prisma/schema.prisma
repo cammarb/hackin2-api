@@ -75,13 +75,23 @@ model CompanyMember {
 }
 
 model Program {
-  id        String  @id @unique @default(uuid())
-  name      String  @unique
-  companyId String
-  Company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  id            String        @id @unique @default(uuid())
+  name          String        @unique
+  companyId     String
+  Company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  description   String
+  programStatus programStatus @default(NOT_STARTED)
+  location      String
+  createdBy
 
   Bounty  Bounty[]
   Members ProgramMember[]
+}
+
+enum programStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  FINISHED
 }
 
 model ProgramMember {
