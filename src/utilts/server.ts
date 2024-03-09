@@ -3,6 +3,7 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
 import routes from '../routes'
+import morgan from 'morgan'
 
 const createServer = () => {
   const app: Application = express()
@@ -17,6 +18,7 @@ const createServer = () => {
   app.use(helmet())
   app.use(cookieParser())
   app.use(express.json())
+  app.use(morgan('dev'))
   routes(app)
   return app
 }
