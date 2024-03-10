@@ -1,4 +1,3 @@
-import express from 'express'
 import dotenv from 'dotenv'
 import createServer from './utilts/server'
 
