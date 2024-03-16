@@ -6,12 +6,17 @@
 	"service": "app",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 	// Features to add to the dev container. More info: https://containers.dev/features.
-	"features": {"ghcr.io/devcontainers/features/sshd:1": {}},
+	"features": {
+		"ghcr.io/devcontainers/features/sshd:1": {}
+	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// This can be used to network with other containers or with the host.
-	"forwardPorts": [3000, 5432],
+	"forwardPorts": [
+		3000,
+		5432
+	],
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "chmod +x generate_keys.sh && ./generate_keys.sh",
+	"postCreateCommand": "chmod +x generate_keys.sh && ./generate_keys.sh && cp .env.example .env",
 	"customizations": {
 		"vscode": {
 			"extensions": [
