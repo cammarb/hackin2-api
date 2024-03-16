@@ -79,7 +79,7 @@ This section assumes **you know how to setup and work with postgresql.**
 
 1. Make sure Postgres is running
 
-   - Take note on the port it is ussing for the next step.
+   - Take note on the port it is using for the next step.
 
 1. Create .env file
 
