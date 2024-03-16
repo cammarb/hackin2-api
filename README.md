@@ -9,7 +9,9 @@ Repository for the Hackin2 API, built using Express.js with Typescript. The API 
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
-  - [Configuration](#configuration)
+  - [Project Setup](#project-setup)
+    - [Manual](#manual)
+    - [Dev Container](#dev-container)
   - [Run the API](#run-the-api)
 - [API Documentation](#api-documentation)
 - [License](#license)
@@ -39,6 +41,7 @@ To run the API locally, you need the following prerequisites:
 - Node.js (version >= 18)
 - npm
 - Docker
+- Postgresql (Only if you opt for manual setup)
 
 ### Installation
 
@@ -55,7 +58,13 @@ To run the API locally, you need the following prerequisites:
    npm install
    ```
 
-### Configuration
+### Project Setup
+
+You can setup the project manually or by opening the devcontainer enviroment
+
+#### Manual
+
+This section assumes **you know how to setup and work with postgresql.**
 
 1. Generate private/public keys
 
@@ -68,7 +77,11 @@ To run the API locally, you need the following prerequisites:
      generate_keys.ps1
      ```
 
-2. Create .env file
+1. Make sure Postgres is running
+
+   - Take note on the port it is ussing for the next step.
+
+1. Create .env file
 
    Before running the API, you need to set up the configuration.
    Copy the .env.example file and rename it to .env, then fill in the appropriate values for the environment variables:
@@ -88,8 +101,21 @@ To run the API locally, you need the following prerequisites:
    PRIVKEY=private_key.pem
    ```
 
+#### Dev Container
+
+Dev Containers will allow you to open the project in a docker container, creating the database for you, setting up the necessary extensions in VSCode and generating the .env as well as the key pairs for jwt.
+
+1. Open the project in VSCode
+2. Install the extension Dev Contaners
+3. Open the command palette by pressing **[Ctrl + Shift + P]** (Windows/Linux) or **[Cmd + Shift + P]** (MacOS)
+4. Search for: _Dev Containers: Open Folder in Container..._ and select that option
+5. VSCode will create the container for you and install all of the requirements and dependencies
+
 ### Run the API
 
 ```bash
+# To populate the database with the seed file
+npx prisma db seed
+
 npm run dev
 ```
