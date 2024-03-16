@@ -92,7 +92,7 @@ This section assumes **you know how to setup and work with postgresql.**
    DATABASE_PASSWORD=postgres
    DATABASE_DB=hackin2db
    DATABASE_PORT=5432
-   DATABASE_URL=postgresql://postgres:postgres@localhost:5432/hackin2db
+   DATABASE_URL=postgresql://postgres:postgres@localhost:DATABASE_PORT/hackin2db
 
    ORIGIN='http://localhost:5173'
    ISSUER='https://hackin2.com'
