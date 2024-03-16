@@ -10,7 +10,7 @@ const createServer = () => {
   app.disable('x-powered-by')
   app.use(
     cors({
-      origin: 'http:/localhost:5734',
+      origin: process.env.ORIGIN,
       methods: ['GET', 'POST', 'PUT'], // Allow only specified HTTP methods
       credentials: true, // Allow credentials (cookies, authorization headers)
     }),
