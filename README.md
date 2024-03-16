@@ -8,20 +8,23 @@ Repository for the Hackin2 API, built using Express.js with Typescript. The API 
 - [Features](#features)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
-  - [Configuration](#configuration)
   - [Installation](#installation)
+  - [Configuration](#configuration)
+  - [Run the API](#run-the-api)
 - [API Documentation](#api-documentation)
 - [License](#license)
 
 ## Introduction
 
-Hackin2 is a platform that helps companies and cybersecurity freelancers connect. This repository contains the backend API, which provides the necessary endpoints for the Hackin2 web application to interact with the database, handle user authentication, and manage security-related tasks.
+Hackin2 is a platform that helps companies and cybersecurity freelancers connect.
+This repository contains the backend API, which provides the necessary endpoints for the Hackin2 web application to interact with the database, handle user authentication, and manage security-related tasks.
 
 ## Features
 
 - User authentication and authorization.
-- Asset management and tracking.
-- Incident reporting and management.
+- Role base access control.
+- Programs management and tracking.
+- Findings reporting and management.
 - Security event logging and monitoring.
 - User activity and access control.
 - Customizable configuration options.
@@ -33,59 +36,60 @@ Hackin2 is a platform that helps companies and cybersecurity freelancers connect
 To run the API locally, you need the following prerequisites:
 
 - git
-- Node.js (version >= 16)
+- Node.js (version >= 18)
 - npm
 - Docker
-
-### Configuration
-
-1. Generate private/public keys (Soon to be automated in Docker)
-
-```bash
-openssl genrsa -out {the_name_of_your_private_key.pem} 2048
-```
-
-```bash
-openssl rsa -pubout -in {the_name_of_your_private_key.pem} -out {the_name_of_your_public_key.pem}
-```
-
-2. Create .env file
-
-Before running the API, you need to set up the configuration.
-Copy the .env.example file and rename it to .env, then fill in the appropriate values for the environment variables:
-
-```
-PORT=8000
-DATABASE_USER=postgres
-DATABASE_PASSWORD=postgres
-DATABASE_DB=hackin2db
-DATABASE_PORT=5432
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/hackin2db
-ORIGIN='http://localhost:PORT'
-ISSUER='https://hackin2.com'
-PUBKEY=public_key.pem
-PRIVKEY=private_key.pem
-```
 
 ### Installation
 
 1. Clone this repository to your local machine:
 
-```bash
-git clone https://github.com/Hackin2-company/hackin2-api.git
-cd hackin2-api
-```
+   ```bash
+   git clone https://github.com/Hackin2-company/hackin2-api.git
+   cd hackin2-api
+   ```
 
 2. Install the dependencies
 
+   ```bash
+   npm install
+   ```
+
+### Configuration
+
+1. Generate private/public keys
+
+   - MacOS/Linux
+     ```bash
+     .generate_keys.sh
+     ```
+   - Windows
+     ```powershell
+     generate_keys.ps1
+     ```
+
+2. Create .env file
+
+   Before running the API, you need to set up the configuration.
+   Copy the .env.example file and rename it to .env, then fill in the appropriate values for the environment variables:
+
+   ```
+   PORT=8000
+   DATABASE_USER=postgres
+   DATABASE_PASSWORD=postgres
+   DATABASE_DB=hackin2db
+   DATABASE_PORT=5432
+   DATABASE_URL=postgresql://postgres:postgres@localhost:5432/hackin2db
+
+   ORIGIN='http://localhost:5173'
+   ISSUER='https://hackin2.com'
+
+   PUBKEY=public_key.pem
+   PRIVKEY=private_key.pem
+   ```
+
+### Run the API
+
 ```bash
-npm install
-```
-
-3. Run docker-compose
-
-This will create the containers for the API and the database for a development enviroment. ***Production configuration: TBD***
-
-```bash
-docker-compose -f docker-compose.dev.yml up
+npm run dev
 ```
