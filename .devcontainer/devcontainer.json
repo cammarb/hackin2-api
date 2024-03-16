@@ -16,7 +16,7 @@
 		5432
 	],
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "chmod +x generate_keys.sh && ./generate_keys.sh && cp .env.example .env",
+	"postCreateCommand": "chmod +x generate_keys.sh && ./generate_keys.sh && cp .env.example -r .env && npx prisma db push && npx prisma db seed",
 	"customizations": {
 		"vscode": {
 			"extensions": [
