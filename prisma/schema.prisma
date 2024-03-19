@@ -86,9 +86,8 @@ model Program {
   createdById   String
   createdBy     User          @relation(fields: [createdById], references: [id])
 
-  Bounty  Bounty[]
-  Members ProgramMember[]
-  userId  String
+  Bounty        Bounty[]
+  ProgramMember ProgramMember[]
 }
 
 enum programStatus {
