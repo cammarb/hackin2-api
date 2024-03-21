@@ -1,4 +1,4 @@
-import prisma from '../../src/config/db'
+import prisma from '../../utilts/client'
 
 describe('Prisma Client', () => {
   it('should create and export the Prisma client instance', () => {

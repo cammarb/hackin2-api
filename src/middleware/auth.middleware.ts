@@ -1,13 +1,17 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
-import { publicKey } from '../app'
-import prisma from '../config/db'
+import prisma from '../utilts/client'
+import getEnvs from '../utilts/envs'
 
-const verifyJWT = async (req: Request | any, res: Response, next: NextFunction) => {
+const verifyJWT = async (
+  req: Request | any,
+  res: Response,
+  next: NextFunction,
+) => {
   const authHeader = req.headers && req.headers['authorization']
-  const secret = publicKey
+  const { publicKey } = await getEnvs()
 
-  if (!authHeader || !secret) return res.sendStatus(401)
+  if (!authHeader || !publicKey) return res.sendStatus(401)
 
   const token = authHeader.split(' ')[1]
 
@@ -22,7 +26,7 @@ const verifyJWT = async (req: Request | any, res: Response, next: NextFunction) 
   if (revokedToken?.revoked === true) return res.sendStatus(403)
 
   try {
-    const decoded = jwt.verify(token, secret) as {
+    const decoded = jwt.verify(token, publicKey) as {
       username: string
       role: string
     }

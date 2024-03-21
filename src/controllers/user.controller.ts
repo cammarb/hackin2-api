@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import prisma from '../config/db'
+import prisma from '../utilts/client'
 import { User, Role } from '@prisma/client'
 import * as EmailValidator from 'email-validator'
 
@@ -81,7 +81,9 @@ export const deleteUser = async (req: Request, res: Response) => {
       },
     })
     if (!user) res.sendStatus(404).json({ error: 'User not found' })
-    res.status(200).json({ message: `User with ${username} deleted successfully` })
+    res
+      .status(200)
+      .json({ message: `User with ${username} deleted successfully` })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
   }

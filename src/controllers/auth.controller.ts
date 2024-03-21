@@ -1,12 +1,12 @@
 import { Request, Response } from 'express'
 import bcrypt from 'bcrypt'
-import prisma from '../config/db'
+import prisma from '../utilts/client'
 import { RefreshToken, User } from '@prisma/client'
-import { generateTokens } from '../config/auth'
+import { generateTokens } from '../utilts/auth'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import fs from 'fs'
 import * as EmailValidator from 'email-validator'
-import hashToken from '../config/hash'
+import hashToken from '../utilts/hash'
 
 export const handleRegistration = async (req: Request, res: Response) => {
   const { username, email, firstName, lastName, password, role } = req.body
@@ -79,7 +79,7 @@ const handleLogin = async (req: Request, res: Response) => {
         message: 'Invalid username or password',
       })
     } else {
-      const tokens = generateTokens(user)
+      const tokens = await generateTokens(user)
 
       const refreshToken: RefreshToken = await prisma.refreshToken.create({
         data: {
@@ -139,7 +139,7 @@ const handleRefreshToken = async (req: Request, res: Response) => {
     },
   })
 
-  const newTokens = generateTokens(user)
+  const newTokens = await generateTokens(user)
   const newRefreshToken: RefreshToken = await prisma.refreshToken.create({
     data: {
       hashedToken: newTokens.refreshToken,

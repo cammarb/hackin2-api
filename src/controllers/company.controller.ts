@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { Company, CompanyMember, Role, User } from '@prisma/client'
-import prisma from '../config/db'
-import hashToken from '../config/hash'
+import prisma from '../utilts/client'
+import hashToken from '../utilts/hash'
 
 export const getCompany = async (req: Request | any, res: Response) => {
   try {
@@ -164,13 +164,17 @@ export const deleteMember = async (req: Request | any, res: Response) => {
 
 export const addProgram = async (req: Request | any, res: Response) => {
   try {
-    const companyId = req.companyId as string
-    const { name } = req.body
+    const companyId = req.companyId
+    const userId = req.userId as string
+    const { name, description, location } = req.body
 
     const program = await prisma.program.create({
       data: {
         name: name,
         companyId: companyId,
+        description: description,
+        location: location,
+        createdById: userId,
       },
     })
     res.status(200).json({ message: 'Program created successfully' })
@@ -189,7 +193,7 @@ export const getCompanyPrograms = async (req: Request | any, res: Response) => {
       },
     })
     res.status(200).json({
-      programs: programs,
+      programs,
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
