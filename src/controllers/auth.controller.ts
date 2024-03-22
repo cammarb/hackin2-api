@@ -105,24 +105,25 @@ const handleLogin = async (req: Request, res: Response) => {
 
 const handleRefreshToken = async (req: Request, res: Response) => {
   const jwtCookie = req.cookies['jwt']
-  if (!jwtCookie) return res.status(401).json({ message: 'Unauthorized' })
 
   const tokenSecretKey = fs.readFileSync(`${process.env.PUBKEY}`, 'utf8')
 
-  if (!tokenSecretKey) return res.sendStatus(403)
+  if (!jwtCookie || !tokenSecretKey)
+    return res.status(401).json({ message: 'Unauthorized' })
+
   const decoded: JwtPayload = jwt.verify(
     jwtCookie,
     tokenSecretKey,
   ) as JwtPayload
 
-  if (!decoded) return res.sendStatus(403)
+  if (!decoded) return res.sendStatus(401)
 
   const user: User | null = await prisma.user.findUnique({
     where: {
       username: decoded.username,
     },
   })
-  if (!user) return res.sendStatus(403) // Forbidden
+  if (!user) return res.sendStatus(401) // Unauthorized
 
   // revoke old refreshToken and add new refreshToken to db
   const oldToken = await prisma.refreshToken.findUnique({
@@ -138,25 +139,27 @@ const handleRefreshToken = async (req: Request, res: Response) => {
       revoked: true,
     },
   })
-
-  const newTokens = await generateTokens(user)
-  const newRefreshToken: RefreshToken = await prisma.refreshToken.create({
-    data: {
-      hashedToken: newTokens.refreshToken,
-      userId: user.id,
-    },
-  })
-
-  res.cookie('jwt', newTokens.refreshToken, {
-    httpOnly: true,
-    sameSite: 'none',
-    secure: true,
-    maxAge: 24 * 60 * 60 * 1000,
-  })
-  res.status(200).json({
-    user: user.username,
-    token: `${newTokens.accessToken}`,
-  })
+  try {
+    const newTokens = await generateTokens(user)
+    const newRefreshToken: RefreshToken = await prisma.refreshToken.create({
+      data: {
+        hashedToken: newTokens.refreshToken,
+        userId: user.id,
+      },
+    })
+    res.cookie('jwt', newTokens.refreshToken, {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    })
+    res.status(200).json({
+      user: user.username,
+      token: `${newTokens.accessToken}`,
+    })
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 const handleLogOut = async (req: Request, res: Response) => {

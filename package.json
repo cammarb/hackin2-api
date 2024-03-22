@@ -18,7 +18,7 @@
   "author": "Camila Martinez",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^5.9.1",
+    "@prisma/client": "^5.11.0",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -50,7 +50,7 @@
     "morgan": "^1.10.0",
     "nodemon": "^3.1.0",
     "prettier": "3.2.4",
-    "prisma": "^5.9.1",
+    "prisma": "^5.11.0",
     "supertest": "^6.3.4",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
