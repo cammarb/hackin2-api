@@ -97,6 +97,7 @@ const handleLogin = async (req: Request, res: Response) => {
 
       res.status(200).json({
         user: user.username,
+        role: user.role,
         token: `${tokens.accessToken}`,
       })
     }
@@ -155,6 +156,7 @@ const handleRefreshToken = async (req: Request, res: Response) => {
     })
     res.status(200).json({
       user: user.username,
+      role: user.role,
       token: `${newTokens.accessToken}`,
     })
   } catch (error) {

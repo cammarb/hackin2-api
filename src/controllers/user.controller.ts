@@ -35,6 +35,7 @@ export const getUser = async (req: Request, res: Response) => {
       role: user?.role,
     })
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: 'Internal Server Error' })
   }
 }
