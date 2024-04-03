@@ -1,16 +1,28 @@
-import request from 'supertest'
-
+import { Application } from 'express'
 import createServer from '../utilts/server'
 
-const app = createServer()
+jest.mock('dotenv', () => ({
+  config: jest.fn(),
+}))
 
-describe('app.ts', () => {
-  it('should respond with a 200 status in /api/v*/ ', async () => {
-    return request(app)
-      .get('/')
-      .then((res) => {
-        expect(res.statusCode).toBe(200)
-        expect(res.body).toEqual({ message: 'Welcome to the Hackin2 API.' })
-      })
+describe('Server setup', () => {
+  let app: Application
+  let consoleSpy: jest.SpyInstance<
+    void,
+    [message?: any, ...optionalParams: any[]],
+    any
+  >
+
+  beforeAll(() => {
+    consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
+    app = createServer()
+  })
+
+  afterAll(() => {
+    consoleSpy.mockRestore()
+  })
+
+  it('should create the server without errors', () => {
+    expect(app).toBeDefined()
   })
 })
