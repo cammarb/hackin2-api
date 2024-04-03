@@ -97,7 +97,7 @@ export const inviteCompanyMembers = async (
     })
     res.status(200).json({ message: `Invitation sent to ${user.email}.` })
   } catch (error) {
-    res.status(500).json({ message: 'Internal Server Error', error: error })
+    res.status(500).json({ error: 'Internal Server Error' })
   }
 }
 

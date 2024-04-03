@@ -3,6 +3,7 @@ import {
   editCompany,
   getCompany,
   getCompanyMembers,
+  inviteCompanyMembers,
 } from '../../controllers/company.controller'
 import prisma from '../../utilts/client'
 
@@ -12,6 +13,13 @@ jest.mock('../../utilts/client', () => ({
     company: {
       findUnique: jest.fn(),
       update: jest.fn(),
+      create: jest.fn(),
+    },
+    companyMember: {
+      create: jest.fn(),
+    },
+    user: {
+      create: jest.fn(),
     },
   },
 }))
@@ -160,6 +168,68 @@ describe('getCompanyMembers', () => {
     )
 
     await getCompanyMembers(req as Request, res as Response)
+
+    expect(res.status).toHaveBeenCalledWith(500)
+    expect(res.json).toHaveBeenCalledWith({ error: 'Internal Server Error' })
+  })
+})
+
+describe('inviteCompanyMembers', () => {
+  let req: Request | any
+  let res: Response | any
+
+  beforeEach(() => {
+    req = {
+      companyId: 'testCompanyId',
+      body: {
+        email: 'test@email.com',
+      },
+    }
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    }
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('should invite a new member to the company', async () => {
+    const mockUser = {
+      id: '1',
+      username: req.body.email.split('@')[0],
+      email: req.body.email,
+      firstName: '',
+      lastName: '',
+      password: 'password',
+      role: 'ENTERPRISE',
+    }
+
+    ;(prisma.user.create as jest.Mock).mockResolvedValueOnce(mockUser)
+    ;(prisma.companyMember.create as jest.Mock).mockResolvedValueOnce({
+      companyId: req.companyId,
+      companyRole: 'MEMBER',
+      userId: mockUser.id,
+    })
+
+    await inviteCompanyMembers(req as Request, res as Response)
+
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith({
+      message: `Invitation sent to ${mockUser.email}.`,
+    })
+  })
+
+  it('should handle errors', async () => {
+    ;(prisma.user.create as jest.Mock).mockRejectedValueOnce(
+      new Error('Internal Server Error'),
+    )
+    ;(prisma.companyMember.create as jest.Mock).mockRejectedValueOnce(
+      new Error('Internal Server Error'),
+    )
+
+    await inviteCompanyMembers(req as Request, res as Response)
 
     expect(res.status).toHaveBeenCalledWith(500)
     expect(res.json).toHaveBeenCalledWith({ error: 'Internal Server Error' })
