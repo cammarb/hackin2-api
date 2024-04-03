@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
-import prisma from '../utilts/client'
 import getEnvs from '../utilts/envs'
 
 const verifyJWT = async (

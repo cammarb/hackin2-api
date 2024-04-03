@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { Company, CompanyMember, Role, User } from '@prisma/client'
+import { Company, CompanyMember } from '@prisma/client'
 import prisma from '../utilts/client'
 import hashToken from '../utilts/hash'
 
@@ -220,8 +220,7 @@ export const getProgram = async (req: Request | any, res: Response) => {
 
 export const deleteProgram = async (req: Request, res: Response) => {
   try {
-  }
-  catch(error){
-    res.status(500).json({error: 'Internal Server Error'})   
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' })
   }
 }
