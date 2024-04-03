@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
-import prisma from '../utilts/client'
 import getEnvs from '../utilts/envs'
 
 const verifyJWT = async (
@@ -15,16 +14,6 @@ const verifyJWT = async (
 
   const token = authHeader.split(' ')[1]
 
-  const revokedToken = await prisma.refreshToken.findUnique({
-    where: {
-      hashedToken: token,
-    },
-    select: {
-      revoked: true,
-    },
-  })
-  if (revokedToken?.revoked === true) return res.sendStatus(403)
-
   try {
     const decoded = jwt.verify(token, publicKey) as {
       username: string
@@ -35,10 +24,10 @@ const verifyJWT = async (
     next()
   } catch (error: any) {
     if (error.name === 'TokenExpiredError') {
-      res.sendStatus(403)
+      return res.status(403).json({ message: 'Token expired' })
     } else if (error.name === 'JsonWebTokenError') {
-      res.sendStatus(401)
-    } else res.sendStatus(500)
+      return res.sendStatus(401)
+    } else return res.sendStatus(500)
   }
 }
 

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { Company, CompanyMember, Role, User } from '@prisma/client'
+import { Company, CompanyMember } from '@prisma/client'
 import prisma from '../utilts/client'
 import hashToken from '../utilts/hash'
 
@@ -97,7 +97,7 @@ export const inviteCompanyMembers = async (
     })
     res.status(200).json({ message: `Invitation sent to ${user.email}.` })
   } catch (error) {
-    res.status(500).json({ message: 'Internal Server Error', error: error })
+    res.status(500).json({ error: 'Internal Server Error' })
   }
 }
 
@@ -213,6 +213,13 @@ export const getProgram = async (req: Request | any, res: Response) => {
     res.status(200).json({
       program: program,
     })
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+}
+
+export const deleteProgram = async (req: Request, res: Response) => {
+  try {
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
   }
