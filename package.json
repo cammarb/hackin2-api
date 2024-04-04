@@ -6,7 +6,6 @@
     "url": "https://github.com/Hackin2-Company/Hackin2-API"
   },
   "main": "server.ts",
-  "type": "module",
   "scripts": {
     "test": "jest",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
