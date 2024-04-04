@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import prisma from '../utilts/client'
+import prisma from '../utils/client'
 import { User, Role } from '@prisma/client'
 import * as EmailValidator from 'email-validator'
 

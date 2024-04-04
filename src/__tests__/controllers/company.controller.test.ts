@@ -5,7 +5,7 @@ import {
   getCompanyMembers,
   inviteCompanyMembers,
 } from '../../controllers/company.controller'
-import prisma from '../../utilts/client'
+import prisma from '../../utils/client'
 
 jest.mock('../../utilts/client', () => ({
   __esModule: true,

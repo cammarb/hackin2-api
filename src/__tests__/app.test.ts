@@ -1,5 +1,5 @@
 import { Application } from 'express'
-import createServer from '../utilts/server'
+import createServer from '../utils/server'
 
 jest.mock('dotenv', () => ({
   config: jest.fn(),

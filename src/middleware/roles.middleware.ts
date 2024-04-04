@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { CompanyMember, CompanyRole, User } from '@prisma/client'
-import prisma from '../utilts/client'
+import prisma from '../utils/client'
 
 const checkEnterprise = async (
   req: Request | any,

@@ -1,12 +1,12 @@
 import { Request, Response } from 'express'
 import bcrypt from 'bcrypt'
-import prisma from '../utilts/client'
+import prisma from '../utils/client'
 import { RefreshToken, User } from '@prisma/client'
-import { generateTokens } from '../utilts/auth'
+import { generateTokens } from '../utils/auth'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import fs from 'fs'
 import * as EmailValidator from 'email-validator'
-import hashToken from '../utilts/hash'
+import hashToken from '../utils/hash'
 
 export const handleRegistration = async (req: Request, res: Response) => {
   const { username, email, firstName, lastName, password, role } = req.body

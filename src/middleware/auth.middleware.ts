@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
-import getEnvs from '../utilts/envs'
+import getEnvs from '../utils/envs'
 
 const verifyJWT = async (
   req: Request | any,

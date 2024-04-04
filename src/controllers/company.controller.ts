@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { Company, CompanyMember } from '@prisma/client'
-import prisma from '../utilts/client'
-import hashToken from '../utilts/hash'
+import prisma from '../utils/client'
+import hashToken from '../utils/hash'
 
 export const getCompany = async (req: Request | any, res: Response) => {
   try {
