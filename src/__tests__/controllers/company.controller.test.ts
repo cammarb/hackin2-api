@@ -7,7 +7,7 @@ import {
 } from '../../controllers/company.controller'
 import prisma from '../../utils/client'
 
-jest.mock('../../utilts/client', () => ({
+jest.mock('../../utils/client', () => ({
   __esModule: true,
   default: {
     company: {
