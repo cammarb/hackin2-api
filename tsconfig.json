@@ -9,8 +9,7 @@
     "skipLibCheck": true
   },
   "include": [
-    "src/**/*",
-    "singleton.ts"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
