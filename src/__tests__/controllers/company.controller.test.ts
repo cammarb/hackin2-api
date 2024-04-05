@@ -5,24 +5,28 @@ import {
   getCompanyMembers,
   inviteCompanyMembers,
 } from '../../controllers/company.controller'
-import prisma from '../../utils/client'
+import { prismaMock } from '../../../singleton'
+import { Role } from '@prisma/client'
 
-jest.mock('../../utils/client', () => ({
-  __esModule: true,
-  default: {
-    company: {
-      findUnique: jest.fn(),
-      update: jest.fn(),
-      create: jest.fn(),
-    },
-    companyMember: {
-      create: jest.fn(),
-    },
-    user: {
-      create: jest.fn(),
-    },
+const mockCompanyMembers = [
+  {
+    userId: '1',
+    companyId: 'testCompanyId',
+    companyRole: 'OWNER',
   },
-}))
+  {
+    userId: '2',
+    companyId: 'testCompanyId',
+    companyRole: 'MEMBER',
+  },
+]
+
+const mockCompany = {
+  id: 'testId',
+  name: 'Test Company',
+  ownerId: 'testOwnerId',
+  CompanyMember: mockCompanyMembers,
+}
 
 describe('getCompany function', () => {
   let req: Request | any
@@ -43,8 +47,7 @@ describe('getCompany function', () => {
   })
 
   it('should return company information', async () => {
-    const mockCompany = { name: 'Test Company' }
-    ;(prisma.company.findUnique as jest.Mock).mockResolvedValueOnce(mockCompany)
+    prismaMock.company.findUnique.mockResolvedValueOnce(mockCompany)
 
     await getCompany(req as Request, res as Response)
 
@@ -55,7 +58,7 @@ describe('getCompany function', () => {
   })
 
   it('should handle errors', async () => {
-    ;(prisma.company.findUnique as jest.Mock).mockRejectedValueOnce(
+    prismaMock.company.findUnique.mockRejectedValueOnce(
       new Error('Internal Server Error'),
     )
 
@@ -89,13 +92,7 @@ describe('editCompany function', () => {
   })
 
   it('should update company information', async () => {
-    const mockCompany = {
-      id: 'testCompanyId',
-      name: 'Test Company',
-      ownerId: 'Old Owner ID',
-    }
-
-    ;(prisma.company.update as jest.Mock).mockResolvedValueOnce(mockCompany)
+    prismaMock.company.update.mockResolvedValueOnce(mockCompany)
 
     await editCompany(req as Request, res as Response)
 
@@ -106,7 +103,7 @@ describe('editCompany function', () => {
   })
 
   it('should handle errors', async () => {
-    ;(prisma.company.update as jest.Mock).mockRejectedValueOnce(
+    prismaMock.company.update.mockRejectedValueOnce(
       new Error('Internal Server Error'),
     )
 
@@ -136,23 +133,7 @@ describe('getCompanyMembers', () => {
   })
 
   it('should get Company Members from given Company ID', async () => {
-    const mockCompany = {
-      id: 'testCompanyId',
-      CompanyMember: [
-        {
-          userId: '1',
-          companyId: 'testCompanyId',
-          companyRole: 'OWNER',
-        },
-        {
-          userId: '2',
-          companyId: 'testCompanyId',
-          companyRole: 'MEMBER',
-        },
-      ],
-    }
-
-    ;(prisma.company.findUnique as jest.Mock).mockResolvedValueOnce(mockCompany)
+    prismaMock.company.findUnique.mockResolvedValueOnce(mockCompany)
 
     await getCompanyMembers(req as Request, res as Response)
 
@@ -163,7 +144,7 @@ describe('getCompanyMembers', () => {
   })
 
   it('should handle errors', async () => {
-    ;(prisma.company.findUnique as jest.Mock).mockRejectedValueOnce(
+    prismaMock.company.findUnique.mockRejectedValueOnce(
       new Error('Internal Server Error'),
     )
 
@@ -203,11 +184,15 @@ describe('inviteCompanyMembers', () => {
       firstName: '',
       lastName: '',
       password: 'password',
-      role: 'ENTERPRISE',
+      role: Role.ENTERPRISE,
+      mfa: false,
+      confirmed: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     }
 
-    ;(prisma.user.create as jest.Mock).mockResolvedValueOnce(mockUser)
-    ;(prisma.companyMember.create as jest.Mock).mockResolvedValueOnce({
+    prismaMock.user.create.mockResolvedValueOnce(mockUser)
+    prismaMock.companyMember.create.mockResolvedValueOnce({
       companyId: req.companyId,
       companyRole: 'MEMBER',
       userId: mockUser.id,
@@ -222,10 +207,10 @@ describe('inviteCompanyMembers', () => {
   })
 
   it('should handle errors', async () => {
-    ;(prisma.user.create as jest.Mock).mockRejectedValueOnce(
+    prismaMock.user.create.mockRejectedValueOnce(
       new Error('Internal Server Error'),
     )
-    ;(prisma.companyMember.create as jest.Mock).mockRejectedValueOnce(
+    prismaMock.companyMember.create.mockRejectedValueOnce(
       new Error('Internal Server Error'),
     )
 
