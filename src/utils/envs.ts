@@ -21,7 +21,6 @@ const getEnvs = async () => {
     })
     return { port, privateKey, publicKey, issuer, origin }
   } catch (error) {
-    console.error('Error reading keys:', error)
     throw error
   }
 }
