@@ -11,18 +11,19 @@ import hashToken from '../utils/hash'
 export const handleRegistration = async (req: Request, res: Response) => {
   const { username, email, firstName, lastName, password, role } = req.body
   if (!username || !password || !email || !firstName || !lastName || !role)
-    return res.status(400).json({ messaege: 'All the fields are required' })
+    return res.status(400).json({ message: 'All the fields are required' })
 
   if (!EmailValidator.validate(email))
-    return res.status(400).json({ messaege: 'Enter a valid email' })
+    return res.status(400).json({ message: 'Enter a valid email' })
 
-  const user: User[] | null = await prisma.user.findMany({
-    where: {
-      OR: [{ username: username }, { email: email }],
-    },
-  })
-  if (typeof user === null) return res.sendStatus(409)
   try {
+    const existingUser: User | null = await prisma.user.findFirst({
+      where: {
+        OR: [{ username: username }, { email: email }],
+      },
+    })
+    if (existingUser)
+      return res.status(409).json({ message: 'User already exists' })
     const hashedPassword = await hashToken(password)
     const user: User = await prisma.user.create({
       data: {
@@ -34,11 +35,6 @@ export const handleRegistration = async (req: Request, res: Response) => {
         role: role,
       },
     })
-    // const userProfile: UserProfile = await prisma.userProfile.create({
-    //   data: {
-    //     userId: user.id,
-    //   },
-    // })
     res.status(201).json({ success: 'User created successfully' })
   } catch (err: Error | any) {
     res.status(500).json({ message: err?.message })
@@ -87,14 +83,12 @@ const handleLogin = async (req: Request, res: Response) => {
           userId: user.id,
         },
       })
-
       res.cookie('jwt', tokens.refreshToken, {
         httpOnly: true,
         sameSite: 'none',
         secure: true,
         maxAge: 24 * 60 * 60 * 1000,
       })
-
       res.status(200).json({
         user: user.username,
         role: user.role,
