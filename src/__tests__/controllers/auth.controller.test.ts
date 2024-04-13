@@ -7,6 +7,7 @@ import {
 } from '../../controllers/auth.controller'
 import bcrypt from 'bcrypt'
 import hashToken from '../../utils/hash'
+import { generateTokens } from '../../utils/auth'
 
 describe('handleRegistration function', () => {
   let req: Request | any
@@ -88,6 +89,20 @@ describe('handleRegistration function', () => {
   })
 })
 
+jest.mock('../../utils/envs', () => ({
+  getEnvs: jest.fn().mockResolvedValue({
+    issuer: 'mockIssuer',
+    privateKey: 'mockPrivateKey',
+  }),
+}))
+
+jest.mock('../../utils/auth', () => ({
+  generateTokens: jest.fn().mockResolvedValue({
+    accessToken: 'mockAccessToken',
+    refreshToken: 'mockRefreshToken',
+  }),
+}))
+
 describe('handleLogin function', () => {
   let req: Request | any
   let res: Response | any
@@ -161,10 +176,10 @@ describe('handleLogin function', () => {
     }
 
     const tokens = {
-      accessToken: '12345',
+      accessToken: 'mockAccessToken',
       refreshToken: {
         id: '1',
-        hashedToken: 'token',
+        hashedToken: 'mockRefreshToken',
         userId: 'testUserId',
         revoked: false,
         createdAt: new Date(),
@@ -177,8 +192,17 @@ describe('handleLogin function', () => {
 
     await handleLogin(req, res)
 
-    expect(res.cookie).toHaveReturned()
+    expect(res.cookie).toHaveBeenCalledWith('jwt', 'mockRefreshToken', {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    })
     expect(res.status).toHaveBeenCalledWith(200)
-    expect(res.json).toHaveBeenCalled()
+    expect(res.json).toHaveBeenCalledWith({
+      user: user.username,
+      role: user.role,
+      token: 'mockAccessToken',
+    })
   })
 })
