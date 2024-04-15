@@ -1,6 +1,6 @@
 import { User } from '@prisma/client'
 import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken'
-import getEnvs from './envs'
+import { getEnvs } from './envs'
 
 const generateToken = async (
   user: User,

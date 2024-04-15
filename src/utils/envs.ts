@@ -25,4 +25,4 @@ const getEnvs = async () => {
   }
 }
 
-export default getEnvs
+export { getEnvs }
