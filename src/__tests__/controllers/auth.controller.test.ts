@@ -6,8 +6,9 @@ import {
   handleRegistration,
 } from '../../controllers/auth.controller'
 import bcrypt from 'bcrypt'
-import hashToken from '../../utils/hash'
 import { generateTokens } from '../../utils/auth'
+import { promises } from 'fs'
+import getEnvs from '../../utils/envs'
 
 describe('handleRegistration function', () => {
   let req: Request | any
@@ -89,18 +90,10 @@ describe('handleRegistration function', () => {
   })
 })
 
-jest.mock('../../utils/envs', () => ({
-  getEnvs: jest.fn().mockResolvedValue({
-    issuer: 'mockIssuer',
-    privateKey: 'mockPrivateKey',
-  }),
-}))
-
-jest.mock('../../utils/auth', () => ({
-  generateTokens: jest.fn().mockResolvedValue({
-    accessToken: 'mockAccessToken',
-    refreshToken: 'mockRefreshToken',
-  }),
+jest.mock('fs', () => ({
+  promises: {
+    readFile: jest.fn().mockResolvedValueOnce('mockPrivateKey'),
+  },
 }))
 
 describe('handleLogin function', () => {
@@ -108,6 +101,23 @@ describe('handleLogin function', () => {
   let res: Response | any
 
   beforeEach(() => {
+    process.env.PORT = '3000' // Set your desired value
+    process.env.PRIVKEY = '/path/to/private/key'
+    process.env.PUBKEY = '/path/to/public/key'
+    process.env.ISSUER = 'example.com'
+    process.env.ORIGIN = 'http://example.com'
+    jest.mock('../../utils/envs', () => ({
+      getEnvs: jest.fn().mockResolvedValueOnce({
+        issuer: 'mockIssuer',
+        privateKey: 'mockPrivateKey',
+      }),
+    }))
+    jest.mock('../../utils/auth', () => ({
+      generateTokens: jest.fn().mockResolvedValueOnce({
+        accessToken: 'mockAccessToken',
+        refreshToken: 'mockRefreshToken',
+      }),
+    }))
     req = {
       body: {
         username: 'testUsername',
@@ -123,6 +133,56 @@ describe('handleLogin function', () => {
 
   afterEach(() => {
     jest.clearAllMocks()
+  })
+
+  it('should handle valid user', async () => {
+    const user = {
+      id: '1',
+      username: 'testUsername',
+      email: 'test@email.com',
+      firstName: 'testFirstName',
+      lastName: 'testLastName',
+      password: 'testPassword',
+      role: Role.ENTERPRISE,
+      mfa: false,
+      confirmed: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+
+    const tokens = {
+      accessToken: 'mockAccessToken',
+      refreshToken: {
+        id: '1',
+        hashedToken: 'mockRefreshToken',
+        userId: '1',
+        revoked: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    }
+
+    prismaMock.user.findUnique.mockResolvedValueOnce(user)
+    prismaMock.refreshToken.create.mockResolvedValueOnce(tokens.refreshToken)
+    jest
+      .spyOn(bcrypt, 'compare')
+      .mockImplementation((providedPassword, hashedPassword) => {
+        return providedPassword === hashedPassword
+      })
+    await handleLogin(req, res)
+
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith({
+      user: user.username,
+      role: user.role,
+      token: 'mockAccessToken',
+    })
+    expect(res.cookie).toHaveBeenCalledWith('jwt', 'mockRefreshToken', {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    })
   })
 
   it('should handle invalid input', async () => {
@@ -152,9 +212,15 @@ describe('handleLogin function', () => {
   })
 
   it('should handle invalid password', async () => {
+    jest.clearAllMocks()
+    jest
+      .spyOn(bcrypt, 'compare')
+      .mockImplementation((providedPassword, hashedPassword) => {
+        return providedPassword !== hashedPassword
+      })
+
     const userWithInvalidPassword = {
       ...req.body,
-      password: 'invalidPassword',
     }
 
     prismaMock.user.findUnique.mockResolvedValueOnce(userWithInvalidPassword)
@@ -165,44 +231,6 @@ describe('handleLogin function', () => {
     expect(res.json).toHaveBeenCalledWith({
       error: 'Authentication failed',
       message: 'Invalid username or password',
-    })
-  })
-
-  it('should handle valid user', async () => {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10)
-    const user = {
-      ...req.body,
-      password: hashedPassword,
-    }
-
-    const tokens = {
-      accessToken: 'mockAccessToken',
-      refreshToken: {
-        id: '1',
-        hashedToken: 'mockRefreshToken',
-        userId: 'testUserId',
-        revoked: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    }
-
-    prismaMock.user.findUnique.mockResolvedValueOnce(user)
-    prismaMock.refreshToken.create.mockResolvedValueOnce(tokens.refreshToken)
-
-    await handleLogin(req, res)
-
-    expect(res.cookie).toHaveBeenCalledWith('jwt', 'mockRefreshToken', {
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true,
-      maxAge: 24 * 60 * 60 * 1000,
-    })
-    expect(res.status).toHaveBeenCalledWith(200)
-    expect(res.json).toHaveBeenCalledWith({
-      user: user.username,
-      role: user.role,
-      token: 'mockAccessToken',
     })
   })
 })

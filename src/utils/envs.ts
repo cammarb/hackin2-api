@@ -1,4 +1,4 @@
-import fs from 'fs'
+import { promises } from 'fs'
 import jwt from 'jsonwebtoken'
 
 const getEnvs = async () => {
@@ -13,10 +13,10 @@ const getEnvs = async () => {
       throw new Error('Missing env variables')
     }
 
-    const privateKey = await fs.promises.readFile(privateKeyPath, {
+    const privateKey = await promises.readFile(privateKeyPath, {
       encoding: 'utf-8',
     })
-    const publicKey = await fs.promises.readFile(publicKeyPath, {
+    const publicKey = await promises.readFile(publicKeyPath, {
       encoding: 'utf-8',
     })
     return { port, privateKey, publicKey, issuer, origin }

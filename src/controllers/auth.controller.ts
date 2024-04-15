@@ -42,59 +42,69 @@ export const handleRegistration = async (req: Request, res: Response) => {
 }
 
 const handleLogin = async (req: Request, res: Response) => {
-  const { username, password } = req.body
+  try {
+    const { username, password } = req.body
 
-  if (
-    !username ||
-    !password ||
-    typeof username !== 'string' ||
-    typeof password !== 'string'
-  )
-    res.status(400).json({
-      error: 'Bad Request',
-      message: 'Both username and password are required',
+    if (
+      !username ||
+      !password ||
+      typeof username !== 'string' ||
+      typeof password !== 'string'
+    ) {
+      return res.status(400).json({
+        error: 'Bad Request',
+        message: 'Both username and password are required',
+      })
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        username: username,
+      },
     })
 
-  const user: User | null = await prisma.user.findUnique({
-    where: {
-      username: username,
-    },
-  })
-
-  if (!user) {
-    res.status(401).json({
-      error: 'Authentication failed',
-      message: 'Invalid username or password',
-    })
-  } else {
-    const passwordMatch = await bcrypt.compare(password, user.password)
-
-    if (!passwordMatch) {
-      res.status(401).json({
+    if (!user) {
+      return res.status(401).json({
         error: 'Authentication failed',
         message: 'Invalid username or password',
       })
-    } else {
-      const tokens = await generateTokens(user)
+    }
 
-      const refreshToken: RefreshToken = await prisma.refreshToken.create({
-        data: {
-          hashedToken: tokens.refreshToken,
-          userId: user.id,
-        },
-      })
-      res.cookie('jwt', tokens.refreshToken, {
-        httpOnly: true,
-        sameSite: 'none',
-        secure: true,
-        maxAge: 24 * 60 * 60 * 1000,
-      })
-      res.status(200).json({
-        user: user.username,
-        role: user.role,
-        token: `${tokens.accessToken}`,
+    const passwordMatch = await bcrypt.compare(password, user.password)
+
+    if (!passwordMatch) {
+      return res.status(401).json({
+        error: 'Authentication failed',
+        message: 'Invalid username or password',
       })
     }
+
+    const tokens = await generateTokens(user)
+
+    const refreshToken = await prisma.refreshToken.create({
+      data: {
+        hashedToken: tokens.refreshToken,
+        userId: user.id,
+      },
+    })
+
+    res.cookie('jwt', tokens.refreshToken, {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    })
+
+    return res.status(200).json({
+      user: user.username,
+      role: user.role,
+      token: tokens.accessToken,
+    })
+  } catch (error) {
+    return res.status(500).json({
+      error: 'Internal Server Error',
+      message: 'An unexpected error occurred',
+    })
   }
 }
 
