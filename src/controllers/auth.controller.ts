@@ -7,6 +7,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken'
 import fs from 'fs'
 import * as EmailValidator from 'email-validator'
 import hashToken from '../utils/hash'
+import { getEnvs } from '../utils/envs'
 
 export const handleRegistration = async (req: Request, res: Response) => {
   const { username, email, firstName, lastName, password, role } = req.body
@@ -111,15 +112,12 @@ const handleLogin = async (req: Request, res: Response) => {
 const handleRefreshToken = async (req: Request, res: Response) => {
   const jwtCookie = req.cookies['jwt']
 
-  const tokenSecretKey = fs.readFileSync(`${process.env.PUBKEY}`, 'utf8')
+  const { publicKey } = await getEnvs()
 
-  if (!jwtCookie || !tokenSecretKey)
+  if (!jwtCookie || !publicKey)
     return res.status(401).json({ message: 'Unauthorized' })
 
-  const decoded: JwtPayload = jwt.verify(
-    jwtCookie,
-    tokenSecretKey,
-  ) as JwtPayload
+  const decoded: JwtPayload = jwt.verify(jwtCookie, publicKey) as JwtPayload
 
   if (!decoded) return res.sendStatus(401)
 
