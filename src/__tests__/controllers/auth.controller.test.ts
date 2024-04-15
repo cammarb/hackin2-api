@@ -1,13 +1,15 @@
 import { Request, Response } from 'express'
 import {
   handleLogin,
+  handleRefreshToken,
   handleRegistration,
 } from '../../controllers/auth.controller'
 import { Role } from '@prisma/client'
 import { prismaMock } from '../../../singleton'
 import { generateTokens } from '../../utils/auth'
-import getEnvs from '../../utils/envs'
+import { getEnvs } from '../../utils/envs'
 import bcrypt from 'bcrypt'
+import jwt, { JwtPayload } from 'jsonwebtoken'
 
 jest.mock('../../utils/auth', () => ({
   generateTokens: jest.fn().mockResolvedValue({
@@ -24,6 +26,10 @@ jest.mock('../../utils/envs', () => ({
     issuer: 'fakeIssuer',
     origin: 'fakeOrigin',
   }),
+}))
+
+jest.mock('jsonwebtoken', () => ({
+  verify: jest.fn().mockReturnValue({ username: 'username', role: 'role' }),
 }))
 
 describe('handleRegistration function', () => {
@@ -229,25 +235,86 @@ describe('handleLogin function', () => {
   })
 })
 
-// describe('handleLogin', () => {
-//   let req: Request | any
-//   let res: Response | any
+describe('handleRefreshToken', () => {
+  let req: Request | any
+  let res: Response | any
 
-//   beforeEach(() => {
-//     req = {
-//       body: {
-//         username: 'testUsername',
-//         password: 'testPassword',
-//       },
-//     }
-//     res = {
-//       status: jest.fn().mockReturnThis(),
-//       json: jest.fn(),
-//       cookie: jest.fn(),
-//     }
-//   })
+  beforeEach(() => {
+    req = {
+      cookies: {
+        jwt: 'mockToken',
+      },
+    }
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      cookie: jest.fn(),
+    }
+  })
 
-//   afterEach(() => {
-//     jest.clearAllMocks()
-//   })
-// })
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
+  test('Should return a new accessToken and refreshToken', async () => {
+    const user = {
+      id: '1',
+      username: 'testUsername',
+      email: 'test@email.com',
+      firstName: 'testFirstName',
+      lastName: 'testLastName',
+      password: 'testPassword',
+      role: Role.ENTERPRISE,
+      mfa: false,
+      confirmed: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+    const refreshToken = {
+      id: '1',
+      hashedToken: 'mockRefreshToken',
+      userId: '1',
+      revoked: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+    const newTokens = {
+      accessToken: {
+        id: '1',
+        hashedToken: 'mockAccessToken',
+        userId: '1',
+        revoked: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      refreshToken: {
+        id: '1',
+        hashedToken: 'mockRefreshToken',
+        userId: '1',
+        revoked: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    }
+
+    prismaMock.user.findUnique.mockResolvedValueOnce(user)
+    prismaMock.refreshToken.findUnique.mockResolvedValueOnce(refreshToken)
+    prismaMock.refreshToken.update.mockResolvedValueOnce(refreshToken)
+    prismaMock.refreshToken.create.mockResolvedValueOnce(newTokens.refreshToken)
+
+    await handleRefreshToken(req, res)
+
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith({
+      user: user.username,
+      role: user.role,
+      token: newTokens.accessToken.hashedToken,
+    })
+    expect(res.cookie).toHaveBeenCalledWith('jwt', 'mockRefreshToken', {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    })
+  })
+})
