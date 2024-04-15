@@ -34,4 +34,4 @@ const generateTokens = async (
   }
 }
 
-export { generateTokens }
+export { generateToken, generateTokens }

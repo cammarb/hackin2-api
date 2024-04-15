@@ -1,14 +1,30 @@
 import { Request, Response } from 'express'
-import { prismaMock } from '../../../singleton'
-import { Role } from '@prisma/client'
 import {
   handleLogin,
   handleRegistration,
 } from '../../controllers/auth.controller'
-import bcrypt from 'bcrypt'
+import { Role } from '@prisma/client'
+import { prismaMock } from '../../../singleton'
 import { generateTokens } from '../../utils/auth'
-import { promises } from 'fs'
 import getEnvs from '../../utils/envs'
+import bcrypt from 'bcrypt'
+
+jest.mock('../../utils/auth', () => ({
+  generateTokens: jest.fn().mockResolvedValue({
+    accessToken: 'mockAccessToken',
+    refreshToken: 'mockRefreshToken',
+  }),
+}))
+
+jest.mock('../../utils/envs', () => ({
+  getEnvs: jest.fn().mockResolvedValue({
+    port: 'fakePort',
+    privateKey: 'fakePrivateKey',
+    publicKey: 'fakePublicKey',
+    issuer: 'fakeIssuer',
+    origin: 'fakeOrigin',
+  }),
+}))
 
 describe('handleRegistration function', () => {
   let req: Request | any
@@ -90,34 +106,11 @@ describe('handleRegistration function', () => {
   })
 })
 
-jest.mock('fs', () => ({
-  promises: {
-    readFile: jest.fn().mockResolvedValueOnce('mockPrivateKey'),
-  },
-}))
-
 describe('handleLogin function', () => {
   let req: Request | any
   let res: Response | any
 
   beforeEach(() => {
-    process.env.PORT = '3000' // Set your desired value
-    process.env.PRIVKEY = '/path/to/private/key'
-    process.env.PUBKEY = '/path/to/public/key'
-    process.env.ISSUER = 'example.com'
-    process.env.ORIGIN = 'http://example.com'
-    jest.mock('../../utils/envs', () => ({
-      getEnvs: jest.fn().mockResolvedValueOnce({
-        issuer: 'mockIssuer',
-        privateKey: 'mockPrivateKey',
-      }),
-    }))
-    jest.mock('../../utils/auth', () => ({
-      generateTokens: jest.fn().mockResolvedValueOnce({
-        accessToken: 'mockAccessToken',
-        refreshToken: 'mockRefreshToken',
-      }),
-    }))
     req = {
       body: {
         username: 'testUsername',
@@ -135,7 +128,7 @@ describe('handleLogin function', () => {
     jest.clearAllMocks()
   })
 
-  it('should handle valid user', async () => {
+  test('should handle valid user', async () => {
     const user = {
       id: '1',
       username: 'testUsername',
@@ -169,6 +162,7 @@ describe('handleLogin function', () => {
       .mockImplementation((providedPassword, hashedPassword) => {
         return providedPassword === hashedPassword
       })
+
     await handleLogin(req, res)
 
     expect(res.status).toHaveBeenCalledWith(200)
@@ -234,3 +228,26 @@ describe('handleLogin function', () => {
     })
   })
 })
+
+// describe('handleLogin', () => {
+//   let req: Request | any
+//   let res: Response | any
+
+//   beforeEach(() => {
+//     req = {
+//       body: {
+//         username: 'testUsername',
+//         password: 'testPassword',
+//       },
+//     }
+//     res = {
+//       status: jest.fn().mockReturnThis(),
+//       json: jest.fn(),
+//       cookie: jest.fn(),
+//     }
+//   })
+
+//   afterEach(() => {
+//     jest.clearAllMocks()
+//   })
+// })
