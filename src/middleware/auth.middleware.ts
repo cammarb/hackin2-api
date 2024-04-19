@@ -10,7 +10,7 @@ const verifyJWT = async (
   const authHeader = req.headers && req.headers['authorization']
   const { publicKey } = await getEnvs()
 
-  if (!authHeader || !publicKey) return res.sendStatus(401)
+  if (!authHeader || !publicKey) return res.status(401)
 
   const token = authHeader.split(' ')[1]
 
@@ -26,8 +26,8 @@ const verifyJWT = async (
     if (error.name === 'TokenExpiredError') {
       return res.status(403).json({ message: 'Token expired' })
     } else if (error.name === 'JsonWebTokenError') {
-      return res.sendStatus(401)
-    } else return res.sendStatus(500)
+      return res.status(401)
+    } else return res.status(500)
   }
 }
 
