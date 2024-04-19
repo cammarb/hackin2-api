@@ -38,7 +38,7 @@ const checkEnterprise = async (
       req.companyRole = companyMember.companyRole
       next()
     } else {
-      return res.sendStatus(403)
+      return res.status(403)
     }
   } catch (error) {
     return res.status(500).json({ error: 'Internal server error' })
@@ -68,7 +68,7 @@ const allowedRoles =
       if (roles.includes(companyMember.companyRole)) {
         next()
       } else {
-        return res.sendStatus(403)
+        return res.status(403).json({ error: 'Unauthorized' })
       }
     } catch (error) {
       console.error('Error in role middleware:', error)
