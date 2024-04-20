@@ -1,4 +1,4 @@
-import express, { Router } from 'express'
+import { Router } from 'express'
 import {
   handleLogOut,
   handleLogin,
@@ -6,7 +6,7 @@ import {
   handleRegistration,
 } from '../controllers/auth.controller'
 
-const authRouter: Router = express.Router()
+const authRouter: Router = Router()
 
 authRouter.post('/register', handleRegistration)
 authRouter.post('/login', handleLogin)

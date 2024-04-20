@@ -13,7 +13,7 @@ import {
 } from '../controllers/company.controller'
 import { allowedRoles } from '../middleware/roles.middleware'
 
-const companyRouter: Router = express.Router()
+const companyRouter: Router = Router()
 
 // Dashboard
 companyRouter.get('/', getCompany)
