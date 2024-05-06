@@ -10,6 +10,8 @@ import {
   getCompanyPrograms,
   inviteCompanyMembers,
   getProgram,
+  addBounty,
+  getBounties,
 } from '../controllers/company.controller'
 import { allowedRoles } from '../middleware/roles.middleware'
 
@@ -52,6 +54,18 @@ companyRouter.get(
   '/programs/:id',
   allowedRoles(['OWNER', 'ADMIN', 'MEMBER']),
   getProgram,
+)
+
+// Bounties
+companyRouter.get(
+  '/programs/:id/bounties',
+  allowedRoles(['OWNER', 'ADMIN', 'MEMBER']),
+  getBounties,
+)
+companyRouter.post(
+  '/programs/:id/bounties/new',
+  allowedRoles(['OWNER', 'ADMIN']),
+  addBounty,
 )
 
 // Settings
