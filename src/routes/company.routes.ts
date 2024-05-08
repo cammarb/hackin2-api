@@ -12,6 +12,9 @@ import {
   getProgram,
   addBounty,
   getBounties,
+  editBounty,
+  getBounty,
+  deleteBounty,
 } from '../controllers/company.controller'
 import { allowedRoles } from '../middleware/roles.middleware'
 
@@ -66,6 +69,21 @@ companyRouter.post(
   '/programs/:id/bounties/new',
   allowedRoles(['OWNER', 'ADMIN']),
   addBounty,
+)
+companyRouter.put(
+  '/bounty/:id/edit',
+  allowedRoles(['OWNER', 'ADMIN']),
+  editBounty,
+)
+companyRouter.get(
+  '/bounty/:id',
+  allowedRoles(['OWNER', 'ADMIN', 'MEMBER']),
+  getBounty,
+)
+companyRouter.delete(
+  '/bounty/:id/delete',
+  allowedRoles(['OWNER', 'ADMIN']),
+  deleteBounty,
 )
 
 // Settings
