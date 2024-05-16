@@ -53,7 +53,17 @@ export const getCompanyMembers = async (req: Request | any, res: Response) => {
         id: companyId,
       },
       select: {
-        CompanyMember: true,
+        CompanyMember: {
+          include: {
+            User: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
       },
     })
     res.status(200).json({
