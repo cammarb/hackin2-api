@@ -86,14 +86,21 @@ model Program {
   createdById   String
   createdBy     User          @relation(fields: [createdById], references: [id])
 
+  // Rewards
+  lowReward      Decimal
+  mediumReward   Decimal
+  highReward     Decimal
+  criticalReward Decimal
+
   Bounty        Bounty[]
   ProgramMember ProgramMember[]
 }
 
 enum programStatus {
   NOT_STARTED
-  IN_PROGRESS
-  FINISHED
+  ACTIVE
+  PAUSED
+  COMPLETE
 }
 
 model ProgramMember {

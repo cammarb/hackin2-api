@@ -176,7 +176,15 @@ export const addProgram = async (req: Request | any, res: Response) => {
   try {
     const companyId = req.companyId
     const userId = req.userId as string
-    const { name, description, location } = req.body
+    const {
+      name,
+      description,
+      location,
+      lowReward,
+      mediumReward,
+      highReward,
+      criticalReward,
+    } = req.body
 
     const program = await prisma.program.create({
       data: {
@@ -185,6 +193,10 @@ export const addProgram = async (req: Request | any, res: Response) => {
         description: description,
         location: location,
         createdById: userId,
+        lowReward: lowReward,
+        mediumReward: mediumReward,
+        highReward: highReward,
+        criticalReward: criticalReward,
       },
     })
     res.status(200).json({ message: 'Program created successfully' })
