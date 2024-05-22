@@ -1,21 +1,32 @@
 import express, { Router, Request, Response } from 'express'
 import {
-  addProgram,
   deleteMember,
   editCompany,
   editMember,
   getCompany,
   getCompanyMembers,
   getMember,
-  getCompanyPrograms,
   inviteCompanyMembers,
+  getCompanyPrograms,
+} from '../controllers/company.controller'
+import {
   getProgram,
+
+  addProgram,
+  updateProgram,
+  deleteProgram,
+  addScope,
+  updateScope,
+  getProgramScopes,
+  deleteScope,
+} from '../controllers/program.controller'
+import {
   addBounty,
   getBounties,
   editBounty,
   getBounty,
   deleteBounty,
-} from '../controllers/company.controller'
+} from '../controllers/bounty.controller'
 import { allowedRoles } from '../middleware/roles.middleware'
 
 const companyRouter: Router = Router()
@@ -57,6 +68,34 @@ companyRouter.get(
   '/programs/:id',
   allowedRoles(['OWNER', 'ADMIN', 'MEMBER']),
   getProgram,
+)
+companyRouter.put(
+  '/programs/:id',
+  allowedRoles(['OWNER', 'ADMIN']),
+  updateProgram,
+)
+companyRouter.delete(
+  '/programs/:id',
+  allowedRoles(['OWNER', 'ADMIN']),
+  deleteProgram,
+)
+
+// Scopes
+companyRouter.get(
+  '/programs/:id/scope',
+  getProgramScopes
+)
+companyRouter.post(
+  '/programs/:id/scope/new',
+  addScope
+)
+companyRouter.put(
+  '/scope/:id/edit',
+  updateScope
+)
+companyRouter.delete(
+  '/scope/:id/delete',
+  deleteScope
 )
 
 // Bounties

@@ -12,10 +12,17 @@ export const getCompany = async (req: Request | any, res: Response) => {
       },
       select: {
         name: true,
+        CompanyMember: {
+          where: {
+            companyRole: {
+              'equals': 'OWNER'
+            }
+          }
+        }
       },
     })
     res.status(200).json({
-      message: `Welcome to Company ${company?.name}.`,
+      message: `Welcome to Company ${company?.name}. The owner is ${company?.CompanyMember}`,
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
@@ -25,7 +32,7 @@ export const getCompany = async (req: Request | any, res: Response) => {
 export const editCompany = async (req: Request | any, res: Response) => {
   try {
     const companyId = req.companyId
-    const { newName, newOwner } = req.body
+    const { newName } = req.body
 
     const company: Company | null = await prisma.company.update({
       where: {
@@ -33,7 +40,6 @@ export const editCompany = async (req: Request | any, res: Response) => {
       },
       data: {
         name: newName,
-        ownerId: newOwner,
       },
     })
 
@@ -172,39 +178,6 @@ export const deleteMember = async (req: Request | any, res: Response) => {
   }
 }
 
-export const addProgram = async (req: Request | any, res: Response) => {
-  try {
-    const companyId = req.companyId
-    const userId = req.userId as string
-    const {
-      name,
-      description,
-      location,
-      lowReward,
-      mediumReward,
-      highReward,
-      criticalReward,
-    } = req.body
-
-    const program = await prisma.program.create({
-      data: {
-        name: name,
-        companyId: companyId,
-        description: description,
-        location: location,
-        createdById: userId,
-        lowReward: lowReward,
-        mediumReward: mediumReward,
-        highReward: highReward,
-        criticalReward: criticalReward,
-      },
-    })
-    res.status(200).json({ message: 'Program created successfully' })
-  } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' })
-  }
-}
-
 export const getCompanyPrograms = async (req: Request | any, res: Response) => {
   try {
     const companyId = req.companyId as string
@@ -219,169 +192,5 @@ export const getCompanyPrograms = async (req: Request | any, res: Response) => {
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
-  }
-}
-
-export const getProgram = async (req: Request | any, res: Response) => {
-  try {
-    const programId = req.params.id
-
-    const program = await prisma.program.findUnique({
-      where: {
-        id: programId,
-      },
-    })
-    if (!program) res.status(404).json({ message: 'Program not found' })
-    res.status(200).json({
-      program: program,
-    })
-  } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' })
-  }
-}
-
-export const deleteProgram = async (req: Request, res: Response) => {
-  try {
-  } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' })
-  }
-}
-
-export const addBounty = async (req: Request | any, res: Response) => {
-  try {
-    const programId = req.params.id
-    const { title } = req.body
-
-    if (!title || !programId) {
-      return res.status(400).json({ error: 'Title and ProgramID are required' })
-    }
-
-    const bounty = await prisma.bounty.create({
-      data: {
-        title: title,
-        programId: programId,
-      },
-    })
-    res.status(200).json({ message: 'Bounty created successfully' })
-  } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError)
-      res.status(500).json({
-        error: {
-          type: 'Prisma error',
-          message: error.message,
-        },
-      })
-    else res.status(500).json({ error: 'Internal Server Error' })
-  }
-}
-
-export const getBounties = async (req: Request | any, res: Response) => {
-  try {
-    const programId = req.params.id
-
-    if (!programId) {
-      return res.status(400).json({ error: 'ProgramID is required' })
-    }
-
-    const bounties = await prisma.bounty.findMany({
-      where: {
-        programId: programId,
-      },
-    })
-    res.status(200).json({
-      bounties: bounties,
-    })
-  } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError)
-      res.status(500).json({
-        error: {
-          type: 'Prisma error',
-          message: error.message,
-        },
-      })
-    else res.status(500).json({ error: 'Internal Server Error' })
-  }
-}
-
-export const editBounty = async (req: Request | any, res: Response) => {
-  try {
-    const bountyId = req.params.id
-    const { title } = req.body
-
-    if (!bountyId) {
-      return res.status(400).json({ error: 'ProgramID is required' })
-    }
-
-    const bounty = await prisma.bounty.update({
-      where: {
-        id: bountyId,
-      },
-      data: {
-        title: title,
-      },
-    })
-    res.status(200).json({
-      bounty: bounty,
-    })
-  } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError)
-      res.status(500).json({
-        error: {
-          type: 'Prisma error',
-          message: error.message,
-        },
-      })
-    else res.status(500).json({ error: 'Internal Server Error' })
-  }
-}
-
-export const getBounty = async (req: Request | any, res: Response) => {
-  try {
-    const bountyId = req.params.id
-    if (!bountyId) {
-      return res.status(400).json({ error: 'BountyID is required' })
-    }
-
-    const bounty = await prisma.bounty.findUnique({
-      where: {
-        id: bountyId,
-      },
-    })
-    res.status(200).json({
-      bounty: bounty,
-    })
-  } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError)
-      res.status(500).json({
-        error: {
-          type: 'Prisma error',
-          message: error.message,
-        },
-      })
-    else res.status(500).json({ error: 'Internal Server Error' })
-  }
-}
-
-export const deleteBounty = async (req: Request | any, res: Response) => {
-  try {
-    const bountyId = req.params.id
-
-    if (!bountyId) res.status(400).json({ error: 'BountyId is required' })
-
-    const bounty = await prisma.bounty.delete({
-      where: {
-        id: bountyId,
-      },
-    })
-    res.status(200).json({ message: 'Bounty deleted successfully' })
-  } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError)
-      res.status(500).json({
-        error: {
-          type: 'Prisma error',
-          message: error.message,
-        },
-      })
-    else res.status(500).json({ error: 'Internal Server Error' })
   }
 }

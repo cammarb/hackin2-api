@@ -39,9 +39,7 @@ model User {
   role      Role
 
   RefreshToken  RefreshToken[]
-  Company       Company?
   CompanyMember CompanyMember?
-  Program       Program[]
 }
 
 model RefreshToken {
@@ -55,24 +53,28 @@ model RefreshToken {
 }
 
 model Company {
-  id      String @id @unique @default(uuid())
-  name    String @unique
-  ownerId String @unique
-  Owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  id   String @id @unique @default(uuid())
+  name String @unique
 
   CompanyMember CompanyMember[]
   Program       Program[]
 }
 
 model CompanyMember {
-  userId      String          @unique
-  User        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String      @unique
+  User        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   companyId   String
-  Company     Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  Company     Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
   companyRole CompanyRole
-  Programs    ProgramMember[]
 
   @@id([userId, companyId])
+}
+
+enum programStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETE
 }
 
 model Program {
@@ -81,40 +83,45 @@ model Program {
   companyId     String
   Company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   description   String
-  programStatus programStatus @default(NOT_STARTED)
+  programStatus programStatus @default(DRAFT)
   location      String
-  createdById   String
-  createdBy     User          @relation(fields: [createdById], references: [id])
 
-  // Rewards
-  lowReward      Decimal
-  mediumReward   Decimal
-  highReward     Decimal
-  criticalReward Decimal
-
-  Bounty        Bounty[]
-  ProgramMember ProgramMember[]
+  Scope          Scope[]
+  Bounty         Bounty[]
+  SeverityReward SeverityReward[]
 }
 
-enum programStatus {
-  NOT_STARTED
-  ACTIVE
-  PAUSED
-  COMPLETE
+model Scope {
+  id          String  @id @unique @default(uuid())
+  name        String
+  description String
+  programId   String
+  Program     Program @relation(fields: [programId], references: [id])
 }
 
-model ProgramMember {
-  programId       String
-  Program         Program       @relation(fields: [programId], references: [id])
-  companyMemberId String
-  CompanyMember   CompanyMember @relation(fields: [companyMemberId], references: [userId])
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
 
-  @@id([programId, companyMemberId])
+model SeverityReward {
+  id        String   @id @unique @default(uuid())
+  severity  Severity
+  min       Decimal
+  max       Decimal
+  programId String
+  Program   Program  @relation(fields: [programId], references: [id])
+  Bounty    Bounty[]
 }
 
 model Bounty {
-  id        String  @id @unique @default(uuid())
-  title     String
-  programId String
-  Program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  id               String         @id @unique @default(uuid())
+  title            String
+  description      String
+  severityRewardId String
+  SeverityReward   SeverityReward @relation(fields: [severityRewardId], references: [id])
+  programId        String
+  Program          Program        @relation(fields: [programId], references: [id], onDelete: Cascade)
 }

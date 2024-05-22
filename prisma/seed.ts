@@ -26,7 +26,6 @@ async function main() {
     update: {},
     create: {
       name: 'Hackin2',
-      ownerId: adminUser.id,
       CompanyMember: {
         create: {
           userId: adminUser.id,
