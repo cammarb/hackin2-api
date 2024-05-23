@@ -12,17 +12,10 @@ export const getCompany = async (req: Request | any, res: Response) => {
       },
       select: {
         name: true,
-        CompanyMember: {
-          where: {
-            companyRole: {
-              'equals': 'OWNER'
-            }
-          }
-        }
       },
     })
     res.status(200).json({
-      message: `Welcome to Company ${company?.name}. The owner is ${company?.CompanyMember}`,
+      message: `Welcome to Company ${company?.name}.`,
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })

@@ -1,6 +1,5 @@
 import express, { NextFunction, Request, Response, Router } from 'express'
 import {
-  addProgram,
   deleteMember,
   editCompany,
   editMember,
@@ -9,8 +8,9 @@ import {
   getMember,
   getCompanyPrograms,
   inviteCompanyMembers,
-  getProgram,
 } from '../../controllers/company.controller'
+
+import { addProgram, getProgram } from '../../controllers/program.controller'
 import { allowedRoles } from '../../middleware/roles.middleware'
 import companyRouter from '../../routes/company.routes'
 
