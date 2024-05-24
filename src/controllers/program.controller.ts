@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import prisma from '../utils/client'
+import { Severity, programStatus } from '@prisma/client'
 
 export const addProgram = async (req: Request | any, res: Response) => {
   try {
@@ -42,7 +43,7 @@ export const getProgram = async (req: Request | any, res: Response) => {
 export const updateProgram = async (req: Request, res: Response) => {
   try {
     const programId = req.params.id
-    const { name, description, location } = req.body
+    const { name, description, location, programStatus } = req.body
 
     if (!programId) res.status(400)
 
@@ -54,9 +55,11 @@ export const updateProgram = async (req: Request, res: Response) => {
         name: name,
         description: description,
         location: location,
+        programStatus: programStatus,
       },
     })
     if (!program) res.status(404).json({ error: 'Program not found' })
+    res.status(204).json({ message: 'Program updated.' })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
   }
@@ -148,3 +151,86 @@ export const deleteScope = async (req: Request | any, res: Response) => {
     res.status(500).json({ error: 'Internal Server Error' })
   }
 }
+
+export const addSeverityReward = async (req: Request | any, res: Response) => {
+  try {
+    const programId = req.params.id
+    const { severity, min, max } = req.body
+    if (!programId) res.status(400).json({ error: 'Program required' })
+
+    const severityReward = await prisma.severityReward.create({
+      data: {
+        severity: severity,
+        min: min,
+        max: max,
+        programId: programId,
+      },
+    })
+    res.status(200).json({ message: 'Severity Reward created successfully' })
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+}
+
+export const updateSeverityReward = async (
+  req: Request | any,
+  res: Response,
+) => {
+  try {
+    const severityId = req.params.id
+    const { severity, min, max } = req.body
+    if (!severityId) res.status(400).json({ error: 'Scope required' })
+
+    const scope = await prisma.severityReward.update({
+      where: {
+        id: severityId,
+      },
+      data: {
+        severity: severity,
+        min: min,
+        max: max,
+      },
+    })
+    res.status(200).json({ message: 'Severity Reward updated successfully' })
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+}
+
+export const getProgramSeverityRewards = async (
+  req: Request | any,
+  res: Response,
+) => {
+  try {
+    const programId = req.params.id
+    if (!programId) res.status(400).json({ error: 'Program required' })
+
+    const severityRewards = await prisma.severityReward.findMany({
+      where: {
+        programId: programId,
+      },
+    })
+    res.status(200).json({ severityRewards: severityRewards })
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+}
+
+export const deleteSeverityReward = async (
+  req: Request | any,
+  res: Response,
+) => {
+  try {
+    const severityId = req.params.id
+    if (!severityId) res.status(400)
+    const severityReward = await prisma.scope.delete({
+      where: {
+        id: severityId,
+      },
+    })
+    res.status(204).json({ message: 'Severity Reward deleted.' })
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+}
+
