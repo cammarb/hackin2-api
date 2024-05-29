@@ -114,6 +114,8 @@ model SeverityReward {
   programId String
   Program   Program  @relation(fields: [programId], references: [id])
   Bounty    Bounty[]
+
+  @@unique([programId, severity])
 }
 
 model Bounty {

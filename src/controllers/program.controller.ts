@@ -156,7 +156,8 @@ export const addSeverityReward = async (req: Request | any, res: Response) => {
   try {
     const programId = req.params.id
     const { severity, min, max } = req.body
-    if (!programId) res.status(400).json({ error: 'Program required' })
+    if (!programId)
+      res.status(400).json({ error: 'Program and other fields required' })
 
     const severityReward = await prisma.severityReward.create({
       data: {
@@ -233,4 +234,3 @@ export const deleteSeverityReward = async (
     res.status(500).json({ error: 'Internal Server Error' })
   }
 }
-
