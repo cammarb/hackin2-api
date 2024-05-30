@@ -204,7 +204,7 @@ export const updateSeverityReward = async (
   try {
     const severityId = req.params.id
     const { min, max } = req.body
-    if (!severityId) res.status(400).json({ error: 'Scope required' })
+    if (!severityId) res.status(400).json({ error: 'Severity Reward required' })
 
     const scope = await prisma.severityReward.update({
       where: {
