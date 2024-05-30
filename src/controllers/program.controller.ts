@@ -14,6 +14,30 @@ export const addProgram = async (req: Request | any, res: Response) => {
         companyId: companyId,
         description: description,
         location: location,
+        SeverityReward: {
+          create: [
+            {
+              severity: Severity.LOW,
+              min: 50,
+              max: 200,
+            },
+            {
+              severity: Severity.MEDIUM,
+              min: 250,
+              max: 1000,
+            },
+            {
+              severity: Severity.HIGH,
+              min: 1500,
+              max: 4000,
+            },
+            {
+              severity: Severity.CRITICAL,
+              min: 5000,
+              max: 10000,
+            },
+          ],
+        },
       },
     })
     res.status(200).json({ message: 'Program created successfully' })
@@ -179,7 +203,7 @@ export const updateSeverityReward = async (
 ) => {
   try {
     const severityId = req.params.id
-    const { severity, min, max } = req.body
+    const { min, max } = req.body
     if (!severityId) res.status(400).json({ error: 'Scope required' })
 
     const scope = await prisma.severityReward.update({
@@ -187,7 +211,6 @@ export const updateSeverityReward = async (
         id: severityId,
       },
       data: {
-        severity: severity,
         min: min,
         max: max,
       },
