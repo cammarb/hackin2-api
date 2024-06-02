@@ -2,8 +2,9 @@ import { Router } from 'express'
 import authRouter from './auth.routes'
 import { verifyJWT } from '../middleware/auth.middleware'
 import userRouter from './user.routes'
-import { checkEnterprise } from '../middleware/roles.middleware'
+import { checkEnterprise, checkPentester } from '../middleware/roles.middleware'
 import companyRouter from './company.routes'
+import pentesterRoutes from './pentester.routes'
 
 export const apiRoutes: Router = Router()
 
@@ -13,3 +14,4 @@ apiRoutes.get('/', (req, res) => {
 apiRoutes.use('/auth', authRouter)
 apiRoutes.use('/user', verifyJWT, userRouter)
 apiRoutes.use('/company', verifyJWT, checkEnterprise, companyRouter)
+apiRoutes.use('/pentester', verifyJWT, checkPentester, pentesterRoutes)

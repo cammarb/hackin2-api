@@ -4,7 +4,7 @@ import { verifyJWT } from '../middleware/auth.middleware'
 
 const userRouter: Router = Router()
 
-userRouter.get('/account', verifyJWT, getUser)
+userRouter.get('/account', getUser)
 userRouter.put('/account/edit', editUser)
 userRouter.delete('/account/delete', deleteUser)
 

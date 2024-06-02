@@ -46,6 +46,31 @@ export const addProgram = async (req: Request | any, res: Response) => {
   }
 }
 
+export const getAllPrograms = async (req: Request | any, res: Response) => {
+  try {
+    const programs = await prisma.program.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        programStatus: true,
+        location: true,
+        Company: {
+          select: {
+            name: true
+          }
+        }
+      }
+    })
+    if (!programs) res.status(404).json({ message: 'No Programs found.' })
+    res.status(200).json({
+      programs: programs,
+    })
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+}
+
 export const getProgram = async (req: Request | any, res: Response) => {
   try {
     const programId = req.params.id
