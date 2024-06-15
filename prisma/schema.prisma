@@ -53,8 +53,9 @@ model RefreshToken {
 }
 
 model Company {
-  id   String @id @unique @default(uuid())
-  name String @unique
+  id      String  @id @unique @default(uuid())
+  name    String  @unique
+  website String?
 
   CompanyMember CompanyMember[]
   Program       Program[]
