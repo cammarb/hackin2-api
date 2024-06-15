@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { Company, CompanyMember, Prisma } from '@prisma/client'
 import prisma from '../utils/client'
 import hashToken from '../utils/hash'
+import { redisClient } from '../utils/redis'
 
 export const getCompany = async (req: Request | any, res: Response) => {
   try {
@@ -176,14 +177,22 @@ export const getCompanyPrograms = async (req: Request | any, res: Response) => {
   try {
     const companyId = req.companyId as string
 
-    const programs = await prisma.program.findMany({
-      where: {
-        companyId: companyId,
-      },
-    })
-    res.status(200).json({
-      programs,
-    })
+    const programs = await redisClient.get('programs')
+    if (programs != null) {
+      console.log('REDIS')
+      return res.json({ programs: JSON.parse(programs) })
+    } else {
+      const programs = await prisma.program.findMany({
+        where: {
+          companyId: companyId,
+        },
+      })
+      redisClient.setEx('programs', 300, JSON.stringify(programs))
+      console.log('POSTGRES')
+      return res.status(200).json({
+        programs,
+      })
+    }
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
   }

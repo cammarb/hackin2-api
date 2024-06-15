@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
 import routes from '../routes'
 import morgan from 'morgan'
+import { redisSession } from './redis'
 
 const createServer = () => {
   const app: Application = express()
@@ -16,6 +17,7 @@ const createServer = () => {
     }),
   )
   app.use(helmet())
+  app.use(redisSession)
   app.use(cookieParser())
   app.use(express.json())
   app.use(morgan('dev'))
