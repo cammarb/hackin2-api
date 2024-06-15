@@ -185,9 +185,9 @@ const handleLogOut = async (req: Request, res: Response) => {
         revoked: true,
       },
     })
-    res.sendStatus(204).json({ message: 'Log Out successful.' })
+    return res.status(200).json({ message: 'Log Out successful.' })
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' })
+    return res.status(500).json({ error: 'Internal Server Error' })
   }
 }
 
