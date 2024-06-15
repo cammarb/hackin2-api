@@ -25,14 +25,15 @@ export const getCompany = async (req: Request | any, res: Response) => {
 export const editCompany = async (req: Request | any, res: Response) => {
   try {
     const companyId = req.companyId
-    const { newName } = req.body
+    const { name, website } = req.body
 
     const company: Company | null = await prisma.company.update({
       where: {
         id: companyId,
       },
       data: {
-        name: newName,
+        name: name,
+        website: website,
       },
     })
 
