@@ -57,10 +57,10 @@ export const getAllPrograms = async (req: Request | any, res: Response) => {
         location: true,
         Company: {
           select: {
-            name: true
-          }
-        }
-      }
+            name: true,
+          },
+        },
+      },
     })
     if (!programs) res.status(404).json({ message: 'No Programs found.' })
     res.status(200).json({
@@ -78,6 +78,21 @@ export const getProgram = async (req: Request | any, res: Response) => {
     const program = await prisma.program.findUnique({
       where: {
         id: programId,
+      },
+      include: {
+        Company: {
+          select: {
+            name: true,
+            website: true,
+          },
+        },
+        SeverityReward: {
+          select: {
+            min: true,
+            max: true,
+            severity: true,
+          },
+        },
       },
     })
     if (!program) res.status(404).json({ message: 'Program not found' })
