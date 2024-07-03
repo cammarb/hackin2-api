@@ -8,6 +8,7 @@ import fs from 'fs'
 import * as EmailValidator from 'email-validator'
 import hashToken from '../utils/hash'
 import { getEnvs } from '../utils/envs'
+import { redisClient } from '../utils/redis'
 
 export const handleRegistration = async (req: Request, res: Response) => {
   const { username, email, firstName, lastName, password, role } = req.body
@@ -42,7 +43,7 @@ export const handleRegistration = async (req: Request, res: Response) => {
   }
 }
 
-const handleLogin = async (req: Request, res: Response) => {
+const handleLogin = async (req: Request | any, res: Response) => {
   try {
     const { username, password } = req.body
 
@@ -96,6 +97,15 @@ const handleLogin = async (req: Request, res: Response) => {
       maxAge: 24 * 60 * 60 * 1000,
     })
 
+    const sessionData = {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+    }
+
+    req.session.logged_in = true
+    req.session.user = sessionData
+
     return res.status(200).json({
       user: user.username,
       role: user.role,
@@ -103,7 +113,7 @@ const handleLogin = async (req: Request, res: Response) => {
     })
   } catch (error) {
     return res.status(500).json({
-      error: 'Internal Server Error',
+      error: error,
       message: 'An unexpected error occurred',
     })
   }
@@ -185,10 +195,38 @@ const handleLogOut = async (req: Request, res: Response) => {
         revoked: true,
       },
     })
-    return res.status(200).json({ message: 'Log Out successful.' })
+
+    req.session.destroy((err: Error) => {
+      if (err) {
+        return res.status(500).json({ message: 'Logout failed' })
+      }
+      res.clearCookie('connect.sid')
+      return res.status(200).json({ message: 'Logged out' })
+    })
   } catch (error) {
     return res.status(500).json({ error: 'Internal Server Error' })
   }
 }
 
-export { handleLogin, handleRefreshToken, handleLogOut }
+const handleSession = async (req: Request, res: Response) => {
+  const session = req.session
+  if (!session) return res.sendStatus(401)
+  try {
+    const sessionData: string | null = await redisClient.get(
+      'hackin2-api:' + session.id,
+    )
+    if (!sessionData) res.sendStatus(403)
+    else {
+      const parsedSession: UserSession = JSON.parse(sessionData)
+      return res.status(200).json({
+        user: parsedSession.user.username,
+        role: parsedSession.user.role,
+      })
+    }
+  } catch (error) {
+    console.error('Error retrieving session data from Redis:', error)
+    return res.status(500).json({ message: 'Internal server error' })
+  }
+}
+
+export { handleLogin, handleRefreshToken, handleLogOut, handleSession }
