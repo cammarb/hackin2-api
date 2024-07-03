@@ -8,8 +8,10 @@ const checkPentester = async (
   next: NextFunction,
 ) => {
   try {
-    const username = req.username
-    const role = req.role
+    const userSession: UserSession = req.session
+
+    const username = userSession.user.username
+    const role = userSession.user.role
 
     if (!username || !role) {
       return res.status(400).json({ error: 'payload not provided' })
@@ -42,11 +44,13 @@ const checkEnterprise = async (
   next: NextFunction,
 ) => {
   try {
-    const username = req.username
-    const role = req.role
+    const userSession: UserSession = req.session
+
+    const username = userSession.user.username
+    const role = userSession.user.role
 
     if (!username || !role) {
-      return res.status(400).json({ error: 'payload not provided' })
+      return res.status(400).json({ error: 'session not provided' })
     }
 
     const user = await prisma.user.findUnique({
@@ -81,33 +85,33 @@ const checkEnterprise = async (
 
 const allowedRoles =
   (roles: string[]) =>
-    async (req: Request | any, res: Response, next: NextFunction) => {
-      try {
-        const userId = req.userId
-        const companyId = req.companyId
-        const companyRole = req.companyRole
+  async (req: Request | any, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.userId
+      const companyId = req.companyId
+      const companyRole = req.companyRole
 
-        const companyMember = await prisma.companyMember.findUnique({
-          where: {
-            userId: userId,
-            companyId: companyId,
-            companyRole: companyRole as CompanyRole,
-          },
-        })
+      const companyMember = await prisma.companyMember.findUnique({
+        where: {
+          userId: userId,
+          companyId: companyId,
+          companyRole: companyRole as CompanyRole,
+        },
+      })
 
-        if (!companyMember) {
-          return res.status(400).json({ error: 'Error getting authorization.' })
-        }
-
-        if (roles.includes(companyMember.companyRole)) {
-          next()
-        } else {
-          return res.status(403).json({ error: 'Unauthorized' })
-        }
-      } catch (error) {
-        console.error('Error in role middleware:', error)
-        return res.status(500).json({ error: 'Internal server error' })
+      if (!companyMember) {
+        return res.status(400).json({ error: 'Error getting authorization.' })
       }
+
+      if (roles.includes(companyMember.companyRole)) {
+        next()
+      } else {
+        return res.status(403).json({ error: 'Unauthorized' })
+      }
+    } catch (error) {
+      console.error('Error in role middleware:', error)
+      return res.status(500).json({ error: 'Internal server error' })
     }
+  }
 
 export { checkEnterprise, allowedRoles, checkPentester }
