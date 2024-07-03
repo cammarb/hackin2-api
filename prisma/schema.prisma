@@ -40,6 +40,7 @@ model User {
 
   RefreshToken  RefreshToken[]
   CompanyMember CompanyMember?
+  Submissions   Submissions[]
 }
 
 model RefreshToken {
@@ -59,6 +60,8 @@ model Company {
 
   CompanyMember CompanyMember[]
   Program       Program[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 }
 
 model CompanyMember {
@@ -67,11 +70,13 @@ model CompanyMember {
   companyId   String
   Company     Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
   companyRole CompanyRole
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   @@id([userId, companyId])
 }
 
-enum programStatus {
+enum ProgramStatus {
   DRAFT
   ACTIVE
   PAUSED
@@ -84,12 +89,38 @@ model Program {
   companyId     String
   Company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   description   String
-  programStatus programStatus @default(DRAFT)
+  programStatus ProgramStatus @default(DRAFT)
   location      String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   Scope          Scope[]
   Bounty         Bounty[]
   SeverityReward SeverityReward[]
+  Submissions    Submissions[]
+}
+
+model Submissions {
+  programId        String
+  Program          Program          @relation(fields: [programId], references: [id])
+  userId           String
+  User             User             @relation(fields: [userId], references: [id])
+  findingsSummary  String
+  Severity         SeverityReward   @relation(fields: [severityRewardId], references: [id])
+  severityRewardId String
+  evidence         String[]
+  status           SubmissionStatus @default(PENDING)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@unique([programId, userId])
+}
+
+enum SubmissionStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  REJECTED
 }
 
 model Scope {
@@ -108,13 +139,14 @@ enum Severity {
 }
 
 model SeverityReward {
-  id        String   @id @unique @default(uuid())
-  severity  Severity
-  min       Decimal
-  max       Decimal
-  programId String
-  Program   Program  @relation(fields: [programId], references: [id])
-  Bounty    Bounty[]
+  id          String        @id @unique @default(uuid())
+  severity    Severity
+  min         Decimal
+  max         Decimal
+  programId   String
+  Program     Program       @relation(fields: [programId], references: [id])
+  Bounty      Bounty[]
+  Submissions Submissions[]
 
   @@unique([programId, severity])
 }
