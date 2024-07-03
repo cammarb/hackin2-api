@@ -13,7 +13,10 @@
 	// This can be used to network with other containers or with the host.
 	"forwardPorts": [
 		3000,
-		5432
+		5432,
+		8080,
+		6379,
+		5540
 	],
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "sudo npm i && sudo chmod +x generate_keys.sh && sudo ./generate_keys.sh && sudo cp .env.example -r .env && sudo npx prisma db push && sudo npx prisma db seed",
