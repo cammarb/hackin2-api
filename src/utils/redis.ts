@@ -1,4 +1,5 @@
 import RedisStore from 'connect-redis'
+import { randomUUID } from 'crypto'
 import session from 'express-session'
 import { createClient } from 'redis'
 
@@ -19,7 +20,7 @@ redisClient.connect().catch(console.error)
 
 export const redisStore = new RedisStore({
   client: redisClient,
-  prefix: 'hackin2-api',
+  prefix: 'hackin2-api:',
 })
 
 export const redisSession = session({
@@ -28,6 +29,10 @@ export const redisSession = session({
   saveUninitialized: false,
   secret: 'redis-secret',
   cookie: {
-    secure: true,
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: false,
+    maxAge: 24 * 60 * 60 * 1000,
   },
+  genid: () => randomUUID(),
 })
