@@ -176,24 +176,24 @@ export const deleteMember = async (req: Request | any, res: Response) => {
 export const getCompanyPrograms = async (req: Request | any, res: Response) => {
   try {
     const companyId = req.companyId as string
+    const redisKey = `hackin2-api:programs:${companyId}`
 
-    const programs = await redisClient.get('programs')
-    if (programs != null) {
-      console.log('REDIS')
-      return res.json({ programs: JSON.parse(programs) })
-    } else {
+    const cachedPrograms = await redisClient.get(redisKey)
+    if (cachedPrograms == null) {
       const programs = await prisma.program.findMany({
         where: {
           companyId: companyId,
         },
       })
-      redisClient.setEx('programs', 300, JSON.stringify(programs))
-      console.log('POSTGRES')
+      await redisClient.setEx(redisKey, 300, JSON.stringify(programs))
       return res.status(200).json({
         programs,
       })
     }
+
+    return res.json({ programs: JSON.parse(cachedPrograms) })
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' })
+    console.error(error)
+    return res.status(500).json({ error: 'Internal Server Error' })
   }
 }
