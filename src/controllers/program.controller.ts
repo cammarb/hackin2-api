@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import prisma from '../utils/client'
-import { Severity, programStatus } from '@prisma/client'
+import { Severity, ProgramStatus } from '@prisma/client'
 import { redisClient } from '../utils/redis'
 
 export const addProgram = async (req: Request | any, res: Response) => {
@@ -50,6 +50,9 @@ export const addProgram = async (req: Request | any, res: Response) => {
 export const getAllPrograms = async (req: Request | any, res: Response) => {
   try {
     const programs = await prisma.program.findMany({
+      where: {
+        programStatus: 'ACTIVE',
+      },
       select: {
         id: true,
         name: true,
@@ -61,6 +64,8 @@ export const getAllPrograms = async (req: Request | any, res: Response) => {
             name: true,
           },
         },
+        createdAt: true,
+        updatedAt: true,
       },
     })
     if (!programs) res.status(404).json({ message: 'No Programs found.' })
@@ -105,12 +110,45 @@ export const getProgram = async (req: Request | any, res: Response) => {
   }
 }
 
+export const getActiveProgram = async (req: Request | any, res: Response) => {
+  try {
+    const programId = req.params.id
+
+    const program = await prisma.program.findUnique({
+      where: {
+        id: programId,
+      },
+      include: {
+        Company: {
+          select: {
+            name: true,
+            website: true,
+          },
+        },
+        SeverityReward: {
+          select: {
+            min: true,
+            max: true,
+            severity: true,
+          },
+        },
+      },
+    })
+    if (!program) res.status(404).json({ message: 'Program not found' })
+    res.status(200).json({
+      program: program,
+    })
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' })
+  }
+}
+
 export const updateProgram = async (req: Request, res: Response) => {
   try {
     const programId = req.params.id
     const { name, description, location, programStatus } = req.body
 
-    if (!programId) res.status(400)
+    if (!programId) return res.status(400)
 
     const program = await prisma.program.update({
       where: {
@@ -123,8 +161,9 @@ export const updateProgram = async (req: Request, res: Response) => {
         programStatus: programStatus,
       },
     })
-    if (!program) res.status(404).json({ error: 'Program not found' })
-    res.status(204).json({ message: 'Program updated.' })
+    if (!program) return res.status(404).json({ error: 'Program not found' })
+
+    return res.status(200).json({ message: 'Program updated.' })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
   }
@@ -262,22 +301,44 @@ export const updateSeverityReward = async (
   }
 }
 
+export const getActiveProgramSeverityRewards = async (
+  req: Request | any,
+  res: Response,
+) => {
+  try {
+    const programId = req.params.id
+    if (!programId) return res.status(400).json({ error: 'Program required' })
+
+    const severityRewards = await prisma.severityReward.findMany({
+      where: {
+        programId: programId,
+        Program: {
+          programStatus: 'ACTIVE',
+        },
+      },
+    })
+    return res.status(200).json({ severityRewards: severityRewards })
+  } catch (error) {
+    return res.status(500).json({ error: 'Internal Server Error' })
+  }
+}
+
 export const getProgramSeverityRewards = async (
   req: Request | any,
   res: Response,
 ) => {
   try {
     const programId = req.params.id
-    if (!programId) res.status(400).json({ error: 'Program required' })
+    if (!programId) return res.status(400).json({ error: 'Program required' })
 
     const severityRewards = await prisma.severityReward.findMany({
       where: {
         programId: programId,
       },
     })
-    res.status(200).json({ severityRewards: severityRewards })
+    return res.status(200).json({ severityRewards: severityRewards })
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' })
+    return res.status(500).json({ error: 'Internal Server Error' })
   }
 }
 
