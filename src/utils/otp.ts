@@ -25,6 +25,4 @@ export const sendOTPEmail = async (email: string, otp: string) => {
     subject: 'Hackin2 - Verification Code',
     text: `Your OTP code is: ${otp}`,
   })
-
-  console.log('message sent')
 }
