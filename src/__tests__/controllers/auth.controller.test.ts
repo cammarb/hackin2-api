@@ -10,6 +10,9 @@ import { generateTokens } from '../../utils/auth'
 import { getEnvs } from '../../utils/envs'
 import bcrypt from 'bcrypt'
 import jwt, { JwtPayload } from 'jsonwebtoken'
+import redis from 'redis-mock'
+import { createTransport } from 'nodemailer'
+import { sendOTPEmail } from '../../utils/otp'
 
 jest.mock('../../utils/auth', () => ({
   generateTokens: jest.fn().mockResolvedValue({
@@ -30,6 +33,18 @@ jest.mock('../../utils/envs', () => ({
 
 jest.mock('jsonwebtoken', () => ({
   verify: jest.fn().mockReturnValue({ username: 'username', role: 'role' }),
+}))
+
+jest.mock('../../utils/otp')
+jest.mock('nodemailer', () => ({
+  createTransport: jest.fn().mockResolvedValue({
+    sendMail: jest.fn().mockResolvedValue({
+      from: 'test@email.com',
+      to: 'test@email.com',
+      subject: 'Hackin2 - Verification Code',
+      text: `Your OTP code is: `,
+    }),
+  }),
 }))
 
 describe('handleRegistration function', () => {
@@ -102,6 +117,7 @@ describe('handleRegistration function', () => {
   it('should create a new user', async () => {
     prismaMock.user.findFirst.mockResolvedValueOnce(null)
     prismaMock.user.create.mockResolvedValueOnce(req.body)
+    const redisClientMock = redis.createClient()
 
     await handleRegistration(req as Request, res as Response)
 

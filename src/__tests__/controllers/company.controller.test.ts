@@ -13,11 +13,15 @@ const mockCompanyMembers = [
     userId: '1',
     companyId: 'testCompanyId',
     companyRole: 'OWNER',
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
     userId: '2',
     companyId: 'testCompanyId',
     companyRole: 'MEMBER',
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
 ]
 
@@ -26,6 +30,9 @@ const mockCompany = {
   name: 'Test Company',
   ownerId: 'testOwnerId',
   CompanyMember: mockCompanyMembers,
+  website: 'https://testCompany.com',
+  createdAt: new Date(),
+  updatedAt: new Date(),
 }
 
 describe('getCompany function', () => {
@@ -196,6 +203,8 @@ describe('inviteCompanyMembers', () => {
       companyId: req.companyId,
       companyRole: 'MEMBER',
       userId: mockUser.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     })
 
     await inviteCompanyMembers(req as Request, res as Response)

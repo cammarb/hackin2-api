@@ -9,6 +9,7 @@ import * as EmailValidator from 'email-validator'
 import hashToken from '../utils/hash'
 import { getEnvs } from '../utils/envs'
 import { redisClient } from '../utils/redis'
+import { generateOTP, sendOTPEmail } from '../utils/otp'
 
 export const handleRegistration = async (req: Request, res: Response) => {
   const { username, email, firstName, lastName, password, role } = req.body
@@ -26,7 +27,9 @@ export const handleRegistration = async (req: Request, res: Response) => {
     })
     if (existingUser)
       return res.status(409).json({ message: 'User already exists' })
+
     const hashedPassword = await hashToken(password)
+    const otp = generateOTP()
     const user: User = await prisma.user.create({
       data: {
         firstName: firstName,
@@ -37,6 +40,8 @@ export const handleRegistration = async (req: Request, res: Response) => {
         role: role,
       },
     })
+    await sendOTPEmail(email, otp)
+    await redisClient.set(email, otp, { EX: 300 })
     res.status(201).json({ success: 'User created successfully' })
   } catch (err: Error | any) {
     res.status(500).json({ message: err?.message })
@@ -229,4 +234,40 @@ const handleSession = async (req: Request, res: Response) => {
   }
 }
 
-export { handleLogin, handleRefreshToken, handleLogOut, handleSession }
+const validateOTP = async (req: Request, res: Response) => {
+  const { email, otp } = req.body
+
+  if (!email || !otp) {
+    return res.status(400).json({ message: 'Email and OTP are required' })
+  }
+
+  try {
+    const cachedOTP = await redisClient.get(email)
+
+    if (cachedOTP !== otp || cachedOTP == null) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' })
+    }
+
+    await redisClient.del(email)
+    const user: User = await prisma.user.update({
+      where: {
+        email: email,
+      },
+      data: {
+        confirmed: true,
+      },
+    })
+
+    res.status(200).json({ success: 'OTP validated successfully' })
+  } catch (err) {
+    res.status(500).json({ message: 'Internal Sever Error' })
+  }
+}
+
+export {
+  handleLogin,
+  handleRefreshToken,
+  handleLogOut,
+  handleSession,
+  validateOTP,
+}
