@@ -8,5 +8,5 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
   collectCoverageFrom: ['src/**/*.ts'],
-  setupFilesAfterEnv: ['<rootDir>/singleton.ts'],
+  setupFilesAfterEnv: ['<rootDir>/singleton.ts', '<rootDir>/redisMock.ts'],
 };

@@ -60,6 +60,8 @@ describe('CheckEnterprise middleware function', () => {
       userId: '1',
       companyId: '1',
       companyRole: CompanyRole.ADMIN,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     }
     prismaMock.user.findUnique.mockResolvedValue(user)
     prismaMock.companyMember.findUnique.mockResolvedValue(companyMember)
@@ -114,6 +116,8 @@ describe('allowedRoles middleware function', () => {
       userId: '1',
       companyId: '1',
       companyRole: CompanyRole.ADMIN,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     }
 
     prismaMock.companyMember.findUnique.mockResolvedValue(companyMember)
@@ -128,6 +132,8 @@ describe('allowedRoles middleware function', () => {
       userId: '1',
       companyId: '1',
       companyRole: CompanyRole.MEMBER,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     }
 
     prismaMock.companyMember.findUnique.mockResolvedValue(companyMember)

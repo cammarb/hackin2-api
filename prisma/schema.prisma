@@ -39,9 +39,8 @@ model User {
   role      Role
 
   RefreshToken  RefreshToken[]
-  Company       Company?
   CompanyMember CompanyMember?
-  Program       Program[]
+  Submissions   Submissions[]
 }
 
 model RefreshToken {
@@ -55,24 +54,33 @@ model RefreshToken {
 }
 
 model Company {
-  id      String @id @unique @default(uuid())
-  name    String @unique
-  ownerId String @unique
-  Owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  id      String  @id @unique @default(uuid())
+  name    String  @unique
+  website String?
 
   CompanyMember CompanyMember[]
   Program       Program[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 }
 
 model CompanyMember {
-  userId      String          @unique
-  User        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String      @unique
+  User        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   companyId   String
-  Company     Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  Company     Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
   companyRole CompanyRole
-  Programs    ProgramMember[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   @@id([userId, companyId])
+}
+
+enum ProgramStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETE
 }
 
 model Program {
@@ -81,33 +89,74 @@ model Program {
   companyId     String
   Company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   description   String
-  programStatus programStatus @default(NOT_STARTED)
+  programStatus ProgramStatus @default(DRAFT)
   location      String
-  createdById   String
-  createdBy     User          @relation(fields: [createdById], references: [id])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
-  Bounty        Bounty[]
-  ProgramMember ProgramMember[]
+  Scope          Scope[]
+  Bounty         Bounty[]
+  SeverityReward SeverityReward[]
+  Submissions    Submissions[]
 }
 
-enum programStatus {
-  NOT_STARTED
-  IN_PROGRESS
-  FINISHED
+model Submissions {
+  programId        String
+  Program          Program          @relation(fields: [programId], references: [id])
+  userId           String
+  User             User             @relation(fields: [userId], references: [id])
+  findingsSummary  String
+  Severity         SeverityReward   @relation(fields: [severityRewardId], references: [id])
+  severityRewardId String
+  evidence         String[]
+  status           SubmissionStatus @default(PENDING)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@unique([programId, userId])
 }
 
-model ProgramMember {
-  programId       String
-  Program         Program       @relation(fields: [programId], references: [id])
-  companyMemberId String
-  CompanyMember   CompanyMember @relation(fields: [companyMemberId], references: [userId])
+enum SubmissionStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  REJECTED
+}
 
-  @@id([programId, companyMemberId])
+model Scope {
+  id          String  @id @unique @default(uuid())
+  name        String
+  description String
+  programId   String
+  Program     Program @relation(fields: [programId], references: [id])
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model SeverityReward {
+  id          String        @id @unique @default(uuid())
+  severity    Severity
+  min         Decimal
+  max         Decimal
+  programId   String
+  Program     Program       @relation(fields: [programId], references: [id])
+  Bounty      Bounty[]
+  Submissions Submissions[]
+
+  @@unique([programId, severity])
 }
 
 model Bounty {
-  id        String  @id @unique @default(uuid())
-  title     String
-  programId String
-  Program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  id               String         @id @unique @default(uuid())
+  title            String
+  description      String
+  severityRewardId String
+  SeverityReward   SeverityReward @relation(fields: [severityRewardId], references: [id])
+  programId        String
+  Program          Program        @relation(fields: [programId], references: [id], onDelete: Cascade)
 }

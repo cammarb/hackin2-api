@@ -4,6 +4,7 @@ import {
   handleLogin,
   handleRefreshToken,
   handleRegistration,
+  validateOTP,
 } from '../../controllers/auth.controller'
 import authRouter from '../../routes/auth.routes'
 
@@ -46,5 +47,8 @@ describe('Auth routes', () => {
   })
   test('Handle Refresh Token route', async () => {
     expect(router.get).toHaveBeenCalledWith('/refresh', handleRefreshToken)
+  })
+  test('Validate OTP', async () => {
+    expect(router.get).toHaveBeenCalledWith('/validateOTP', validateOTP)
   })
 })
