@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
 import prisma from '../utils/client'
 import { Severity, ProgramStatus } from '@prisma/client'
-import { redisClient } from '../utils/redis'
 
 export const addProgram = async (req: Request | any, res: Response) => {
   try {
