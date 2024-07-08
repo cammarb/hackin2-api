@@ -4,10 +4,11 @@ import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
 import routes from '../routes'
 import morgan from 'morgan'
-import { redisSession } from './redis'
+import { connectRedis, redisSession } from './redis'
 
 const createServer = () => {
   const app: Application = express()
+  connectRedis()
   app.disable('x-powered-by')
   app.use(
     cors({
