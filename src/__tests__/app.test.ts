@@ -13,9 +13,9 @@ describe('Server setup', () => {
     any
   >
 
-  beforeAll(() => {
+  beforeAll(async () => {
     consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
-    app = createServer()
+    app = await createServer()
   })
 
   afterAll(() => {
