@@ -1,12 +1,22 @@
 import RedisStore from 'connect-redis'
 import { randomUUID } from 'crypto'
-import session from 'express-session'
+import session, { Session } from 'express-session'
 import { createClient } from 'redis'
 
 const redisClient = createClient()
-redisClient.on('error', (err) => console.log('Redis Client Error', err))
+// redisClient.on('error', (err) => console.log('Redis Client Error', err))
+// redisClient.on('ready', () => {
+//   console.log('Redis Client Connected')
+// })
 
-const connectRedis = async () => await redisClient.connect()
+const connectRedis = async () => {
+  try {
+    await redisClient.connect()
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
+}
 
 const redisStore = new RedisStore({
   client: redisClient,

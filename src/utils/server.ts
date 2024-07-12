@@ -4,11 +4,13 @@ import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
 import routes from '../routes'
 import morgan from 'morgan'
-import { connectRedis, redisSession } from './redis'
+import { connectRedis, redisSession, redisStore } from './redis'
+import session from 'express-session'
+import { randomUUID } from 'crypto'
 
-const createServer = () => {
+const createServer = async () => {
   const app: Application = express()
-  connectRedis()
+  await connectRedis()
   app.disable('x-powered-by')
   app.use(
     cors({
@@ -18,7 +20,21 @@ const createServer = () => {
     }),
   )
   app.use(helmet())
-  app.use(redisSession)
+  app.use(
+    session({
+      store: redisStore,
+      resave: false,
+      saveUninitialized: false,
+      secret: 'redis-secret',
+      cookie: {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: false,
+        maxAge: 24 * 60 * 60 * 1000,
+      },
+      genid: () => randomUUID(),
+    }),
+  )
   app.use(cookieParser())
   app.use(express.json())
   app.use(morgan('dev'))
