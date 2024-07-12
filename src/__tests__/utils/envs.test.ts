@@ -1,4 +1,5 @@
 import { getEnvs } from '../../utils/envs'
+import { promises } from 'fs'
 
 jest.mock('fs', () => ({
   promises: {
@@ -13,6 +14,9 @@ describe('getEnvs', () => {
     process.env.PUBKEY = '/path/to/public/key'
     process.env.ISSUER = 'example.com'
     process.env.ORIGIN = 'http://example.com'
+    process.env.OTP_SERVICE = 'test email'
+    process.env.OTP_USER = 'user@test.com'
+    process.env.OTP_PASS = 'test password'
   })
 
   afterEach(() => {
@@ -21,19 +25,29 @@ describe('getEnvs', () => {
     delete process.env.PUBKEY
     delete process.env.ISSUER
     delete process.env.ORIGIN
+    delete process.env.OTP_SERVICE
+    delete process.env.OTP_USER
+    delete process.env.OTP_PASS
     jest.clearAllMocks()
   })
 
   test('getEnvs returns the correct environment variables', async () => {
-    const fs = require('fs')
-    fs.promises.readFile.mockResolvedValue('dummy content')
+    const readFileMock = promises.readFile as jest.Mock
+    readFileMock.mockImplementation((path) => {
+      if (path === process.env.PRIVKEY) {
+        return Promise.resolve('dummy private key content')
+      } else if (path === process.env.PUBKEY) {
+        return Promise.resolve('dummy public key content')
+      }
+      return Promise.reject(new Error('File not found'))
+    })
 
     const result = await getEnvs()
 
     expect(result).toEqual({
       port: '3000',
-      privateKey: 'dummy content',
-      publicKey: 'dummy content',
+      privateKey: 'dummy private key content',
+      publicKey: 'dummy public key content',
       issuer: 'example.com',
       origin: 'http://example.com',
     })
