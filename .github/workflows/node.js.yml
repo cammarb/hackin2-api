@@ -31,7 +31,8 @@ jobs:
         run: npm run build
 
   container-setup:
-    needs: bild
+    runs-on: ubuntu-latest
+    needs: build
     steps:
       - name: Docker compose up
         run: docker-compose -f test-compose.yml up -d
@@ -41,10 +42,11 @@ jobs:
         run: npx prisma db push
 
   test:
-   needs: container-setup
-   steps:
+    runs-on: ubuntu-latest
+    needs: container-setup
+    steps:
       - name: Run tests
-          run: npm test
+        run: npm test
       - name: Tear down Docker services
         if: always()
         run: docker-compose -f test-compose.yml down
