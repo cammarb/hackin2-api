@@ -40,6 +40,7 @@ describe('POST /api/v1/auth/register', () => {
 
   afterEach(async () => {
     await prisma.user.deleteMany()
+    await redisClient.flushAll()
   })
 
   afterAll(async () => {
