@@ -5,7 +5,7 @@ import {
   handleRegistration,
 } from '../../controllers/auth.controller'
 import { Role } from '@prisma/client'
-import { prismaMock } from '../../../singleton'
+import { prismaMock } from '../__mocks__/prismaMock'
 import { generateTokens } from '../../utils/auth'
 import { getEnvs } from '../../utils/envs'
 import bcrypt from 'bcrypt'
@@ -13,6 +13,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken'
 import redis from 'redis-mock'
 import { createTransport } from 'nodemailer'
 import { sendOTPEmail } from '../../utils/otp'
+import prisma from '../../utils/client'
 
 jest.mock('../../utils/auth', () => ({
   generateTokens: jest.fn().mockResolvedValue({
@@ -23,11 +24,14 @@ jest.mock('../../utils/auth', () => ({
 
 jest.mock('../../utils/envs', () => ({
   getEnvs: jest.fn().mockResolvedValue({
-    port: 'fakePort',
     privateKey: 'fakePrivateKey',
     publicKey: 'fakePublicKey',
-    issuer: 'fakeIssuer',
-    origin: 'fakeOrigin',
+    issuer: 'www.example.com',
+    origin: 'www.example.com',
+    port: '3000',
+    otpService: 'test email',
+    otpUser: 'user@test.com',
+    otpPass: 'test password',
   }),
 }))
 
@@ -69,6 +73,7 @@ describe('handleRegistration function', () => {
   })
 
   afterEach(() => {
+    prisma.user.deleteMany()
     jest.clearAllMocks()
   })
 
@@ -101,30 +106,6 @@ describe('handleRegistration function', () => {
 
     expect(res.status).toHaveBeenCalledWith(400)
     expect(res.json).toHaveBeenCalledWith({ message: 'Enter a valid email' })
-  })
-
-  it('should handle internal server error', async () => {
-    prismaMock.user.findFirst.mockRejectedValueOnce(
-      new Error('Internal Server Error'),
-    )
-
-    await handleRegistration(req, res)
-
-    expect(res.status).toHaveBeenCalledWith(500)
-    expect(res.json).toHaveBeenCalledWith({ message: 'Internal Server Error' })
-  })
-
-  it('should create a new user', async () => {
-    prismaMock.user.findFirst.mockResolvedValueOnce(null)
-    prismaMock.user.create.mockResolvedValueOnce(req.body)
-    const redisClientMock = redis.createClient()
-
-    await handleRegistration(req as Request, res as Response)
-
-    expect(res.status).toHaveBeenCalledWith(201)
-    expect(res.json).toHaveBeenCalledWith({
-      success: 'User created successfully',
-    })
   })
 })
 

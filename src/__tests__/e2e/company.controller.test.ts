@@ -5,7 +5,7 @@ import {
   getCompanyMembers,
   inviteCompanyMembers,
 } from '../../controllers/company.controller'
-import { prismaMock } from '../../../singleton'
+import { prismaMock } from '../__mocks__/prismaMock'
 import { Role } from '@prisma/client'
 
 const mockCompanyMembers = [

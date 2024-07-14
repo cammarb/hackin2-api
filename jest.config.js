@@ -9,5 +9,5 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
   collectCoverageFrom: ['src/**/*.ts'],
-  setupFilesAfterEnv: ['<rootDir>/singleton.ts', '<rootDir>/redisMock.ts'],
+  setupFilesAfterEnv: ['<rootDir>/src/__tests__/__mocks__/prismaMock.ts'],
 };

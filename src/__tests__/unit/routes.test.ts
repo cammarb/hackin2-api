@@ -1,8 +1,8 @@
 import { Application, Request, Response } from 'express'
-import routes from '../routes'
-import { apiRoutes } from '../routes/api.routes'
+import routes from '../../routes'
+import { apiRoutes } from '../../routes/api.routes'
 
-jest.mock('../routes/api.routes', () => ({
+jest.mock('../../routes/api.routes', () => ({
   apiRoutes: jest.fn(),
 }))
 

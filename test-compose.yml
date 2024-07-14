@@ -1,0 +1,26 @@
+# Docker compose for tests
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres-test
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: testdb
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7.2
+    container_name: redis-test
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+
+volumes:
+  postgres-data:
+  redis-data:

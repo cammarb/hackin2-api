@@ -4,18 +4,14 @@ import session, { Session } from 'express-session'
 import { createClient } from 'redis'
 
 const redisClient = createClient()
-// redisClient.on('error', (err) => console.log('Redis Client Error', err))
-// redisClient.on('ready', () => {
-//   console.log('Redis Client Connected')
-// })
+redisClient.on('error', (err) => console.error('Redis Client Error', err))
 
 const connectRedis = async () => {
-  try {
-    await redisClient.connect()
-  } catch (error) {
-    console.error(error)
-    throw error
-  }
+  if (!redisClient.isOpen) redisClient.connect()
+}
+
+const disconnectRedis = async () => {
+  if (redisClient.isOpen) redisClient.disconnect()
 }
 
 const redisStore = new RedisStore({
@@ -37,4 +33,4 @@ const redisSession = session({
   genid: () => randomUUID(),
 })
 
-export { redisClient, connectRedis, redisStore, redisSession }
+export { redisClient, redisStore, redisSession, connectRedis, disconnectRedis }

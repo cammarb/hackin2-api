@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { checkEnterprise } from '../../middleware/roles.middleware'
 import { allowedRoles } from '../../middleware/roles.middleware'
-import { prismaMock } from '../../../singleton'
+import { prismaMock } from '../__mocks__/prismaMock'
 import { CompanyRole, Role } from '@prisma/client'
 
 describe('CheckEnterprise middleware function', () => {

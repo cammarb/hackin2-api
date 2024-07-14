@@ -50,6 +50,9 @@ describe('getEnvs', () => {
       publicKey: 'dummy public key content',
       issuer: 'example.com',
       origin: 'http://example.com',
+      otpPass: 'test password',
+      otpService: 'test email',
+      otpUser: 'user@test.com',
     })
   })
 

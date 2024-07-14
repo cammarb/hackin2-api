@@ -9,7 +9,7 @@ import * as EmailValidator from 'email-validator'
 import hashToken from '../utils/hash'
 import { getEnvs } from '../utils/envs'
 import { generateOTP, sendOTPEmail } from '../utils/otp'
-import { redisClient } from '../utils/redis'
+import { connectRedis, disconnectRedis, redisClient } from '../utils/redis'
 
 export const handleRegistration = async (req: Request, res: Response) => {
   const { username, email, firstName, lastName, password, role } = req.body
@@ -42,9 +42,9 @@ export const handleRegistration = async (req: Request, res: Response) => {
     })
     await sendOTPEmail(email, otp)
     await redisClient.set(email, otp, { EX: 300 })
-    res.status(201).json({ success: 'User created successfully' })
+    return res.status(201).json({ success: 'User created successfully' })
   } catch (err: Error | any) {
-    res.status(500).json({ message: err?.message })
+    return res.status(500).json({ message: err?.message })
   }
 }
 
