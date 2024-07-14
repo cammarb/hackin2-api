@@ -29,22 +29,12 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
-
-  container-setup:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Docker compose up
+      - name: Create Postgresql and Redis containers
         run: docker-compose -f test-compose.yml up -d
-      - name: Copy .env.test to .env for testing
+      - name: Use .env.test as .env
         run: cp .env.test -r .env
-      - name: Push Prisma changes to the test database
+      - name: Push Prisma changes to the db
         run: npx prisma db push
-
-  test:
-    runs-on: ubuntu-latest
-    needs: container-setup
-    steps:
       - name: Run tests
         run: npm test
       - name: Tear down Docker services
