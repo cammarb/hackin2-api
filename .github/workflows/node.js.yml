@@ -27,16 +27,24 @@ jobs:
           cache: 'npm'
       - name: Clean install node packages
         run: npm ci
-      - name: Build the project
+      - name: Build
         run: npm run build
-      - name: Build E2E Docker services
+
+  container-setup:
+    needs: bild
+    steps:
+      - name: Docker compose up
         run: docker-compose -f test-compose.yml up -d
       - name: Copy .env.test to .env for testing
         run: cp .env.test -r .env
       - name: Push Prisma changes to the test database
         run: npx prisma db push
+
+  test:
+   needs: container-setup
+   steps:
       - name: Run tests
-        run: npm test
+          run: npm test
       - name: Tear down Docker services
         if: always()
         run: docker-compose -f test-compose.yml down
