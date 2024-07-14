@@ -25,17 +25,16 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-
       - name: Clean install node packages
         run: npm ci
-
-      - run: npm run build
-
-      - name: Build E2E Docker image
-        run: docker compose -f test-compose.yml
-
-      - name: Push Prisma changes to the test db with .env.test variables
-      - run: dotenv -e .env.test -- npx prisma db push
-
+      - name: Build the project
+        run: npm run build
+      - name: Build E2E Docker services
+        run: docker-compose -f test-compose.yml up -d
+      - name: Push Prisma changes to the test database
+        run: dotenv -e .env.test -- npx prisma db push
       - name: Run tests
         run: npm test
+      - name: Tear down Docker services
+        if: always()
+        run: docker-compose -f test-compose.yml down
