@@ -1,4 +1,4 @@
-import { PrismaClient, Role, Severity, User } from '@prisma/client'
+import { CompanyRole, PrismaClient, Role, Severity, User } from '@prisma/client'
 import hashToken from '../src/utils/hash'
 
 const prisma = new PrismaClient()
@@ -30,7 +30,7 @@ async function main() {
       CompanyMember: {
         create: {
           userId: adminUser.id,
-          companyRole: 'OWNER',
+          companyRole: CompanyRole.OWNER,
         },
       },
       Program: {
