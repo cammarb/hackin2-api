@@ -4,6 +4,7 @@ import {
   handleLogin,
   handleRefreshToken,
   handleRegistration,
+  handleSession,
   validateOTP,
 } from '../controllers/auth.controller'
 
@@ -13,6 +14,7 @@ authRouter.post('/register', handleRegistration)
 authRouter.post('/login', handleLogin)
 authRouter.post('/logout', handleLogOut)
 authRouter.get('/refresh', handleRefreshToken)
+authRouter.get('/session', handleSession)
 authRouter.get('/validateOTP', validateOTP)
 
 export default authRouter

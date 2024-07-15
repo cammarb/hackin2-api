@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import { getEnvs } from '../utils/envs'
+import { redisClient } from '../utils/redis'
 
 const verifyJWT = async (
   req: Request | any,
@@ -31,4 +32,18 @@ const verifyJWT = async (
   }
 }
 
-export { verifyJWT }
+const checkSession = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { id } = req.session
+  if (!id) return res.status(401)
+
+  const userSession = await redisClient.get('hackin2-api:' + id)
+  if (!userSession) return res.status(403)
+
+  next()
+}
+
+export { verifyJWT, checkSession }

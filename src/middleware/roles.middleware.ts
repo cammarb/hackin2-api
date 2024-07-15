@@ -8,8 +8,10 @@ const checkPentester = async (
   next: NextFunction,
 ) => {
   try {
-    const username = req.username
-    const role = req.role
+    const userSession: UserSession = req.session
+
+    const username = userSession.user.username
+    const role = userSession.user.role
 
     if (!username || !role) {
       return res.status(400).json({ error: 'payload not provided' })
@@ -42,11 +44,13 @@ const checkEnterprise = async (
   next: NextFunction,
 ) => {
   try {
-    const username = req.username
-    const role = req.role
+    const userSession: UserSession = req.session
+
+    const username = userSession.user.username
+    const role = userSession.user.role
 
     if (!username || !role) {
-      return res.status(400).json({ error: 'payload not provided' })
+      return res.status(400).json({ error: 'session not provided' })
     }
 
     const user = await prisma.user.findUnique({

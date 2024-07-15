@@ -176,7 +176,7 @@ export const deleteMember = async (req: Request | any, res: Response) => {
 export const getCompanyPrograms = async (req: Request | any, res: Response) => {
   try {
     const companyId = req.companyId as string
-    const redisKey = 'hackin2-api:programs'
+    const redisKey = `hackin2-api:programs:${companyId}`
 
     const programs = await redisClient.get(redisKey)
     if (programs != null) {
@@ -187,12 +187,13 @@ export const getCompanyPrograms = async (req: Request | any, res: Response) => {
           companyId: companyId,
         },
       })
-      redisClient.setEx(redisKey, 300, JSON.stringify(programs))
+      await redisClient.setEx(redisKey, 300, JSON.stringify(programs))
       return res.status(200).json({
         programs,
       })
     }
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' })
+    console.error(error)
+    return res.status(500).json({ error: 'Internal Server Error' })
   }
 }
