@@ -176,10 +176,10 @@ export const deleteMember = async (req: Request | any, res: Response) => {
 export const getCompanyPrograms = async (req: Request | any, res: Response) => {
   try {
     const companyId = req.companyId as string
+    const redisKey = 'hackin2-api:programs'
 
-    const programs = await redisClient.get('programs')
+    const programs = await redisClient.get(redisKey)
     if (programs != null) {
-      console.log('REDIS')
       return res.json({ programs: JSON.parse(programs) })
     } else {
       const programs = await prisma.program.findMany({
@@ -187,8 +187,7 @@ export const getCompanyPrograms = async (req: Request | any, res: Response) => {
           companyId: companyId,
         },
       })
-      redisClient.setEx('programs', 300, JSON.stringify(programs))
-      console.log('POSTGRES')
+      redisClient.setEx(redisKey, 300, JSON.stringify(programs))
       return res.status(200).json({
         programs,
       })

@@ -10,6 +10,8 @@ import { randomUUID } from 'crypto'
 
 const createServer = async () => {
   const app: Application = express()
+
+  redisClient.connect()
   app.disable('x-powered-by')
   app.use(
     cors({

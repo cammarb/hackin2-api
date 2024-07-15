@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import prisma from '../utils/client'
 import { Severity, ProgramStatus } from '@prisma/client'
+import { redisClient } from '../utils/redis'
 
 export const addProgram = async (req: Request | any, res: Response) => {
   try {
@@ -160,6 +161,10 @@ export const updateProgram = async (req: Request, res: Response) => {
         programStatus: programStatus,
       },
     })
+
+    const redisKey = 'hackin2-api:programs'
+    const cachedPrograms = await redisClient.get(redisKey)
+    if (cachedPrograms != null) await redisClient.del(redisKey)
     if (!program) return res.status(404).json({ error: 'Program not found' })
 
     return res.status(200).json({ message: 'Program updated.' })
