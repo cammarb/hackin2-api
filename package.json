@@ -10,11 +10,9 @@
     "test": "jest --forceExit --detectOpenHandles",
     "test:e2e": "docker-compose -f test-compose.yml up -d && dotenv -e .env.test -- npx prisma db push && jest --forceExit --detectOpenHandles && docker-compose -f test-compose.yml down",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
-    "build": "tsc"
-  },
-  "docker": {
-    "up": "docker-compose up -d",
-    "down": "docker-compose down"
+    "build": "tsc",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
