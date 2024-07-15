@@ -1,3 +1,5 @@
+name: Hackin2 API
+
 services:
   postgres:
     image: postgres:16
