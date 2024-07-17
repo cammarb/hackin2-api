@@ -7,10 +7,12 @@ import morgan from 'morgan'
 import { redisClient, redisStore } from './redis'
 import session from 'express-session'
 import { randomUUID } from 'crypto'
+import fileUpload from 'express-fileupload'
 
 const createServer = async () => {
   const app: Application = express()
 
+  app.use(fileUpload({ useTempFiles: true, tempFileDir: '/tmp/' }))
   redisClient.connect()
   app.disable('x-powered-by')
   app.use(
@@ -38,7 +40,7 @@ const createServer = async () => {
   )
   app.use(cookieParser())
   app.use(express.json())
-  app.use(morgan('dev'))
+  app.use(morgan('combined'))
   routes(app)
   return app
 }

@@ -1,4 +1,4 @@
-name: Hackin2 API
+name: hackin2-api
 
 services:
   postgres:

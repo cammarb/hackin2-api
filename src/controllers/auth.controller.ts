@@ -125,39 +125,39 @@ const handleLogin = async (req: Request | any, res: Response) => {
 }
 
 const handleRefreshToken = async (req: Request, res: Response) => {
-  const jwtCookie = req.cookies['jwt']
-
-  const { publicKey } = await getEnvs()
-
-  if (!jwtCookie || !publicKey)
-    return res.status(401).json({ message: 'Unauthorized' })
-
-  const decoded: JwtPayload = jwt.verify(jwtCookie, publicKey) as JwtPayload
-
-  if (!decoded) return res.sendStatus(401)
-
-  const user: User | null = await prisma.user.findUnique({
-    where: {
-      username: decoded.username,
-    },
-  })
-  if (!user) return res.sendStatus(401) // Unauthorized
-
-  // revoke old refreshToken and add new refreshToken to db
-  const oldToken = await prisma.refreshToken.findUnique({
-    where: {
-      hashedToken: jwtCookie,
-    },
-  })
-  const updatedToken = await prisma.refreshToken.update({
-    where: {
-      hashedToken: oldToken?.hashedToken,
-    },
-    data: {
-      revoked: true,
-    },
-  })
   try {
+    const jwtCookie = req.cookies['jwt']
+
+    const { publicKey } = await getEnvs()
+
+    if (!jwtCookie || !publicKey)
+      return res.status(401).json({ message: 'Unauthorized' })
+
+    const decoded: JwtPayload = jwt.verify(jwtCookie, publicKey) as JwtPayload
+
+    if (!decoded) return res.sendStatus(401)
+
+    const user: User | null = await prisma.user.findUnique({
+      where: {
+        username: decoded.username,
+      },
+    })
+    if (!user) return res.sendStatus(401) // Unauthorized
+
+    // revoke old refreshToken and add new refreshToken to db
+    const oldToken = await prisma.refreshToken.findUnique({
+      where: {
+        hashedToken: jwtCookie,
+      },
+    })
+    const updatedToken = await prisma.refreshToken.update({
+      where: {
+        hashedToken: oldToken?.hashedToken,
+      },
+      data: {
+        revoked: true,
+      },
+    })
     const newTokens = await generateTokens(user)
     const newRefreshToken: RefreshToken = await prisma.refreshToken.create({
       data: {
@@ -176,8 +176,12 @@ const handleRefreshToken = async (req: Request, res: Response) => {
       role: user.role,
       token: `${newTokens.accessToken}`,
     })
-  } catch (error) {
-    console.log(error)
+  } catch (error: any) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(403).json({ message: 'Token expired' })
+    } else if (error.name === 'JsonWebTokenError') {
+      return res.status(401)
+    } else return res.status(500)
   }
 }
 
@@ -222,7 +226,7 @@ const handleSession = async (req: Request, res: Response) => {
     )
     if (!sessionData) res.sendStatus(403)
     else {
-      const parsedSession: UserSession = JSON.parse(sessionData)
+      const parsedSession = JSON.parse(sessionData)
       return res.status(200).json({
         user: parsedSession.user.username,
         role: parsedSession.user.role,

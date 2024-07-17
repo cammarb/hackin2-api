@@ -1,4 +1,11 @@
-import { CompanyRole, PrismaClient, Role, Severity, User } from '@prisma/client'
+import {
+  CompanyRole,
+  PrismaClient,
+  ProgramStatus,
+  Role,
+  Severity,
+  User,
+} from '@prisma/client'
 import hashToken from '../src/utils/hash'
 
 const prisma = new PrismaClient()
@@ -68,6 +75,7 @@ async function main() {
             name: 'Program B',
             description: 'This is the description for Program B',
             location: 'Berlin',
+            programStatus: ProgramStatus.ACTIVE,
             SeverityReward: {
               create: [
                 {

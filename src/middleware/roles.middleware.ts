@@ -8,7 +8,7 @@ const checkPentester = async (
   next: NextFunction,
 ) => {
   try {
-    const userSession: UserSession = req.session
+    const userSession = req.session
 
     const username = userSession.user.username
     const role = userSession.user.role
@@ -44,7 +44,7 @@ const checkEnterprise = async (
   next: NextFunction,
 ) => {
   try {
-    const userSession: UserSession = req.session
+    const userSession = req.session
 
     const username = userSession.user.username
     const role = userSession.user.role
