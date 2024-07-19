@@ -4,7 +4,7 @@ import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
 import routes from '../routes'
 import morgan from 'morgan'
-import { redisClient, redisStore } from './redis'
+import { connectRedis, redisClient, redisStore } from './redis'
 import session from 'express-session'
 import { randomUUID } from 'crypto'
 import fileUpload from 'express-fileupload'
@@ -13,7 +13,7 @@ const createServer = async () => {
   const app: Application = express()
 
   app.use(fileUpload({ useTempFiles: true, tempFileDir: '/tmp/' }))
-  redisClient.connect()
+  await connectRedis()
   app.disable('x-powered-by')
   app.use(
     cors({

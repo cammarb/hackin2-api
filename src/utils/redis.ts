@@ -7,11 +7,11 @@ const redisClient = createClient()
 redisClient.on('error', (err) => console.error('Redis Client Error', err))
 
 const connectRedis = async () => {
-  if (!redisClient.isOpen) redisClient.connect()
+  if (!redisClient.isOpen) await redisClient.connect()
 }
 
 const disconnectRedis = async () => {
-  if (redisClient.isOpen) redisClient.disconnect()
+  if (redisClient.isOpen) await redisClient.disconnect()
 }
 
 const redisStore = new RedisStore({
