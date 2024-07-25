@@ -1,21 +1,14 @@
 import { Application } from 'express'
 import createServer from '../../utils/server'
 import request from 'supertest'
-import { disconnectRedis, redisClient } from '../../utils/redis'
+import { redisClient } from '../../utils/redis'
 import prisma from '../../utils/client'
+import { ProgramStatus } from '@prisma/client'
 
+jest.setTimeout(3000)
 jest.unmock('../../utils/client')
 
 let app: Application
-
-beforeAll(async () => {
-  app = await createServer()
-  await prisma.$connect()
-})
-
-afterAll(async () => {
-  await disconnectRedis()
-})
 
 const programs = [
   {
@@ -23,7 +16,7 @@ const programs = [
     name: 'Program A',
     companyId: '832d9489-bb58-438a-9445-a904456ecfeb',
     description: 'This is the description for Program A',
-    programStatus: 'DRAFT',
+    programStatus: ProgramStatus.DRAFT,
     location: 'Berlin',
     createdAt: '2024-07-19T09:03:13.563Z',
     updatedAt: '2024-07-19T09:03:13.563Z',
@@ -33,7 +26,7 @@ const programs = [
     name: 'Program B',
     companyId: '832d9489-bb58-438a-9445-a904456ecfeb',
     description: 'This is the description for Program B',
-    programStatus: 'ACTIVE',
+    programStatus: ProgramStatus.ACTIVE,
     location: 'Berlin',
     createdAt: '2024-07-19T09:03:13.563Z',
     updatedAt: '2024-07-19T09:03:13.563Z',
@@ -41,6 +34,18 @@ const programs = [
 ]
 
 describe('GET /programs', () => {
+  beforeAll(async () => {
+    app = await createServer()
+    await prisma.$connect()
+    prisma.program.createMany({
+      data: programs,
+    })
+  })
+
+  afterAll(async () => {
+    await redisClient.disconnect()
+  })
+
   it('should GET all of the programs', async () => {
     const response = await request(app).get('/api/v1/programs')
 

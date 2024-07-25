@@ -1,4 +1,5 @@
 import { Request, Response } from 'express'
+import { SessionData } from 'express-session'
 import bcrypt from 'bcrypt'
 import prisma from '../utils/client'
 import { RefreshToken, User } from '@prisma/client'
@@ -103,13 +104,15 @@ const handleLogin = async (req: Request | any, res: Response) => {
     })
 
     const sessionData = {
-      id: user.id,
-      username: user.username,
-      role: user.role,
+      logged_in: true,
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+      },
     }
 
-    req.session.logged_in = true
-    req.session.user = sessionData
+    req.session = sessionData as SessionData
 
     return res.status(200).json({
       user: user.username,

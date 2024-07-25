@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { getEnvs } from '../../utils/envs'
-import { verifyJWT } from '../../middleware/auth.middleware'
+import { verifyJWT } from '../../auth/auth.middleware'
 
 jest.mock('../../utils/envs', () => ({
   getEnvs: jest.fn().mockResolvedValue({

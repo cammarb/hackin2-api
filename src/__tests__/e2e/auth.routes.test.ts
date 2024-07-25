@@ -1,20 +1,21 @@
-import { disconnectRedis, redisClient } from '../../utils/redis'
+import { redisClient } from '../../utils/redis'
 import createServer from '../../utils/server'
-import express, { NextFunction, Request, Response, Router } from 'express'
-import {
-  handleLogOut,
-  handleLogin,
-  handleRefreshToken,
-  handleRegistration,
-  validateOTP,
-} from '../../controllers/auth.controller'
-import authRouter from '../../routes/auth.routes'
+import express, {
+  Application,
+  NextFunction,
+  Request,
+  Response,
+  Router,
+} from 'express'
 import request from 'supertest'
 import nodemailer from 'nodemailer'
 import prisma from '../../utils/client'
-import { Role } from '@prisma/client'
+import { Prisma, Role } from '@prisma/client'
+import { PostgreSqlContainer } from '@testcontainers/postgresql'
+import { PrismaClient } from '@prisma/client'
+import { RedisContainer } from '@testcontainers/redis'
 
-jest.setTimeout(30000)
+jest.setTimeout(3000)
 jest.mock('nodemailer')
 let mockSendMail: jest.Mock<any, any, any>
 jest.unmock('../../utils/client')
@@ -28,10 +29,12 @@ const userData = {
   role: Role.ENTERPRISE,
 }
 
+let app: Application
+
 describe('POST /api/v1/auth/register', () => {
   beforeAll(async () => {
+    app = await createServer()
     await prisma.$connect()
-    await redisClient.connect()
     mockSendMail = jest.fn().mockResolvedValue('mocked response')
     nodemailer.createTransport = jest
       .fn()
@@ -45,6 +48,7 @@ describe('POST /api/v1/auth/register', () => {
 
   afterAll(async () => {
     await prisma.$disconnect()
+    await redisClient.disconnect()
   })
 
   it('should register a new user', async () => {

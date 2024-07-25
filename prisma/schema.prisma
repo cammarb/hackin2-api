@@ -101,6 +101,7 @@ model Program {
 }
 
 model Submissions {
+  id               String           @id @unique @default(uuid())
   programId        String
   Program          Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
   userId           String

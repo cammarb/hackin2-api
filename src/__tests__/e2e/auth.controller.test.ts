@@ -3,7 +3,7 @@ import {
   handleLogin,
   handleRefreshToken,
   handleRegistration,
-} from '../../controllers/auth.controller'
+} from '../../auth/auth.controller'
 import { Role } from '@prisma/client'
 import { prismaMock } from '../__mocks__/prismaMock'
 import { generateTokens } from '../../utils/auth'

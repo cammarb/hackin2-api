@@ -6,14 +6,6 @@ import { createClient } from 'redis'
 const redisClient = createClient()
 redisClient.on('error', (err) => console.error('Redis Client Error', err))
 
-const connectRedis = async () => {
-  if (!redisClient.isOpen) await redisClient.connect()
-}
-
-const disconnectRedis = async () => {
-  if (redisClient.isOpen) await redisClient.disconnect()
-}
-
 const redisStore = new RedisStore({
   client: redisClient,
   prefix: 'hackin2-api:',
@@ -33,4 +25,4 @@ const redisSession = session({
   genid: () => randomUUID(),
 })
 
-export { redisClient, redisStore, redisSession, connectRedis, disconnectRedis }
+export { redisClient, redisStore, redisSession }

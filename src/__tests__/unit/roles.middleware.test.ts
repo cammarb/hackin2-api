@@ -10,8 +10,14 @@ describe('CheckEnterprise middleware function', () => {
   let next: NextFunction
   beforeAll(() => {
     req = {
-      username: 'username',
-      role: 'ENTERPRISE',
+      session: {
+        logged_in: true,
+        user: {
+          id: 1,
+          username: 'username',
+          role: Role.ENTERPRISE,
+        },
+      },
     }
     res = {
       status: jest.fn(() => res),
