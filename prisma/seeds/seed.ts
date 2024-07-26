@@ -16,13 +16,26 @@ async function main() {
   let hashedPassword = await hashToken(password)
 
   const adminUser = await prisma.user.upsert({
-    where: { username: 'camila.martinez' },
+    where: { username: 'user.admin' },
     update: {},
     create: {
-      firstName: 'Camila',
-      lastName: 'Martinez',
-      username: 'camila.martinez',
-      email: 'camila.martinez@code.berlin',
+      firstName: 'User',
+      lastName: 'Admin',
+      username: 'user.admin',
+      email: 'user.admin@code.berlin',
+      password: hashedPassword,
+      role: Role.ENTERPRISE,
+    },
+  })
+
+  const memberUser = await prisma.user.upsert({
+    where: { username: 'user.member' },
+    update: {},
+    create: {
+      firstName: 'User',
+      lastName: 'Member',
+      username: 'user.member',
+      email: 'user.member@code.berlin',
       password: hashedPassword,
       role: Role.ENTERPRISE,
     },
@@ -35,10 +48,16 @@ async function main() {
       name: 'Hackin2',
       website: 'hackin2.com',
       CompanyMember: {
-        create: {
-          userId: adminUser.id,
-          companyRole: CompanyRole.OWNER,
-        },
+        create: [
+          {
+            userId: adminUser.id,
+            companyRole: CompanyRole.OWNER,
+          },
+          {
+            userId: memberUser.id,
+            companyRole: CompanyRole.MEMBER,
+          },
+        ],
       },
       Program: {
         create: [
@@ -107,13 +126,13 @@ async function main() {
   })
 
   const pentesterUser = await prisma.user.upsert({
-    where: { username: 'camila.test' },
+    where: { username: 'user.pentester' },
     update: {},
     create: {
-      firstName: 'Camila',
-      lastName: 'Test',
-      username: 'camila.test',
-      email: 'camila.test@code.berlin',
+      firstName: 'User',
+      lastName: 'Pentester',
+      username: 'user.pentester',
+      email: 'user.pentester@code.berlin',
       password: hashedPassword,
       role: Role.PENTESTER,
     },
