@@ -6,7 +6,7 @@ import {
   Severity,
   User,
 } from '@prisma/client'
-import hashToken from '../src/utils/hash'
+import hashToken from '../../src/utils/hash'
 
 const prisma = new PrismaClient()
 

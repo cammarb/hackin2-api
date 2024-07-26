@@ -8,15 +8,16 @@
   "main": "server.ts",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
-    "test": "jest",
-    "test:unit": "jest unit",
-    "test:e2e": "dotenv -e .env.test -- npx prisma migrate deploy && jest e2e --forceExit --detectOpenHandles",
+    "test": "dotenv -e .env.test -- jest",
+    "test:unit": "dotenv -e .env.test -- jest unit",
+    "test:e2e": "dotenv -e .env.test -- npx prisma migrate deploy && dotenv -e .env.test -- jest e2e --forceExit --detectOpenHandles",
     "build": "tsc",
     "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down"
+    "docker:down": "docker-compose down",
+    "testseed": "dotenv -e .env.test -- ts-node prisma/seeds/testSeed.ts"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seeds/seed.ts"
   },
   "keywords": [],
   "author": "Camila Martinez",

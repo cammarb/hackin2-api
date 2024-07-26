@@ -3,8 +3,19 @@ import { randomUUID } from 'crypto'
 import session, { Session } from 'express-session'
 import { createClient } from 'redis'
 
-const redisClient = createClient()
-redisClient.on('error', (err) => console.error('Redis Client Error', err))
+const redisClient = createClient({
+  url: process.env.REDIS_URL,
+})
+
+redisClient.on('error', (err) => console.log('Redis Client Error', err))
+
+const connectRedis = async () => {
+  if (!redisClient.isOpen) await redisClient.connect()
+}
+
+const disconnectRedis = async () => {
+  if (redisClient.isOpen) await redisClient.disconnect()
+}
 
 const redisStore = new RedisStore({
   client: redisClient,
@@ -25,4 +36,4 @@ const redisSession = session({
   genid: () => randomUUID(),
 })
 
-export { redisClient, redisStore, redisSession }
+export { redisClient, redisStore, redisSession, connectRedis, disconnectRedis }

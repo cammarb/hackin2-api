@@ -4,19 +4,18 @@ import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
 import routes from './routes'
 import morgan from 'morgan'
-import { redisClient, redisStore } from './redis'
+import { connectRedis, redisClient, redisStore } from './redis'
 import session from 'express-session'
 import { randomUUID } from 'crypto'
 import fileUpload from 'express-fileupload'
 import compression from 'compression'
-import { configDotenv } from 'dotenv'
 
 const createServer = async () => {
-  configDotenv()
   const app: Application = express()
 
+  await connectRedis()
+
   app.use(fileUpload({ useTempFiles: true, tempFileDir: '/tmp/' }))
-  await redisClient.connect()
   app.disable('x-powered-by')
   app.use(
     cors({
@@ -45,7 +44,9 @@ const createServer = async () => {
   app.use(cookieParser())
   app.use(express.json())
   app.use(morgan('combined'))
+
   routes(app)
+
   return app
 }
 

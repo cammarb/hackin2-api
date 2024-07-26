@@ -1,4 +1,7 @@
+import { configDotenv } from 'dotenv'
 import createServer from './utils/server'
+
+configDotenv()
 
 const startServer = async () => {
   const app = await createServer()

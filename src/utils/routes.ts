@@ -21,7 +21,7 @@ const routes = (app: Application) => {
 
   apiRoutes.use('/company', verifyJWT, checkEnterprise, companyRouter)
 
-  apiRoutes.use('/programs', verifyJWT, programRouter)
+  apiRoutes.use('/programs', programRouter)
   apiRoutes.use('/bounties', verifyJWT, bountyRouter)
   apiRoutes.use('/submissions', verifyJWT, submissionRouter)
   apiRoutes.use('/severityRewards', verifyJWT, severityRewardRouter)
