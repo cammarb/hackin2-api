@@ -3,9 +3,7 @@ import { randomUUID } from 'crypto'
 import session, { Session } from 'express-session'
 import { createClient } from 'redis'
 
-const redisClient = createClient({
-  url: process.env.REDIS_URL,
-})
+const redisClient = createClient()
 
 redisClient.on('error', (err) => console.log('Redis Client Error', err))
 

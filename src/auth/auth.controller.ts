@@ -96,25 +96,22 @@ const handleLogin = async (req: Request | any, res: Response) => {
       },
     })
 
+    const sessionData = {
+      logged_in: true,
+      id: user.id,
+      username: user.username,
+      role: user.role,
+    }
+
+    req.session.user = sessionData as SessionData
+
     res.cookie('jwt', tokens.refreshToken, {
       httpOnly: true,
       sameSite: 'none',
       secure: true,
       maxAge: 24 * 60 * 60 * 1000,
     })
-
-    const sessionData = {
-      logged_in: true,
-      user: {
-        id: user.id,
-        username: user.username,
-        role: user.role,
-      },
-    }
-
-    req.session = sessionData as SessionData
-
-    return res.status(200).json({
+    res.status(200).json({
       user: user.username,
       role: user.role,
       token: tokens.accessToken,

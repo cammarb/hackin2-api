@@ -1,9 +1,13 @@
 import { Router } from 'express'
-import { editCompany, getCompany } from './company.controller'
+import {
+  editCompanyController,
+  getCompaniesController,
+  getCompanyByIdController,
+} from './company.controller'
 import { allowedRoles } from '../middleware/roles.middleware'
 
 export const companyRouter: Router = Router()
 
-companyRouter.get('/', getCompany)
-companyRouter.get('/:id', allowedRoles(['OWNER']), getCompany)
-companyRouter.put('/edit', allowedRoles(['OWNER']), editCompany)
+companyRouter.get('/', allowedRoles(['OWNER']), getCompaniesController)
+companyRouter.get('/:id', allowedRoles(['OWNER']), getCompanyByIdController)
+companyRouter.put('/:id/edit', allowedRoles(['OWNER']), editCompanyController)

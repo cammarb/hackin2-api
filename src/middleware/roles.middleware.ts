@@ -44,10 +44,10 @@ const checkEnterprise = async (
   next: NextFunction,
 ) => {
   try {
-    const userSession = req.session
+    const userSession = req.session.user
 
-    const username = userSession.user.username
-    const role = userSession.user.role
+    const username = userSession.username
+    const role = userSession.role
 
     if (!username || !role) {
       return res.status(400).json({ error: 'session not provided' })
@@ -71,7 +71,7 @@ const checkEnterprise = async (
       if (!companyMember) {
         return res.status(404).json({ error: 'Member not found' })
       }
-      req.userId = user.id
+      req.userId = companyMember.userId
       req.companyId = companyMember.companyId
       req.companyRole = companyMember.companyRole
       next()

@@ -10,8 +10,8 @@ import {
 
 export const authRouter: Router = Router()
 
-authRouter.post('/register', handleRegistration)
 authRouter.post('/login', handleLogin)
+authRouter.post('/register', handleRegistration)
 authRouter.post('/logout', handleLogOut)
 authRouter.get('/refresh', handleRefreshToken)
 authRouter.get('/session', handleSession)

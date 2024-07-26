@@ -1,71 +1,53 @@
 import { Request, Response } from 'express'
-import { Company } from '@prisma/client'
-import prisma from '../utils/client'
-import { redisClient } from '../utils/redis'
+import { editCompany, getCompanies, getCompanyById } from './company.service'
 
-export const getCompany = async (req: Request | any, res: Response) => {
+export const getCompaniesController = async (req: Request, res: Response) => {
   try {
-    const companyId = req.companyId
-    const company = await prisma.company.findUnique({
-      where: {
-        id: companyId,
-      },
-      select: {
-        name: true,
-      },
-    })
-    res.status(200).json({
+    const companies = await getCompanies()
+
+    if (!companies) return res.status(404).json({ error: 'Resource not found' })
+
+    return res.status(200).json({ companies: companies })
+  } catch (error) {
+    return res.status(500).json({ error: 'Internal Server Error' })
+  }
+}
+
+export const getCompanyByIdController = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id
+
+    if (!id)
+      return res.status(400).json({ error: 'Missing request params or body' })
+
+    const company = await getCompanyById(id)
+
+    if (!company) return res.status(404).json({ error: 'Resource not found' })
+
+    return res.status(200).json({
       message: `Welcome to Company ${company?.name}.`,
     })
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' })
+    return res.status(500).json({ error: 'Internal Server Error' })
   }
 }
 
-export const editCompany = async (req: Request | any, res: Response) => {
+export const editCompanyController = async (req: Request, res: Response) => {
   try {
-    const companyId = req.companyId
-    const { name, website } = req.body
+    const id = req.params.id
+    const body = req.body
 
-    const company: Company | null = await prisma.company.update({
-      where: {
-        id: companyId,
-      },
-      data: {
-        name: name,
-        website: website,
-      },
-    })
+    if (!id || !body)
+      return res
+        .status(400)
+        .json({ error: 'Missing request parameters or body' })
 
-    res.status(200).json({
+    const company = await editCompany(id, body)
+
+    return res.status(200).json({
       company,
     })
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' })
-  }
-}
-
-export const getCompanyPrograms = async (req: Request | any, res: Response) => {
-  try {
-    const companyId = req.companyId as string
-    const redisKey = `hackin2-api:programs:${companyId}`
-
-    const programs = await redisClient.get(redisKey)
-    if (programs != null) {
-      return res.json({ programs: JSON.parse(programs) })
-    } else {
-      const programs = await prisma.program.findMany({
-        where: {
-          companyId: companyId,
-        },
-      })
-      await redisClient.setEx(redisKey, 300, JSON.stringify(programs))
-      return res.status(200).json({
-        programs,
-      })
-    }
-  } catch (error) {
-    console.error(error)
     return res.status(500).json({ error: 'Internal Server Error' })
   }
 }
