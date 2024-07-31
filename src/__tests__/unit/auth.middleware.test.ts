@@ -1,9 +1,13 @@
 import { Request, Response, NextFunction } from 'express'
 import { getEnvs } from '../../utils/envs'
 import { verifyJWT } from '../../auth/auth.middleware'
-import { generateTokens } from '../../utils/auth'
+import { generateToken, generateTokens } from '../../utils/auth'
 import { Role, User } from '@prisma/client'
-import { UnauthorizedError } from '../../error/apiError'
+import {
+  InvalidJWTError,
+  JWTExpiredError,
+  UnauthorizedError,
+} from '../../error/apiError'
 
 const privateKey = `-----BEGIN PRIVATE KEY-----
 MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDgZVRy0KtHKxv1
@@ -67,6 +71,8 @@ let tokens = {
   refreshToken: '',
 }
 
+let expiredToken = ''
+
 describe('verifyJWT middleware function', () => {
   let req: Request | any
   let res: Response | any
@@ -85,6 +91,7 @@ describe('verifyJWT middleware function', () => {
     })
 
     tokens = await generateTokens(testUser)
+    expiredToken = await generateToken(testUser, '0s')
   })
 
   beforeEach(async () => {
@@ -109,9 +116,30 @@ describe('verifyJWT middleware function', () => {
 
   test('Should throw error when jwt is missing in headers', async () => {
     req.headers = {}
-    await verifyJWT(req, res, next)
-    expect(next).toHaveBeenCalledWith(
-      new UnauthorizedError('Missing Authorization Headers'),
-    )
+    try {
+      await verifyJWT(req, res, next)
+    } catch (error) {
+      expect(next).toHaveBeenCalledWith(
+        new UnauthorizedError('Missing Authorization Headers'),
+      )
+    }
+  })
+
+  test('Should throw `JWTExpiredError` when jwt is expired', async () => {
+    req.headers.authorization = `Bearer ${expiredToken}`
+    try {
+      await verifyJWT(req, res, next)
+    } catch (error) {
+      expect(next).toHaveBeenCalledWith(new JWTExpiredError('jwt expired'))
+    }
+  })
+
+  test('Should throw `InvalidJWTError` when jwt is invalid', async () => {
+    req.headers.authorization = `Bearer invalid${expiredToken}`
+    try {
+      await verifyJWT(req, res, next)
+    } catch (error) {
+      expect(next).toHaveBeenCalledWith(new InvalidJWTError('invalid token'))
+    }
   })
 })
