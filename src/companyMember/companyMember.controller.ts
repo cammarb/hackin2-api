@@ -13,7 +13,7 @@ export const getCompanyMembersController = async (
   res: Response,
 ) => {
   try {
-    const session: SessionData = req.session as SessionData
+    const session = req.session.user as SessionData['user']
 
     const companyMembers = await getCompanyMembers(session)
 
@@ -35,7 +35,7 @@ export const addCompanyMembersController = async (
   res: Response,
 ) => {
   try {
-    const session: SessionData = req.session as SessionData
+    const session = req.session.user as SessionData['user']
     const email = req.body.email
 
     if (!email || !session)

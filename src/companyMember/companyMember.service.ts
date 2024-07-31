@@ -4,7 +4,7 @@ import hashToken from '../utils/hash'
 import { generateRandomPassword } from '../utils/passwordGenerator'
 import { CompanyMember, CompanyRole, Role } from '@prisma/client'
 
-export const getCompanyMembers = async (session: SessionData) => {
+export const getCompanyMembers = async (session: SessionData['user']) => {
   const user = session.username
   const companyId = session.company
 
@@ -26,7 +26,10 @@ export const getCompanyMembers = async (session: SessionData) => {
   return companyMembers
 }
 
-export const addCompanyMember = async (email: string, session: SessionData) => {
+export const addCompanyMember = async (
+  email: string,
+  session: SessionData['user'],
+) => {
   const companyId = session.company
 
   if (!companyId) throw new Error('Missing companyId')
