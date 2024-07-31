@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import {
   handleLogin,
   handleRefreshToken,
-  handleRegistration,
+  registrationController,
 } from '../../auth/auth.controller'
 import { Role } from '@prisma/client'
 import { prismaMock } from '../__mocks__/prismaMock'
@@ -14,6 +14,7 @@ import redis from 'redis-mock'
 import { createTransport } from 'nodemailer'
 import { sendOTPEmail } from '../../utils/otp'
 import prisma from '../../utils/client'
+import { InvalidParameterError } from '../../error/apiError'
 
 jest.mock('../../utils/auth', () => ({
   generateTokens: jest.fn().mockResolvedValue({
@@ -71,6 +72,7 @@ describe('handleRegistration function', () => {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
     }
+    next = jest.fn()
   })
 
   afterEach(() => {
@@ -78,35 +80,14 @@ describe('handleRegistration function', () => {
     jest.clearAllMocks()
   })
 
-  it('should handle existing user', async () => {
-    prismaMock.user.findFirst.mockResolvedValueOnce(req.body)
-
-    await handleRegistration(req, res, next)
-
-    expect(res.status).toHaveBeenCalledWith(409)
-    expect(res.json).toHaveBeenCalledWith({ message: 'User already exists' })
-  })
-
-  it('should handle invalid input', async () => {
-    const invalidReq = { body: {} } as Request
-
-    await handleRegistration(invalidReq, res, next)
-
-    expect(res.status).toHaveBeenCalledWith(400)
-    expect(res.json).toHaveBeenCalledWith({
-      message: 'All the fields are required',
-    })
-  })
-
   it('should handle invalid email', async () => {
-    const invalidEmailReq = {
+    req = {
       body: { ...req.body, email: 'invalidEmail' },
     } as Request
 
-    await handleRegistration(invalidEmailReq, res, next)
+    await registrationController(req, res, next)
 
-    expect(res.status).toHaveBeenCalledWith(400)
-    expect(res.json).toHaveBeenCalledWith({ message: 'Enter a valid email' })
+    expect(next).toHaveBeenCalledWith(new InvalidParameterError(req.body.email))
   })
 })
 

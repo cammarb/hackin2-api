@@ -11,7 +11,7 @@ import {
   handleLogOut,
   handleLogin,
   handleRefreshToken,
-  handleRegistration,
+  registrationController,
   validateOTP,
 } from '../../auth/auth.controller'
 import { authRouter } from '../../auth/auth.routes'
@@ -85,6 +85,8 @@ describe('POST /api/v1/auth/register', () => {
       .send(userData)
 
     expect(response.status).toBe(409)
-    expect(response.body).toEqual({ message: 'User already exists' })
+    expect(response.body).toEqual({
+      error: { message: 'Unique constraint violation' },
+    })
   })
 })

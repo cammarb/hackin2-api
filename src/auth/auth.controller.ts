@@ -5,50 +5,36 @@ import prisma from '../utils/client'
 import { RefreshToken, User } from '@prisma/client'
 import { generateTokens } from '../utils/auth'
 import jwt, { JwtPayload } from 'jsonwebtoken'
-import * as EmailValidator from 'email-validator'
 import hashToken from '../utils/hash'
 import { getEnvs } from '../utils/envs'
 import { redisClient } from '../utils/redis'
 import { generateOTP, sendOTPEmail } from '../utils/otp'
+import { createUser } from '../user/user.service'
+import { validateEmail } from '../utils/emailValidator'
+import { NewUserBody } from '../user/user.dto'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import { BadRequestError, ConflictError } from '../error/apiError'
 
-export const handleRegistration = async (
+export const registrationController = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  const { username, email, firstName, lastName, password, role } = req.body
-  if (!username || !password || !email || !firstName || !lastName || !role)
-    return res.status(400).json({ message: 'All the fields are required' })
-
-  if (!EmailValidator.validate(email))
-    return res.status(400).json({ message: 'Enter a valid email' })
-
   try {
-    const existingUser: User | null = await prisma.user.findFirst({
-      where: {
-        OR: [{ username: username }, { email: email }],
-      },
-    })
-    if (existingUser)
-      return res.status(409).json({ message: 'User already exists' })
+    const body = req.body as NewUserBody
+    await validateEmail(body.email)
 
-    const hashedPassword = await hashToken(password)
+    body.password = await hashToken(body.password)
     const otp = generateOTP()
-    const user: User = await prisma.user.create({
-      data: {
-        firstName: firstName,
-        lastName: lastName,
-        username: username,
-        email: email,
-        password: hashedPassword,
-        role: role,
-      },
-    })
-    await sendOTPEmail(email, otp)
-    await redisClient.set(email, otp, { EX: 300 })
+    const user: User = await createUser(body)
+    await sendOTPEmail(user.email, otp)
+    await redisClient.set(user.email, otp, { EX: 300 })
     return res.status(201).json({ success: 'User created successfully' })
   } catch (err) {
-    next(err)
+    if (err instanceof PrismaClientKnownRequestError) {
+      if (err.code === 'P2002')
+        next(new ConflictError('Unique constraint violation'))
+    } else next(err)
   }
 }
 

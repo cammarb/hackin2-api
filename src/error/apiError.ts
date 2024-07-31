@@ -84,3 +84,10 @@ export class ResourceNotFoundError extends NotFoundError {
     Object.setPrototypeOf(this, MissingBodyParameterError.prototype)
   }
 }
+
+export class ConflictError extends ApiError {
+  constructor(message?: string) {
+    super(message ? message : 'Conflict', 409)
+    Object.setPrototypeOf(this, ConflictError.prototype)
+  }
+}

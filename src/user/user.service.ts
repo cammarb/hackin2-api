@@ -1,7 +1,9 @@
-import { Role } from '@prisma/client'
+import { Role, User } from '@prisma/client'
 import prisma from '../utils/client'
-import { UpdateUser, UserQueryParams } from './user.dto'
+import { NewUserBody, UpdateUser, UserQueryParams } from './user.dto'
 import { validate } from 'email-validator'
+import { BadRequestError } from '../error/apiError'
+import { nextTick } from 'process'
 
 export const getUsers = async (queryParams: UserQueryParams) => {
   let users
@@ -90,5 +92,21 @@ export const deleteUser = async (id: string) => {
     },
   })
 
+  return user
+}
+
+export const createUser = async (body: NewUserBody) => {
+  const { username, email, firstName, lastName, password, role } = body
+
+  const user: User = await prisma.user.create({
+    data: {
+      firstName: firstName,
+      lastName: lastName,
+      username: username,
+      email: email,
+      password: password,
+      role: role,
+    },
+  })
   return user
 }
