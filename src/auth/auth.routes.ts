@@ -1,21 +1,27 @@
 import { Router } from 'express'
 import {
-  handleLogOut,
-  handleLogin,
-  handleRefreshToken,
+  loginController,
+  logoutController,
+  refreshTokenController,
   registrationController,
-  handleSession,
+  sessionController,
   validateOTP,
 } from './auth.controller'
 import {
   validateBody,
+  validateCookies,
+  validateParams,
   ValidationCriteria,
 } from '../middleware/params.middleware'
-import { NewUserBody } from '../user/user.dto'
+import { LoginUserBody, NewUserBody } from '../user/user.dto'
 
 export const authRouter: Router = Router()
 
-authRouter.post('/login', handleLogin)
+authRouter.post(
+  '/login',
+  validateBody<LoginUserBody>(['username', 'password'], ValidationCriteria.ALL),
+  loginController,
+)
 authRouter.post(
   '/register',
   validateBody<NewUserBody>(
@@ -24,7 +30,11 @@ authRouter.post(
   ),
   registrationController,
 )
-authRouter.post('/logout', handleLogOut)
-authRouter.get('/refresh', handleRefreshToken)
-authRouter.get('/session', handleSession)
+authRouter.get(
+  '/refresh',
+  validateCookies(['jwt'], ValidationCriteria.ALL),
+  refreshTokenController,
+)
+authRouter.post('/logout', logoutController)
+authRouter.get('/session', sessionController)
 authRouter.get('/validateOTP', validateOTP)

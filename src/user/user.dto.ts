@@ -19,3 +19,8 @@ export interface NewUserBody {
   password: string
   role: Role
 }
+
+export interface LoginUserBody {
+  username: string
+  password: string
+}

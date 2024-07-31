@@ -108,3 +108,30 @@ export const validateBody = <T extends object>(
     next()
   }
 }
+
+/**
+ * Middleware to validate the presence of cookies
+ *
+ * @param cookie - An array of cookies that need to be checked.
+ */
+export const validateCookies = (
+  cookie: string[],
+  criteria?: ValidationCriteria,
+) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const cookies = req.cookies
+
+    if (criteria === ValidationCriteria.ALL) {
+      const missingFields = cookie.filter((field) => !(field in cookies))
+      if (missingFields.length > 0) {
+        return next(new MissingBodyParameterError(missingFields.join(', ')))
+      }
+    } else if (criteria === ValidationCriteria.AT_LEAST_ONE) {
+      const hasRequiredField = cookie.some((field) => field in cookie)
+      if (!hasRequiredField) {
+        return next(new MissingBodyParameterError(cookie.join(', ')))
+      }
+    }
+    next()
+  }
+}

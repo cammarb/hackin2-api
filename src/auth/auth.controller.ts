@@ -1,19 +1,29 @@
 import { NextFunction, Request, Response } from 'express'
 import { SessionData } from 'express-session'
-import bcrypt from 'bcrypt'
 import prisma from '../utils/client'
-import { RefreshToken, User } from '@prisma/client'
+import { User } from '@prisma/client'
 import { generateTokens } from '../utils/auth'
-import jwt, { JwtPayload } from 'jsonwebtoken'
+import jwt, {
+  JsonWebTokenError,
+  JwtPayload,
+  TokenExpiredError,
+} from 'jsonwebtoken'
 import hashToken from '../utils/hash'
 import { getEnvs } from '../utils/envs'
 import { redisClient } from '../utils/redis'
 import { generateOTP, sendOTPEmail } from '../utils/otp'
 import { createUser } from '../user/user.service'
 import { validateEmail } from '../utils/emailValidator'
-import { NewUserBody } from '../user/user.dto'
+import { LoginUserBody, NewUserBody } from '../user/user.dto'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
-import { BadRequestError, ConflictError } from '../error/apiError'
+import {
+  BadRequestError,
+  ConflictError,
+  InvalidJWTError,
+  JWTExpiredError,
+  MissingBodyParameterError,
+} from '../error/apiError'
+import { loginService, refreshTokenCycleService } from './auth.service'
 
 export const registrationController = async (
   req: Request,
@@ -38,43 +48,15 @@ export const registrationController = async (
   }
 }
 
-const handleLogin = async (req: Request, res: Response, next: NextFunction) => {
+export const loginController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
-    const { username, password } = req.body
+    const body = req.body as LoginUserBody
 
-    if (
-      !username ||
-      !password ||
-      typeof username !== 'string' ||
-      typeof password !== 'string'
-    ) {
-      return res.status(400).json({
-        error: 'Bad Request',
-        message: 'Both username and password are required',
-      })
-    }
-
-    const user = await prisma.user.findUnique({
-      where: {
-        username: username,
-      },
-    })
-
-    if (!user) {
-      return res.status(401).json({
-        error: 'Authentication failed',
-        message: 'Invalid username or password',
-      })
-    }
-
-    const passwordMatch = await bcrypt.compare(password, user.password)
-
-    if (!passwordMatch) {
-      return res.status(401).json({
-        error: 'Authentication failed',
-        message: 'Invalid username or password',
-      })
-    }
+    const user = await loginService(body)
 
     const tokens = await generateTokens(user)
 
@@ -85,14 +67,12 @@ const handleLogin = async (req: Request, res: Response, next: NextFunction) => {
       },
     })
 
-    const sessionData: SessionData['user'] = {
+    req.session.user = {
       logged_in: true,
       id: user.id,
       username: user.username,
       role: user.role,
-    }
-
-    req.session.user = sessionData
+    } as SessionData['user']
 
     res.cookie('jwt', tokens.refreshToken, {
       httpOnly: true,
@@ -110,18 +90,15 @@ const handleLogin = async (req: Request, res: Response, next: NextFunction) => {
   }
 }
 
-const handleRefreshToken = async (
+export const refreshTokenController = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const jwtCookie = req.cookies['jwt']
+    const jwtCookie: string = req.cookies['jwt']
 
     const { publicKey } = await getEnvs()
-
-    if (!jwtCookie || !publicKey)
-      return res.status(401).json({ message: 'Unauthorized' })
 
     const decoded: JwtPayload = jwt.verify(jwtCookie, publicKey) as JwtPayload
 
@@ -132,29 +109,10 @@ const handleRefreshToken = async (
         username: decoded.username,
       },
     })
-    if (!user) return res.sendStatus(401) // Unauthorized
+    if (!user) return res.sendStatus(401)
 
-    // revoke old refreshToken and add new refreshToken to db
-    const oldToken = await prisma.refreshToken.findUnique({
-      where: {
-        hashedToken: jwtCookie,
-      },
-    })
-    const updatedToken = await prisma.refreshToken.update({
-      where: {
-        hashedToken: oldToken?.hashedToken,
-      },
-      data: {
-        revoked: true,
-      },
-    })
-    const newTokens = await generateTokens(user)
-    const newRefreshToken: RefreshToken = await prisma.refreshToken.create({
-      data: {
-        hashedToken: newTokens.refreshToken,
-        userId: user.id,
-      },
-    })
+    const newTokens = await refreshTokenCycleService(jwtCookie, user)
+
     res.cookie('jwt', newTokens.refreshToken, {
       httpOnly: true,
       sameSite: 'none',
@@ -166,28 +124,30 @@ const handleRefreshToken = async (
       role: user.role,
       token: `${newTokens.accessToken}`,
     })
-  } catch (error: any) {
-    if (error.name === 'TokenExpiredError') {
-      return res.status(403).json({ message: 'Token expired' })
-    } else if (error.name === 'JsonWebTokenError') {
-      return res.status(401)
-    } else return res.status(500)
+  } catch (error) {
+    if (error instanceof TokenExpiredError) {
+      next(new JWTExpiredError(error.message))
+    } else if (error instanceof JsonWebTokenError) {
+      next(new InvalidJWTError(error.message))
+    } else {
+      next(error)
+    }
   }
 }
 
-const handleLogOut = async (
+export const logoutController = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  const jwtCookie = req.cookies['jwt']
-  const jwtHeader = req.headers['authorization']
-
-  if (!jwtCookie || !jwtHeader) {
-    return res.sendStatus(204)
-  }
-
   try {
+    const jwtCookie = req.cookies['jwt']
+    const jwtHeader = req.headers['authorization']
+
+    if (!jwtCookie || !jwtHeader) {
+      return res.sendStatus(204)
+    }
+
     res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true })
     res.removeHeader('authorization')
     const token = await prisma.refreshToken.updateMany({
@@ -201,24 +161,25 @@ const handleLogOut = async (
 
     req.session.destroy((err: Error) => {
       if (err) {
-        return res.status(500).json({ message: 'Logout failed' })
+        throw new Error()
       }
       res.clearCookie('connect.sid')
-      return res.status(200).json({ message: 'Logged out' })
+      return res.status(204)
     })
   } catch (error) {
-    return res.status(500).json({ error: 'Internal Server Error' })
+    next(error)
   }
 }
 
-const handleSession = async (
+export const sessionController = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  const session = req.session
-  if (!session) return res.sendStatus(401)
   try {
+    const session = req.session
+    if (!session) return res.sendStatus(401)
+
     const sessionData: string | null = await redisClient.get(
       'hackin2-api:' + session.id,
     )
@@ -231,24 +192,24 @@ const handleSession = async (
       })
     }
   } catch (error) {
-    console.error('Error retrieving session data from Redis:', error)
-    return res.status(500).json({ message: 'Internal server error' })
+    next(error)
   }
 }
 
-const validateOTP = async (req: Request, res: Response, next: NextFunction) => {
-  const { email, otp } = req.body
-
-  if (!email || !otp) {
-    return res.status(400).json({ message: 'Email and OTP are required' })
-  }
-
+export const validateOTP = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
+    const { email, otp } = req.body
+
+    if (!email || !otp) throw new MissingBodyParameterError('email, body')
+
     const cachedOTP = await redisClient.get(email)
 
-    if (cachedOTP !== otp || cachedOTP == null) {
-      return res.status(400).json({ message: 'Invalid or expired OTP' })
-    }
+    if (cachedOTP !== otp || cachedOTP == null)
+      throw new BadRequestError('Invalid OTP')
 
     await redisClient.del(email)
     const user: User = await prisma.user.update({
@@ -264,12 +225,4 @@ const validateOTP = async (req: Request, res: Response, next: NextFunction) => {
   } catch (err) {
     next(err)
   }
-}
-
-export {
-  handleLogin,
-  handleRefreshToken,
-  handleLogOut,
-  handleSession,
-  validateOTP,
 }
