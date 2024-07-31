@@ -1,5 +1,5 @@
 # Docker compose for tests
-name: test-containers
+name: testcontainers
 
 services:
   postgres-test:
