@@ -2,7 +2,7 @@
 
 # Start the test containers
 echo "Starting test containers..."
-docker compose -f src/__tests__/testcontainers/compose.yml up -d
+docker compose -f test-compose.yml up -d
 
 # Wait a moment for the containers to start
 echo "Waiting for containers to initialize..."
@@ -26,6 +26,6 @@ npx dotenv -e .env.test -- jest --forceExit --detectOpenHandles
 
 # Stop the test containers
 echo "Stopping test containers..."
-docker compose -f src/__tests__/testcontainers/compose.yml down
+docker compose -f test-compose.yml down
 
 echo "Test run completed."
