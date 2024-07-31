@@ -1,19 +1,16 @@
-import { Program, ProgramStatus } from '@prisma/client'
+import { Program, ProgramStatus, Severity } from '@prisma/client'
 import prisma from '../utils/client'
-import { ProgramQueryParams, UpdateProgram } from './program.dto'
+import {
+  NewProgramBody,
+  ProgramQueryParams,
+  UpdateProgramBody,
+} from './program.dto'
 
 export const getPrograms = async (queryParams: ProgramQueryParams) => {
   let programs: Program[]
 
   if (!queryParams) {
     programs = await prisma.program.findMany()
-  }
-
-  const allowedParams = ['status', 'company']
-  for (const param in queryParams) {
-    if (!allowedParams.includes(param)) {
-      throw new Error('Invalid query parameter')
-    }
   }
 
   let programStatus: ProgramStatus | undefined
@@ -76,7 +73,7 @@ export const getProgramById = async (id: string) => {
 
 export const editProgram = async (
   id: string,
-  body: UpdateProgram,
+  body: UpdateProgramBody,
 ): Promise<Program | null> => {
   const { name, description, programStatus, location } = body
 
@@ -93,4 +90,52 @@ export const editProgram = async (
   })
 
   return updatedProgram
+}
+
+export const addProgram = async (companyId: string, body: NewProgramBody) => {
+  const { name, description, location } = body
+
+  const program = await prisma.program.create({
+    data: {
+      name: name,
+      companyId: companyId,
+      description: description,
+      location: location,
+      SeverityReward: {
+        create: [
+          {
+            severity: Severity.LOW,
+            min: 50,
+            max: 200,
+          },
+          {
+            severity: Severity.MEDIUM,
+            min: 250,
+            max: 1000,
+          },
+          {
+            severity: Severity.HIGH,
+            min: 1500,
+            max: 4000,
+          },
+          {
+            severity: Severity.CRITICAL,
+            min: 5000,
+            max: 10000,
+          },
+        ],
+      },
+    },
+  })
+
+  return program
+}
+
+export const deleteProgram = async (id: string) => {
+  const program = await prisma.program.delete({
+    where: {
+      id: id,
+    },
+  })
+  return program
 }

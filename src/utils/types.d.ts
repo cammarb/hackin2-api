@@ -1,4 +1,4 @@
-import { SessionData } from 'express-session'
+import { Request } from 'express'
 
 declare module 'express-session' {
   interface SessionData {
@@ -7,5 +7,14 @@ declare module 'express-session' {
     username: string
     role: 'ENTERPRISE' | 'ADMIN' | 'PENTESTER'
     company?: string
+  }
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      id?: string
+      err?: string
+    }
   }
 }

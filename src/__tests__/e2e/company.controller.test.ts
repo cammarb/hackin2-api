@@ -1,5 +1,8 @@
 import { Request, Response } from 'express'
-import { editCompany, getCompany } from '../../company/company.controller'
+import {
+  editCompanyController,
+  getCompanyByIdController,
+} from '../../company/company.controller'
 import { prismaMock } from '../__mocks__/prismaMock'
 import { Role } from '@prisma/client'
 
@@ -51,7 +54,7 @@ describe('getCompany function', () => {
   it('should return company information', async () => {
     prismaMock.company.findUnique.mockResolvedValueOnce(mockCompany)
 
-    await getCompany(req as Request, res as Response)
+    await getCompanyByIdController(req as Request, res as Response)
 
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({
@@ -64,7 +67,7 @@ describe('getCompany function', () => {
       new Error('Internal Server Error'),
     )
 
-    await getCompany(req as Request, res as Response)
+    await getCompanyByIdController(req as Request, res as Response)
 
     expect(res.status).toHaveBeenCalledWith(500)
     expect(res.json).toHaveBeenCalledWith({ error: 'Internal Server Error' })
@@ -96,7 +99,7 @@ describe('editCompany function', () => {
   it('should update company information', async () => {
     prismaMock.company.update.mockResolvedValueOnce(mockCompany)
 
-    await editCompany(req as Request, res as Response)
+    await editCompanyController(req as Request, res as Response)
 
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({
@@ -109,7 +112,7 @@ describe('editCompany function', () => {
       new Error('Internal Server Error'),
     )
 
-    await editCompany(req as Request, res as Response)
+    await editCompanyController(req as Request, res as Response)
 
     expect(res.status).toHaveBeenCalledWith(500)
     expect(res.json).toHaveBeenCalledWith({ error: 'Internal Server Error' })

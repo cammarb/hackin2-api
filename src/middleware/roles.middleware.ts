@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { CompanyMember, CompanyRole, User } from '@prisma/client'
 import prisma from '../utils/client'
+import { ResourceNotFoundError } from '../error/apiError'
 
 const checkPentester = async (
   req: Request | any,
@@ -58,9 +59,7 @@ const checkEnterprise = async (
       select: { id: true, role: true },
     })
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' })
-    }
+    if (!user) throw new ResourceNotFoundError()
 
     const userRole = user.role
     if (role === userRole && userRole === 'ENTERPRISE') {
@@ -75,11 +74,9 @@ const checkEnterprise = async (
       req.companyId = companyMember.companyId
       req.companyRole = companyMember.companyRole
       next()
-    } else {
-      return res.status(403)
-    }
+    } else throw new Error()
   } catch (error) {
-    return res.status(500).json({ error: 'Internal server error' })
+    next(error)
   }
 }
 

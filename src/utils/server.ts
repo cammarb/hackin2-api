@@ -1,4 +1,4 @@
-import express, { Application } from 'express'
+import express, { Application, Response, Request } from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
@@ -9,12 +9,16 @@ import session from 'express-session'
 import { randomUUID } from 'crypto'
 import fileUpload from 'express-fileupload'
 import compression from 'compression'
+import { errorHandler, logErrors } from '../error/error.middleware'
+import { requestId } from '../middleware/requestId.middleware'
+import { logger } from './logger'
 
 const createServer = async () => {
   const app: Application = express()
 
   await connectRedis()
 
+  app.use(requestId)
   app.use(fileUpload({ useTempFiles: true, tempFileDir: '/tmp/' }))
   app.disable('x-powered-by')
   app.use(
@@ -43,9 +47,10 @@ const createServer = async () => {
   )
   app.use(cookieParser())
   app.use(express.json())
-  app.use(morgan('combined'))
-
+  app.use(logger())
   routes(app)
+  app.use(logErrors)
+  app.use(errorHandler)
 
   return app
 }

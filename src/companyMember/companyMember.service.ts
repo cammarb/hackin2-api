@@ -5,8 +5,8 @@ import { generateRandomPassword } from '../utils/passwordGenerator'
 import { CompanyMember, CompanyRole, Role } from '@prisma/client'
 
 export const getCompanyMembers = async (session: SessionData) => {
-  const { user } = session
-  const companyId = user.company
+  const user = session.username
+  const companyId = session.company
 
   const companyMembers = await prisma.companyMember.findMany({
     where: {
@@ -27,7 +27,8 @@ export const getCompanyMembers = async (session: SessionData) => {
 }
 
 export const addCompanyMember = async (email: string, session: SessionData) => {
-  const companyId = session.user.company
+  const companyId = session.company
+
   if (!companyId) throw new Error('Missing companyId')
 
   const username = email.split('@')[0]
