@@ -31,7 +31,7 @@ jobs:
       - name: Build
         run: npm run build
       - name: Create Postgresql and Redis containers
-        run: docker-compose -f ./src/__tests__/testcontainers/compose.yml up -d
+        run: docker-compose -f test-compose.yml up -d
       - name: Push Prisma changes to the db
         run: npx dotenv -e .env.test -- npx prisma db push
       - name: Generate public-private key pairs
@@ -40,4 +40,4 @@ jobs:
         run: npm test
       - name: Tear down Docker services
         if: always()
-        run: docker-compose -f ./src/__tests__/testcontainers/compose.yml down
+        run: docker-compose -f test-compose.yml down
