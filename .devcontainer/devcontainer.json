@@ -6,12 +6,30 @@
 	"service": "app",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
+	"features": {
+		"ghcr.io/devcontainers/features/sshd:1": {}
+	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// This can be used to network with other containers or with the host.
-	// "forwardPorts": [3000, 5432],
+	"forwardPorts": [
+		3000,
+		5432,
+		8080,
+		6379,
+		5540
+	],
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "chmod +x generate_keys.sh && ./generate_keys.sh"
+	"postCreateCommand": "sudo npm i && sudo chmod +x generate_keys.sh && sudo ./generate_keys.sh && sudo cp .env.example -r .env && sudo npx prisma db push && sudo npx prisma db seed",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"dbaeumer.vscode-eslint",
+				"VisualStudioExptTeam.vscodeintellicode",
+				"esbenp.prettier-vscode",
+				"Prisma.prisma"
+			]
+		}
+	}
 	// Configure tool-specific properties.
 	// "customizations": {},
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.

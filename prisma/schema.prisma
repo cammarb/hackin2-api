@@ -10,25 +10,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-generator erd {
-  provider = "prisma-erd-generator"
+// generator erd {
+//   provider = "prisma-erd-generator"
+// }
+
+enum Role {
+  PENTESTER
+  ENTERPRISE
+}
+
+enum CompanyRole {
+  OWNER
+  ADMIN
+  MEMBER
 }
 
 model User {
-  id           String         @id @unique @default(uuid())
-  firstName    String
-  lastName     String
-  username     String         @unique
-  email        String         @unique
-  password     String
-  companyId    String?
-  role         Role           @default(USER)
-  RefreshToken RefreshToken[]
-  userProfile  UserProfile?
-  company      Company?       @relation(fields: [companyId], references: [id])
-  Gig          Gig[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id        String   @id @unique @default(uuid())
+  firstName String
+  lastName  String
+  username  String   @unique
+  email     String   @unique
+  password  String
+  mfa       Boolean  @default(false)
+  confirmed Boolean  @default(false) // User must confirm the account through email
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  role      Role
+
+  RefreshToken  RefreshToken[]
+  CompanyMember CompanyMember?
+  Submissions   Submissions[]
 }
 
 model RefreshToken {
@@ -41,78 +53,113 @@ model RefreshToken {
   updatedAt   DateTime @updatedAt
 }
 
-model UserProfile {
-  id                String                @id @unique @default(uuid())
-  qualifications    Qualification[]
-  skills            SkillsOnUserProfile[]
-  yearsOfExperience Int?
-  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId            String                @unique
-}
-
-model Skill {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-
-  UserProfiles SkillsOnUserProfile[]
-}
-
-model SkillsOnUserProfile {
-  userProfile   UserProfile @relation(fields: [userProfileId], references: [id])
-  userProfileId String
-  Skill         Skill       @relation(fields: [skillId], references: [id])
-  skillId       Int
-
-  @@id([userProfileId, skillId])
-}
-
-model Qualification {
-  id              String       @id @unique @default(uuid())
-  qualification   String
-  institutionName String
-  startDate       DateTime
-  endDate         DateTime?
-  userProfileId   String
-  userProfile     UserProfile? @relation(fields: [userProfileId], references: [id])
-}
-
 model Company {
-  id                 String @id @unique @default(uuid())
-  companyName        String
-  companyURL         String
-  companyLogo        String
-  companyDescription String
-  userId             String @unique
-  Gig                Gig[]
-  User               User[]
+  id      String  @id @unique @default(uuid())
+  name    String  @unique
+  website String?
+
+  CompanyMember CompanyMember[]
+  Program       Program[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 }
 
-model GigType {
+model CompanyMember {
+  userId      String      @unique
+  User        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId   String
+  Company     Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyRole CompanyRole
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@id([userId, companyId])
+}
+
+enum ProgramStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETE
+}
+
+model Program {
+  id            String        @id @unique @default(uuid())
+  name          String        @unique
+  companyId     String
+  Company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  description   String
+  programStatus ProgramStatus @default(DRAFT)
+  location      String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  Scope          Scope[]
+  Bounty         Bounty[]
+  SeverityReward SeverityReward[]
+  Submissions    Submissions[]
+}
+
+model Submissions {
+  id               String           @id @unique @default(uuid())
+  programId        String
+  Program          Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
+  userId           String
+  User             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  asset            String
+  Severity         SeverityReward   @relation(fields: [severityRewardId], references: [id], onDelete: Cascade)
+  severityRewardId String
+  evidence         String
+  impact           String
+  findings         String[]
+  status           SubmissionStatus @default(PENDING)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@unique([programId, userId])
+}
+
+enum SubmissionStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  REJECTED
+}
+
+model Scope {
   id          String  @id @unique @default(uuid())
-  name        String  @unique
-  description String?
-
-  gig Gig[]
+  name        String
+  description String
+  programId   String
+  Program     Program @relation(fields: [programId], references: [id])
 }
 
-model Gig {
-  id               String   @id @unique @default(uuid())
-  title            String   @unique
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model SeverityReward {
+  id          String        @id @unique @default(uuid())
+  severity    Severity
+  min         Decimal
+  max         Decimal
+  programId   String
+  Program     Program       @relation(fields: [programId], references: [id])
+  Bounty      Bounty[]
+  Submissions Submissions[]
+
+  @@unique([programId, severity])
+}
+
+model Bounty {
+  id               String         @id @unique @default(uuid())
+  title            String
   description      String
-  gigType          GigType  @relation(fields: [gigTypeId], references: [id])
-  requirements     String[]
-  paymentDetails   Decimal
-  startDate        DateTime
-  endDate          DateTime
-  postedById       String
-  postedBy         Company  @relation(fields: [postedById], references: [userId])
-  menteeAssignedId String?
-  menteeAssigned   User?    @relation(fields: [menteeAssignedId], references: [id])
-  gigTypeId        String
-}
-
-enum Role {
-  USER
-  ADMIN
-  MANAGER // Manages a company profile
+  severityRewardId String
+  SeverityReward   SeverityReward @relation(fields: [severityRewardId], references: [id])
+  programId        String
+  Program          Program        @relation(fields: [programId], references: [id], onDelete: Cascade)
 }

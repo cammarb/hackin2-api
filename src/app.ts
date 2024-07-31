@@ -1,44 +1,17 @@
-import express, { Application, Express, Request, Response } from 'express'
-import dotenv from 'dotenv'
-import cors from 'cors'
-import fs from 'fs'
+import { configDotenv } from 'dotenv'
+import createServer from './utils/server'
 
-import userRouter from './routes/user.routes'
-import authRouter from './routes/auth.routes'
-import cookieParser from 'cookie-parser'
-import helmet from 'helmet'
-import gigRouter from './routes/gig.routes'
+configDotenv()
 
-dotenv.config()
+const startServer = async () => {
+  const app = await createServer()
+  const port = 8000
 
-const app: Application = express()
-const privateKey = fs.readFileSync(`${process.env.PRIVKEY}`, {
-  encoding: 'utf-8',
-})
-const publicKey = fs.readFileSync(`${process.env.PUBKEY}`, {
-  encoding: 'utf-8',
-})
-const issuer = process.env.ISSUER
-const origin = process.env.ORIGIN
-
-app.disable('x-powered-by')
-app.use(
-  cors({
-    origin: origin,
-    methods: ['GET', 'POST', 'PUT'], // Allow only specified HTTP methods
-    credentials: true, // Allow credentials (cookies, authorization headers)
+  app.listen(port, () => {
+    console.log(`Server is running at http://localhost:${port}`)
   })
-)
-app.use(helmet())
-app.use(cookieParser())
-app.use(express.json())
+}
 
-app.use('/', (req, res)=>{
-  res.send("Welcome to the Hackin2 API.")
+startServer().catch((err) => {
+  console.error('Failed to start server:', err)
 })
-app.use('/user', userRouter)
-app.use('/auth', authRouter)
-app.use('/gig', gigRouter)
-
-export default app
-export { privateKey, publicKey, issuer }

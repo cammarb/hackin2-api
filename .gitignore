@@ -13,7 +13,6 @@ prisma/migrations/*/*.sql
 dist
 
 # Tests
-jest.config.js
 coverage/
 
 # macOS
