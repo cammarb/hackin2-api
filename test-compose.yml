@@ -1,6 +1,6 @@
 # Docker compose for tests
 name: testcontainers
-
+version: '3.8'
 services:
   postgres-test:
     image: postgres:16

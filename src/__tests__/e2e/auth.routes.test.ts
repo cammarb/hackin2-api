@@ -17,7 +17,7 @@ import {
 import { authRouter } from '../../auth/auth.routes'
 import request from 'supertest'
 import nodemailer from 'nodemailer'
-import { Role } from '@prisma/client'
+import { Role, User } from '@prisma/client'
 import prisma from '../../utils/client'
 
 jest.setTimeout(60000)
@@ -47,12 +47,14 @@ describe('POST /api/v1/auth/register', () => {
   })
 
   afterEach(async () => {
-    await prisma.user.deleteMany()
     await redisClient.flushAll()
   })
 
   afterAll(async () => {
     await redisClient.disconnect()
+    await prisma.user.delete({
+      where: { username: 'steve.jobs' },
+    })
   })
 
   it('should register a new user', async () => {
@@ -78,10 +80,6 @@ describe('POST /api/v1/auth/register', () => {
   })
 
   it('should not register a new user when their email or username already exists', async () => {
-    const user = await prisma.user.create({
-      data: userData,
-    })
-
     const response = await request(app)
       .post('/api/v1/auth/register')
       .send(userData)
