@@ -8,13 +8,13 @@ docker compose -f src/__tests__/testcontainers/compose.yml up -d
 echo "Waiting for containers to initialize..."
 sleep 5
 
-# Run test seed
-echo "Running seed file..."
-npx dotenv -e .env.test -- ts-node prisma/seeds/testSeed.ts
-
 # Apply migrations
 echo "Applying database migrations..."
 npx dotenv -e .env.test -- npx prisma migrate deploy
+
+# Run test seed
+echo "Running seed file..."
+npx dotenv -e .env.test -- ts-node prisma/seeds/testSeed.ts
 
 # Run the tests
 echo "Running tests..."
