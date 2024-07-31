@@ -3,6 +3,7 @@ import { checkEnterprise } from '../../middleware/roles.middleware'
 import { allowedRoles } from '../../middleware/roles.middleware'
 import { prismaMock } from '../__mocks__/prismaMock'
 import { CompanyRole, Role } from '@prisma/client'
+import { ResourceNotFoundError } from '../../error/apiError'
 
 describe('CheckEnterprise middleware function', () => {
   let req: Request | any
@@ -11,9 +12,9 @@ describe('CheckEnterprise middleware function', () => {
   beforeAll(() => {
     req = {
       session: {
-        logged_in: true,
         user: {
           id: 1,
+          logged_in: true,
           username: 'username',
           role: Role.ENTERPRISE,
         },
@@ -44,8 +45,7 @@ describe('CheckEnterprise middleware function', () => {
     prismaMock.user.findUnique.mockResolvedValueOnce(null)
 
     await checkEnterprise(req, res, next)
-    expect(res.status).toHaveBeenCalledWith(404)
-    expect(res.status().json).toHaveBeenCalledWith({ error: 'User not found' })
+    expect(next).toHaveBeenCalledWith(new ResourceNotFoundError())
   })
 
   test('When user belongs to a Company', async () => {
