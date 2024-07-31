@@ -1,33 +1,37 @@
 import RedisStore from 'connect-redis'
-import session from 'express-session'
+import { randomUUID } from 'crypto'
+import session, { Session } from 'express-session'
 import { createClient } from 'redis'
 
-export const redisClient = createClient()
-// redisClient.on('connect', () => {
-//   console.log('Redis client connected')
-// })
+const redisClient = createClient()
 
-// redisClient.on('ready', () => {
-//   console.log('Redis client ready')
-// })
+redisClient.on('error', (err) => console.log('Redis Client Error', err))
 
-// redisClient.on('end', () => {
-//   console.log('Redis client disconnected')
-// })
+const connectRedis = async () => {
+  if (!redisClient.isOpen) await redisClient.connect()
+}
 
-// redisClient.connect().catch(console.error)
+const disconnectRedis = async () => {
+  if (redisClient.isOpen) await redisClient.disconnect()
+}
 
-export const redisStore = new RedisStore({
+const redisStore = new RedisStore({
   client: redisClient,
-  prefix: 'hackin2-api',
+  prefix: 'hackin2-api:',
 })
 
-export const redisSession = session({
+const redisSession = session({
   store: redisStore,
   resave: false,
   saveUninitialized: false,
   secret: 'redis-secret',
   cookie: {
-    secure: true,
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: false,
+    maxAge: 24 * 60 * 60 * 1000,
   },
+  genid: () => randomUUID(),
 })
+
+export { redisClient, redisStore, redisSession, connectRedis, disconnectRedis }

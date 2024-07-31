@@ -101,14 +101,17 @@ model Program {
 }
 
 model Submissions {
+  id               String           @id @unique @default(uuid())
   programId        String
-  Program          Program          @relation(fields: [programId], references: [id])
+  Program          Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
   userId           String
-  User             User             @relation(fields: [userId], references: [id])
-  findingsSummary  String
-  Severity         SeverityReward   @relation(fields: [severityRewardId], references: [id])
+  User             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  asset            String
+  Severity         SeverityReward   @relation(fields: [severityRewardId], references: [id], onDelete: Cascade)
   severityRewardId String
-  evidence         String[]
+  evidence         String
+  impact           String
+  findings         String[]
   status           SubmissionStatus @default(PENDING)
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt

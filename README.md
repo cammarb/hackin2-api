@@ -23,6 +23,8 @@ This repository contains the backend API, which provides the necessary endpoints
 
 ![diagram](./diagram.svg)
 
+![diagram](Hackin2%20-%20Current%20infrastructure.drawio.svg)
+
 ## Features
 
 - User authentication and authorization with `JWT` and `Sessions`.
