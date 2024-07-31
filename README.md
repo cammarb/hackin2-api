@@ -44,7 +44,6 @@ To run the API locally, you need the following prerequisites:
 - git
 - Node.js (version >= 18)
 - npm
-- Docker
 
 ### Installation
 
@@ -85,7 +84,7 @@ This section assumes **you know how to work with docker.**
    Run this command in your terminal
 
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
 3. Create .env file
@@ -126,6 +125,5 @@ npx prisma db push
 
 # To populate the database with the seed file
 npx prisma db seed
-
 npm run dev
 ```
