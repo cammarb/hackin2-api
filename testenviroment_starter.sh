@@ -8,9 +8,13 @@ docker compose -f src/__tests__/testcontainers/compose.yml up -d
 echo "Waiting for containers to initialize..."
 sleep 5
 
+# Generate private-public key pair
+echo "Applying database migrations..."
+./generate_keys.sh
+
 # Apply migrations
 echo "Applying database migrations..."
-npx dotenv -e .env.test -- npx prisma migrate deploy
+npx dotenv -e .env.test -- npx prisma db push
 
 # Run test seed
 echo "Running seed file..."
