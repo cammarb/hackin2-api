@@ -10,7 +10,7 @@ export const logErrors = (
   if (err instanceof ApiError) {
     req.err = `Exception="${err.constructor.name}" Message="${err.message}"`
   } else {
-    req.err = `Exception="Unknown" Message="${err.message}"`
+    req.err = `Exception="${err.name}" Message="${err.message}"`
   }
 
   next(err)

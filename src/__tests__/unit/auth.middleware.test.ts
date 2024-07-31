@@ -43,6 +43,6 @@ describe('verifyJWT middleware function', () => {
   test('Should throw error when jwt is missing in headers', async () => {
     req.headers = {}
     await verifyJWT(req, res, next)
-    expect(res.status).toHaveBeenCalledWith(401)
+    expect(next).toHaveBeenCalled()
   })
 })

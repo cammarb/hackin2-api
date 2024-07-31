@@ -8,6 +8,34 @@ export class ApiError extends Error {
   }
 }
 
+export class UnauthorizedError extends ApiError {
+  constructor(message?: string) {
+    super(message ? message : 'Unauthorized', 401)
+    Object.setPrototypeOf(this, UnauthorizedError.prototype)
+  }
+}
+
+export class JWTExpiredError extends UnauthorizedError {
+  constructor(message: string) {
+    super(message)
+    Object.setPrototypeOf(this, UnauthorizedError.prototype)
+  }
+}
+
+export class ForbiddenError extends ApiError {
+  constructor(message?: string) {
+    super(message ? message : 'Forbidden', 403)
+    Object.setPrototypeOf(this, ForbiddenError.prototype)
+  }
+}
+
+export class InvalidJWTError extends ForbiddenError {
+  constructor(message: string) {
+    super(message)
+    Object.setPrototypeOf(this, ForbiddenError.prototype)
+  }
+}
+
 export class NotFoundError extends ApiError {
   constructor(message: string) {
     super(message, 404)

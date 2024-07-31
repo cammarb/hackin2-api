@@ -1,18 +1,21 @@
-import { Request, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { SessionData } from 'express-session'
 import bcrypt from 'bcrypt'
 import prisma from '../utils/client'
 import { RefreshToken, User } from '@prisma/client'
 import { generateTokens } from '../utils/auth'
 import jwt, { JwtPayload } from 'jsonwebtoken'
-import fs from 'fs'
 import * as EmailValidator from 'email-validator'
 import hashToken from '../utils/hash'
 import { getEnvs } from '../utils/envs'
 import { redisClient } from '../utils/redis'
 import { generateOTP, sendOTPEmail } from '../utils/otp'
 
-export const handleRegistration = async (req: Request, res: Response) => {
+export const handleRegistration = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const { username, email, firstName, lastName, password, role } = req.body
   if (!username || !password || !email || !firstName || !lastName || !role)
     return res.status(400).json({ message: 'All the fields are required' })
@@ -44,12 +47,12 @@ export const handleRegistration = async (req: Request, res: Response) => {
     await sendOTPEmail(email, otp)
     await redisClient.set(email, otp, { EX: 300 })
     return res.status(201).json({ success: 'User created successfully' })
-  } catch (err: Error | any) {
-    return res.status(500).json({ message: err?.message })
+  } catch (err) {
+    next(err)
   }
 }
 
-const handleLogin = async (req: Request | any, res: Response) => {
+const handleLogin = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { username, password } = req.body
 
@@ -96,14 +99,14 @@ const handleLogin = async (req: Request | any, res: Response) => {
       },
     })
 
-    const sessionData = {
+    const sessionData: SessionData['user'] = {
       logged_in: true,
       id: user.id,
       username: user.username,
       role: user.role,
     }
 
-    req.session.user = sessionData as SessionData
+    req.session.user = sessionData
 
     res.cookie('jwt', tokens.refreshToken, {
       httpOnly: true,
@@ -117,14 +120,15 @@ const handleLogin = async (req: Request | any, res: Response) => {
       token: tokens.accessToken,
     })
   } catch (error) {
-    return res.status(500).json({
-      error: error,
-      message: 'An unexpected error occurred',
-    })
+    next(error)
   }
 }
 
-const handleRefreshToken = async (req: Request, res: Response) => {
+const handleRefreshToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const jwtCookie = req.cookies['jwt']
 
@@ -185,7 +189,11 @@ const handleRefreshToken = async (req: Request, res: Response) => {
   }
 }
 
-const handleLogOut = async (req: Request, res: Response) => {
+const handleLogOut = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const jwtCookie = req.cookies['jwt']
   const jwtHeader = req.headers['authorization']
 
@@ -217,7 +225,11 @@ const handleLogOut = async (req: Request, res: Response) => {
   }
 }
 
-const handleSession = async (req: Request, res: Response) => {
+const handleSession = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const session = req.session
   if (!session) return res.sendStatus(401)
   try {
@@ -238,7 +250,7 @@ const handleSession = async (req: Request, res: Response) => {
   }
 }
 
-const validateOTP = async (req: Request, res: Response) => {
+const validateOTP = async (req: Request, res: Response, next: NextFunction) => {
   const { email, otp } = req.body
 
   if (!email || !otp) {
@@ -264,7 +276,7 @@ const validateOTP = async (req: Request, res: Response) => {
 
     res.status(200).json({ success: 'OTP validated successfully' })
   } catch (err) {
-    res.status(500).json({ message: 'Internal Sever Error' })
+    next(err)
   }
 }
 

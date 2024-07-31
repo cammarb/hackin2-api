@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import {
   handleLogin,
   handleRefreshToken,
@@ -54,6 +54,7 @@ jest.mock('nodemailer', () => ({
 describe('handleRegistration function', () => {
   let req: Request | any
   let res: Response | any
+  let next: NextFunction
 
   beforeEach(() => {
     req = {
@@ -80,7 +81,7 @@ describe('handleRegistration function', () => {
   it('should handle existing user', async () => {
     prismaMock.user.findFirst.mockResolvedValueOnce(req.body)
 
-    await handleRegistration(req, res)
+    await handleRegistration(req, res, next)
 
     expect(res.status).toHaveBeenCalledWith(409)
     expect(res.json).toHaveBeenCalledWith({ message: 'User already exists' })
@@ -89,7 +90,7 @@ describe('handleRegistration function', () => {
   it('should handle invalid input', async () => {
     const invalidReq = { body: {} } as Request
 
-    await handleRegistration(invalidReq, res)
+    await handleRegistration(invalidReq, res, next)
 
     expect(res.status).toHaveBeenCalledWith(400)
     expect(res.json).toHaveBeenCalledWith({
@@ -102,7 +103,7 @@ describe('handleRegistration function', () => {
       body: { ...req.body, email: 'invalidEmail' },
     } as Request
 
-    await handleRegistration(invalidEmailReq, res)
+    await handleRegistration(invalidEmailReq, res, next)
 
     expect(res.status).toHaveBeenCalledWith(400)
     expect(res.json).toHaveBeenCalledWith({ message: 'Enter a valid email' })
@@ -112,6 +113,7 @@ describe('handleRegistration function', () => {
 describe('handleLogin function', () => {
   let req: Request | any
   let res: Response | any
+  let next: NextFunction
 
   beforeEach(() => {
     req = {
@@ -119,12 +121,16 @@ describe('handleLogin function', () => {
         username: 'testUsername',
         password: 'testPassword',
       },
+      session: {
+        user: {},
+      },
     }
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
       cookie: jest.fn(),
     }
+    next = jest.fn()
   })
 
   afterEach(() => {
@@ -166,7 +172,7 @@ describe('handleLogin function', () => {
         return providedPassword === hashedPassword
       })
 
-    await handleLogin(req, res)
+    await handleLogin(req, res, next)
 
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({
@@ -187,7 +193,7 @@ describe('handleLogin function', () => {
       body: { username: 123, password: 'testPassword' },
     } as Request
 
-    await handleLogin(invalidReq, res)
+    await handleLogin(invalidReq, res, next)
 
     expect(res.status).toHaveBeenCalledWith(400)
     expect(res.json).toHaveBeenCalledWith({
@@ -199,7 +205,7 @@ describe('handleLogin function', () => {
   it('should handle invalid user', async () => {
     prismaMock.user.findUnique.mockResolvedValueOnce(null)
 
-    await handleLogin(req, res)
+    await handleLogin(req, res, next)
 
     expect(res.status).toHaveBeenCalledWith(401)
     expect(res.json).toHaveBeenCalledWith({
@@ -222,7 +228,7 @@ describe('handleLogin function', () => {
 
     prismaMock.user.findUnique.mockResolvedValueOnce(userWithInvalidPassword)
 
-    await handleLogin(req, res)
+    await handleLogin(req, res, next)
 
     expect(res.status).toHaveBeenCalledWith(401)
     expect(res.json).toHaveBeenCalledWith({
@@ -235,6 +241,7 @@ describe('handleLogin function', () => {
 describe('handleRefreshToken', () => {
   let req: Request | any
   let res: Response | any
+  let next: NextFunction
 
   beforeEach(() => {
     req = {
@@ -299,7 +306,7 @@ describe('handleRefreshToken', () => {
     prismaMock.refreshToken.update.mockResolvedValueOnce(refreshToken)
     prismaMock.refreshToken.create.mockResolvedValueOnce(newTokens.refreshToken)
 
-    await handleRefreshToken(req, res)
+    await handleRefreshToken(req, res, next)
 
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({

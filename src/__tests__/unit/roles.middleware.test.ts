@@ -96,7 +96,7 @@ describe('CheckEnterprise middleware function', () => {
     prismaMock.user.findUnique.mockResolvedValue(user)
 
     await checkEnterprise(req, res, next)
-    expect(res.status).toHaveBeenCalledWith(403)
+    expect(next).toHaveBeenCalled()
   })
 })
 
