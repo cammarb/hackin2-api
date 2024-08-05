@@ -1,24 +1,12 @@
-import { disconnectRedis, redisClient } from '../../utils/redis'
-import createServer from '../../utils/server'
-import express, {
-  Application,
-  NextFunction,
-  Request,
-  Response,
-  Router,
-} from 'express'
+import { Role } from '@prisma/client'
 import {
-  handleLogOut,
-  handleLogin,
-  handleRefreshToken,
-  registrationController,
-  validateOTP,
-} from '../../auth/auth.controller'
-import { authRouter } from '../../auth/auth.routes'
-import request from 'supertest'
+  Application
+} from 'express'
 import nodemailer from 'nodemailer'
-import { Role, User } from '@prisma/client'
+import request from 'supertest'
 import prisma from '../../utils/client'
+import { redisClient } from '../../utils/redis'
+import createServer from '../../utils/server'
 
 jest.setTimeout(60000)
 jest.mock('nodemailer')

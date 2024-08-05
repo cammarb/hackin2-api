@@ -1,15 +1,16 @@
 import { Router } from 'express'
 import { allowedRoles } from '../middleware/roles.middleware'
-import { getBounties, getBountyById } from './bounty.service'
 import {
   addBountyController,
   deleteBountyController,
   editBountyController,
+  getBountiesController,
 } from './bounty.controller'
+import { getBountyById } from './bounty.service'
 
 export const bountyRouter: Router = Router()
 
-bountyRouter.get('/', allowedRoles(['OWNER', 'ADMIN', 'MEMBER']), getBounties)
+bountyRouter.get('/', allowedRoles(['OWNER', 'ADMIN', 'MEMBER']), getBountiesController)
 bountyRouter.get(
   '/:id',
   allowedRoles(['OWNER', 'ADMIN', 'MEMBER']),

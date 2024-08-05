@@ -1,20 +1,17 @@
+import { Role } from '@prisma/client'
+import bcrypt from 'bcrypt'
 import { NextFunction, Request, Response } from 'express'
 import {
-  handleLogin,
-  handleRefreshToken,
+  loginController,
+  refreshTokenController,
   registrationController,
 } from '../../auth/auth.controller'
-import { Role } from '@prisma/client'
-import { prismaMock } from '../__mocks__/prismaMock'
-import { generateTokens } from '../../utils/auth'
-import { getEnvs } from '../../utils/envs'
-import bcrypt from 'bcrypt'
-import jwt, { JwtPayload } from 'jsonwebtoken'
-import redis from 'redis-mock'
-import { createTransport } from 'nodemailer'
-import { sendOTPEmail } from '../../utils/otp'
+import {
+  InvalidParameterError,
+  ResourceNotFoundError
+} from '../../error/apiError'
 import prisma from '../../utils/client'
-import { InvalidParameterError } from '../../error/apiError'
+import { prismaMock } from '../__mocks__/prismaMock'
 
 jest.mock('../../utils/auth', () => ({
   generateTokens: jest.fn().mockResolvedValue({
@@ -95,6 +92,7 @@ describe('handleLogin function', () => {
   let req: Request | any
   let res: Response | any
   let next: NextFunction
+  let bcryptCompare: jest.SpyInstance
 
   beforeEach(() => {
     req = {
@@ -112,10 +110,13 @@ describe('handleLogin function', () => {
       cookie: jest.fn(),
     }
     next = jest.fn()
+
+    bcryptCompare = jest.spyOn(bcrypt, 'compare')
   })
 
   afterEach(() => {
     jest.clearAllMocks()
+    bcryptCompare.mockRestore();
   })
 
   test('should handle valid user', async () => {
@@ -147,13 +148,11 @@ describe('handleLogin function', () => {
 
     prismaMock.user.findUnique.mockResolvedValueOnce(user)
     prismaMock.refreshToken.create.mockResolvedValueOnce(tokens.refreshToken)
-    jest
-      .spyOn(bcrypt, 'compare')
-      .mockImplementation((providedPassword, hashedPassword) => {
-        return providedPassword === hashedPassword
-      })
+    bcryptCompare.mockImplementation((providedPassword, hashedPassword) => {
+      return providedPassword === hashedPassword
+    })
 
-    await handleLogin(req, res, next)
+    await loginController(req, res, next)
 
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({
@@ -174,48 +173,41 @@ describe('handleLogin function', () => {
       body: { username: 123, password: 'testPassword' },
     } as Request
 
-    await handleLogin(invalidReq, res, next)
+    await loginController(invalidReq, res, next)
 
-    expect(res.status).toHaveBeenCalledWith(400)
-    expect(res.json).toHaveBeenCalledWith({
-      error: 'Bad Request',
-      message: 'Both username and password are required',
-    })
+    expect(next).toHaveBeenCalledWith(new ResourceNotFoundError())
   })
 
   it('should handle invalid user', async () => {
     prismaMock.user.findUnique.mockResolvedValueOnce(null)
 
-    await handleLogin(req, res, next)
+    await loginController(req, res, next)
 
-    expect(res.status).toHaveBeenCalledWith(401)
-    expect(res.json).toHaveBeenCalledWith({
-      error: 'Authentication failed',
-      message: 'Invalid username or password',
-    })
+    expect(next).toHaveBeenCalledWith(new ResourceNotFoundError())
   })
 
   it('should handle invalid password', async () => {
-    jest.clearAllMocks()
-    jest
-      .spyOn(bcrypt, 'compare')
-      .mockImplementation((providedPassword, hashedPassword) => {
-        return providedPassword !== hashedPassword
-      })
-
-    const userWithInvalidPassword = {
-      ...req.body,
+    const user = {
+      id: '1',
+      username: 'testUsername',
+      email: 'test@email.com',
+      firstName: 'testFirstName',
+      lastName: 'testLastName',
+      password: 'rightPassword',
+      role: Role.ENTERPRISE,
+      mfa: false,
+      confirmed: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     }
 
-    prismaMock.user.findUnique.mockResolvedValueOnce(userWithInvalidPassword)
+    bcryptCompare.mockResolvedValue(false)
 
-    await handleLogin(req, res, next)
+    prismaMock.user.findUnique.mockResolvedValueOnce(user)
 
-    expect(res.status).toHaveBeenCalledWith(401)
-    expect(res.json).toHaveBeenCalledWith({
-      error: 'Authentication failed',
-      message: 'Invalid username or password',
-    })
+    await loginController(req, res, next)
+
+    expect(next).toHaveBeenCalledWith(new Error())
   })
 })
 
@@ -287,7 +279,7 @@ describe('handleRefreshToken', () => {
     prismaMock.refreshToken.update.mockResolvedValueOnce(refreshToken)
     prismaMock.refreshToken.create.mockResolvedValueOnce(newTokens.refreshToken)
 
-    await handleRefreshToken(req, res, next)
+    await refreshTokenController(req, res, next)
 
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({

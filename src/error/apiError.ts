@@ -15,13 +15,6 @@ export class UnauthorizedError extends ApiError {
   }
 }
 
-export class JWTExpiredError extends UnauthorizedError {
-  constructor(message: string) {
-    super(message)
-    Object.setPrototypeOf(this, UnauthorizedError.prototype)
-  }
-}
-
 export class ForbiddenError extends ApiError {
   constructor(message?: string) {
     super(message ? message : 'Forbidden', 403)
@@ -29,10 +22,17 @@ export class ForbiddenError extends ApiError {
   }
 }
 
+export class JWTExpiredError extends ForbiddenError {
+  constructor(message: string) {
+    super(message)
+    Object.setPrototypeOf(this, JWTExpiredError.prototype)
+  }
+}
+
 export class InvalidJWTError extends ForbiddenError {
   constructor(message: string) {
     super(message)
-    Object.setPrototypeOf(this, ForbiddenError.prototype)
+    Object.setPrototypeOf(this, InvalidJWTError.prototype)
   }
 }
 
@@ -81,7 +81,7 @@ export class MissingBodyParameterError extends BadRequestError {
 export class ResourceNotFoundError extends NotFoundError {
   constructor(resource?: string) {
     super(`Resource not found ${resource ? resource : ''}`)
-    Object.setPrototypeOf(this, MissingBodyParameterError.prototype)
+    Object.setPrototypeOf(this, ResourceNotFoundError.prototype)
   }
 }
 
@@ -89,5 +89,12 @@ export class ConflictError extends ApiError {
   constructor(message?: string) {
     super(message ? message : 'Conflict', 409)
     Object.setPrototypeOf(this, ConflictError.prototype)
+  }
+}
+
+export class AuthenticationError extends ApiError {
+  constructor(message?: string) {
+    super(message ? message : 'Authentication Error', 401)
+    Object.setPrototypeOf(this, AuthenticationError.prototype)
   }
 }

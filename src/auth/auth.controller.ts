@@ -1,21 +1,12 @@
+import { User } from '@prisma/client'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { NextFunction, Request, Response } from 'express'
 import { SessionData } from 'express-session'
-import prisma from '../utils/client'
-import { User } from '@prisma/client'
-import { generateTokens } from '../utils/auth'
 import jwt, {
   JsonWebTokenError,
   JwtPayload,
   TokenExpiredError,
 } from 'jsonwebtoken'
-import hashToken from '../utils/hash'
-import { getEnvs } from '../utils/envs'
-import { redisClient } from '../utils/redis'
-import { generateOTP, sendOTPEmail } from '../utils/otp'
-import { createUser } from '../user/user.service'
-import { validateEmail } from '../utils/emailValidator'
-import { LoginUserBody, NewUserBody } from '../user/user.dto'
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import {
   BadRequestError,
   ConflictError,
@@ -23,6 +14,15 @@ import {
   JWTExpiredError,
   MissingBodyParameterError,
 } from '../error/apiError'
+import { LoginUserBody, NewUserBody } from '../user/user.dto'
+import { createUser } from '../user/user.service'
+import { generateTokens } from '../utils/auth'
+import prisma from '../utils/client'
+import { validateEmail } from '../utils/emailValidator'
+import { getEnvs } from '../utils/envs'
+import hashToken from '../utils/hash'
+import { generateOTP, sendOTPEmail } from '../utils/otp'
+import { redisClient } from '../utils/redis'
 import { loginService, refreshTokenCycleService } from './auth.service'
 
 export const registrationController = async (
@@ -72,6 +72,10 @@ export const loginController = async (
       id: user.id,
       username: user.username,
       role: user.role,
+      company: {
+        id: user.CompanyMember?.companyId,
+        role: user.CompanyMember?.companyRole
+      }
     } as SessionData['user']
 
     res.cookie('jwt', tokens.refreshToken, {
@@ -84,6 +88,7 @@ export const loginController = async (
       user: user.username,
       role: user.role,
       token: tokens.accessToken,
+      company: user.CompanyMember?.companyId
     })
   } catch (error) {
     next(error)
@@ -104,10 +109,17 @@ export const refreshTokenController = async (
 
     if (!decoded) return res.sendStatus(401)
 
-    const user: User | null = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: {
         username: decoded.username,
       },
+      include: {
+        CompanyMember: {
+          select: {
+            companyId: true
+          }
+        }
+      }
     })
     if (!user) return res.sendStatus(401)
 
@@ -123,10 +135,12 @@ export const refreshTokenController = async (
       user: user.username,
       role: user.role,
       token: `${newTokens.accessToken}`,
+      company: user.CompanyMember?.companyId
+
     })
   } catch (error) {
     if (error instanceof TokenExpiredError) {
-      next(new JWTExpiredError(error.message))
+      next(new JWTExpiredError('refresh token expired'))
     } else if (error instanceof JsonWebTokenError) {
       next(new InvalidJWTError(error.message))
     } else {
@@ -148,8 +162,6 @@ export const logoutController = async (
       return res.sendStatus(204)
     }
 
-    res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true })
-    res.removeHeader('authorization')
     const token = await prisma.refreshToken.updateMany({
       where: {
         hashedToken: jwtCookie,
@@ -163,8 +175,18 @@ export const logoutController = async (
       if (err) {
         throw new Error()
       }
-      res.clearCookie('connect.sid')
-      return res.status(204)
+      res.removeHeader('authorization')
+      res.clearCookie('jwt', {
+        httpOnly: true,
+        sameSite: 'none',
+        secure: true,
+      });
+      res.clearCookie('connect.sid', {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: false,
+      });
+      return res.sendStatus(204)
     })
   } catch (error) {
     next(error)

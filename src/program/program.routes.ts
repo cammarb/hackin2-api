@@ -1,18 +1,18 @@
 import { Router } from 'express'
 import {
+  validateBody,
+  validateParams,
+  validateQuery,
+  ValidationCriteria,
+} from '../middleware/params.middleware'
+import { checkEnterprise } from '../middleware/roles.middleware'
+import {
   addProgramController,
   deleteProgramController,
   editProgramController,
   getProgramByIdController,
   getProgramsController,
 } from './program.controller'
-import { checkEnterprise } from '../middleware/roles.middleware'
-import {
-  validateBody,
-  validateParams,
-  validateQuery,
-  ValidationCriteria,
-} from '../middleware/params.middleware'
 import {
   NewProgramBody,
   NewProgramQuery,
@@ -29,7 +29,7 @@ programRouter.get(
 )
 programRouter.post(
   '/new',
-  validateParams<NewProgramQuery>(['company'], ValidationCriteria.ALL),
+  validateQuery<NewProgramQuery>(['company'], ValidationCriteria.ALL),
   validateBody<NewProgramBody>(
     ['name', 'location', 'description'],
     ValidationCriteria.ALL,

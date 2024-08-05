@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import {
+  AuthenticationError,
   InvalidParameterError,
   MissingBodyParameterError,
   MissingParameterError,
@@ -120,6 +121,10 @@ export const validateCookies = (
 ) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const cookies = req.cookies
+
+    if (cookie.includes('jwt') && !(cookies['jwt'])) {
+      return next(new AuthenticationError());
+    }
 
     if (criteria === ValidationCriteria.ALL) {
       const missingFields = cookie.filter((field) => !(field in cookies))

@@ -13,8 +13,8 @@ export const getBountiesController = async (req: Request, res: Response) => {
 
     const bounties = await getBounties(queryParams)
 
-    if (bounties.length == 0)
-      return res.status(404).json({ error: 'Bounties not found' })
+    if (bounties.length <= 0)
+      return res.status(200).json({ message: 'No bounties yet' })
     res.status(200).json({ bounties: bounties })
   } catch (error) {
     return res.status(500).json({ error: 'Internal Server Error' })

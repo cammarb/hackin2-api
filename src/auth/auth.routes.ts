@@ -1,5 +1,11 @@
 import { Router } from 'express'
 import {
+  validateBody,
+  validateCookies,
+  ValidationCriteria
+} from '../middleware/params.middleware'
+import { LoginUserBody, NewUserBody } from '../user/user.dto'
+import {
   loginController,
   logoutController,
   refreshTokenController,
@@ -7,13 +13,6 @@ import {
   sessionController,
   validateOTP,
 } from './auth.controller'
-import {
-  validateBody,
-  validateCookies,
-  validateParams,
-  ValidationCriteria,
-} from '../middleware/params.middleware'
-import { LoginUserBody, NewUserBody } from '../user/user.dto'
 
 export const authRouter: Router = Router()
 

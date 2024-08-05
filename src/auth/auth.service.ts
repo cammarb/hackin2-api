@@ -1,9 +1,9 @@
 import { RefreshToken, User } from '@prisma/client'
-import { ResourceNotFoundError } from '../error/apiError'
+import { compare } from 'bcrypt'
+import { AuthenticationError } from '../error/apiError'
 import { LoginUserBody } from '../user/user.dto'
 import { generateTokens } from '../utils/auth'
 import prisma from '../utils/client'
-import { compare } from 'bcrypt'
 
 export const loginService = async (body: LoginUserBody) => {
   const { username, password } = body
@@ -12,11 +12,20 @@ export const loginService = async (body: LoginUserBody) => {
     where: {
       username: username,
     },
+    include: {
+      CompanyMember: {
+        select: {
+          companyId: true,
+          companyRole: true
+        }
+      }
+    }
   })
 
-  if (!user) throw new ResourceNotFoundError()
+  if (!user) throw new AuthenticationError()
 
-  await compare(password, password)
+  const isValidPassword = await compare(password, user.password)
+  if (!isValidPassword) throw new AuthenticationError()
 
   return user
 }
@@ -27,16 +36,18 @@ export const loginService = async (body: LoginUserBody) => {
  * @returns new `accessToken` and `refreshToken`
  */
 export const refreshTokenCycleService = async (token: string, user: User) => {
-  const revokeToken = await prisma.refreshToken.update({
-    where: {
-      hashedToken: token,
-    },
-    data: {
-      revoked: true,
-    },
-  })
+  const [revokeToken, newTokens] = await Promise.all([
+    prisma.refreshToken.update({
+      where: {
+        hashedToken: token,
+      },
+      data: {
+        revoked: true,
+      },
+    }),
+    generateTokens(user)
+  ])
 
-  const newTokens = await generateTokens(user)
   const newRefreshToken: RefreshToken = await prisma.refreshToken.create({
     data: {
       hashedToken: newTokens.refreshToken,

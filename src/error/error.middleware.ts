@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { ApiError } from './apiError'
 
 export const logErrors = (
@@ -24,17 +24,13 @@ export const errorHandler = (
 ) => {
   if (err instanceof ApiError) {
     res.status(err.statusCode).json({
-      error: {
-        message: err.message,
-        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-      },
+      message: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
     })
   } else {
     res.status(500).json({
-      error: {
-        message: 'Internal Server Error',
-        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-      },
+      message: 'Internal Server Error',
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
     })
   }
 }
