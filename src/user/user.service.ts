@@ -1,6 +1,6 @@
-import { Role, User } from '@prisma/client'
+import type { Role, User } from '@prisma/client'
 import prisma from '../utils/client'
-import { NewUserBody, UpdateUser, UserQueryParams } from './user.dto'
+import type { NewUserBody, UpdateUser, UserQueryParams } from './user.dto'
 import { validate } from 'email-validator'
 import { BadRequestError } from '../error/apiError'
 import { nextTick } from 'process'
@@ -15,8 +15,8 @@ export const getUsers = async (queryParams: UserQueryParams) => {
         lastName: true,
         username: true,
         email: true,
-        role: true,
-      },
+        role: true
+      }
     })
   }
 
@@ -34,15 +34,15 @@ export const getUsers = async (queryParams: UserQueryParams) => {
 
   users = await prisma.user.findMany({
     where: {
-      role: role,
+      role: role
     },
     select: {
       firstName: true,
       lastName: true,
       username: true,
       email: true,
-      role: true,
-    },
+      role: true
+    }
   })
 
   return users
@@ -51,7 +51,7 @@ export const getUsers = async (queryParams: UserQueryParams) => {
 export const getUserById = async (id: string) => {
   const user = await prisma.user.findUnique({
     where: {
-      id: id,
+      id: id
     },
     select: {
       id: true,
@@ -59,8 +59,8 @@ export const getUserById = async (id: string) => {
       lastName: true,
       username: true,
       email: true,
-      role: true,
-    },
+      role: true
+    }
   })
   return user
 }
@@ -72,14 +72,14 @@ export const editUser = async (id: string, body: UpdateUser) => {
 
   const user = await prisma.user.update({
     where: {
-      id: id,
+      id: id
     },
     data: {
       username: username,
       email: email,
       firstName: firstName,
-      lastName: lastName,
-    },
+      lastName: lastName
+    }
   })
 
   return user
@@ -88,8 +88,8 @@ export const editUser = async (id: string, body: UpdateUser) => {
 export const deleteUser = async (id: string) => {
   const user = await prisma.user.delete({
     where: {
-      id: id,
-    },
+      id: id
+    }
   })
 
   return user
@@ -105,8 +105,8 @@ export const createUser = async (body: NewUserBody) => {
       username: username,
       email: email,
       password: password,
-      role: role,
-    },
+      role: role
+    }
   })
   return user
 }

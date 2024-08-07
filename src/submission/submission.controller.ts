@@ -1,13 +1,13 @@
-import { query, Request, Response } from 'express'
+import { query, type Request, type Response } from 'express'
 import {
   addSumission,
   getSubmissionById,
-  getSubmissions,
+  getSubmissions
 } from './submission.service'
 
 export const addSumissionController = async (
   req: Request | any,
-  res: Response,
+  res: Response
 ) => {
   try {
     const user = req.session.user
@@ -27,7 +27,7 @@ export const addSumissionController = async (
 
 export const getSubmissionsController = async (
   req: Request | any,
-  res: Response,
+  res: Response
 ) => {
   try {
     const queryParams = req.query
@@ -45,7 +45,7 @@ export const getSubmissionsController = async (
 
 export const getSubmissionByIdController = async (
   req: Request | any,
-  res: Response,
+  res: Response
 ) => {
   try {
     const id = req.params.id

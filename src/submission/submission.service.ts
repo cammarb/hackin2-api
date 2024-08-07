@@ -1,13 +1,13 @@
 import prisma from '../utils/client'
-import { SubmissionBody, SubmissionQueryParams } from './submission.dto'
+import type { SubmissionBody, SubmissionQueryParams } from './submission.dto'
 import { cloudinary } from '../utils/cloudinary'
-import { FileArray, UploadedFile } from 'express-fileupload'
+import type { FileArray, UploadedFile } from 'express-fileupload'
 
 export const getSubmissionById = async (id: string) => {
   const submission = await prisma.submissions.findUnique({
     where: {
-      id: id,
-    },
+      id: id
+    }
   })
 
   return submission
@@ -23,20 +23,20 @@ export const getSubmissions = async (queryParams: SubmissionQueryParams) => {
   const submissions = await prisma.submissions.findMany({
     where: {
       userId: userId,
-      programId: programId,
+      programId: programId
     },
     include: {
       Program: {
         select: {
-          name: true,
-        },
+          name: true
+        }
       },
       Severity: {
         select: {
-          severity: true,
-        },
-      },
-    },
+          severity: true
+        }
+      }
+    }
   })
 
   return submissions
@@ -45,7 +45,7 @@ export const getSubmissions = async (queryParams: SubmissionQueryParams) => {
 export const addSumission = async (
   user: { id: string },
   body: SubmissionBody,
-  files: FileArray,
+  files: FileArray
 ) => {
   const { programId, asset, severity, evidence, impact } = body
 
@@ -61,7 +61,7 @@ export const addSumission = async (
     const uploadPromises = findings.map((file: UploadedFile) => {
       return cloudinary.uploader.upload(file.tempFilePath, {
         folder: 'uploads',
-        resource_type: 'auto',
+        resource_type: 'auto'
       })
     })
 
@@ -77,8 +77,8 @@ export const addSumission = async (
       severityRewardId: severity,
       evidence: evidence,
       impact: impact,
-      findings: fileUrls,
-    },
+      findings: fileUrls
+    }
   })
 
   return submission

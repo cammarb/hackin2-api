@@ -4,7 +4,7 @@ import {
   deleteSeverityRewardController,
   getSeverityRewardByIdController,
   getSeverityRewardsController,
-  updateSeverityRewardController,
+  updateSeverityRewardController
 } from './severityReward.controller'
 
 export const severityRewardRouter: Router = Router()

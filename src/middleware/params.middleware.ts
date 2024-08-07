@@ -1,14 +1,14 @@
-import { NextFunction, Request, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 import {
   AuthenticationError,
   InvalidParameterError,
   MissingBodyParameterError,
-  MissingParameterError,
+  MissingParameterError
 } from '../error/apiError'
 
 export enum ValidationCriteria {
-  ALL,
-  AT_LEAST_ONE,
+  ALL = 0,
+  AT_LEAST_ONE = 1
 }
 
 /**
@@ -19,13 +19,13 @@ export enum ValidationCriteria {
  */
 export const validateParams = <T>(
   allowedParams: (keyof T)[],
-  criteria?: ValidationCriteria,
+  criteria?: ValidationCriteria
 ) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const params = req.params
 
     const unexpectedParams = Object.keys(params).filter(
-      (param) => !allowedParams.includes(param as keyof T),
+      (param) => !allowedParams.includes(param as keyof T)
     )
 
     if (unexpectedParams.length > 0) {
@@ -55,13 +55,13 @@ export const validateParams = <T>(
  */
 export const validateQuery = <T>(
   allowedQuery: (keyof T)[],
-  criteria?: ValidationCriteria,
+  criteria?: ValidationCriteria
 ) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const query = req.query
 
     const unexpectedParams = Object.keys(query).filter(
-      (param) => !allowedQuery.includes(param as keyof T),
+      (param) => !allowedQuery.includes(param as keyof T)
     )
     if (unexpectedParams.length > 0) {
       return next(new InvalidParameterError(unexpectedParams.join(', ')))
@@ -90,7 +90,7 @@ export const validateQuery = <T>(
  */
 export const validateBody = <T extends object>(
   requiredFields: (keyof T)[],
-  criteria?: ValidationCriteria,
+  criteria?: ValidationCriteria
 ) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const body: T = req.body
@@ -117,13 +117,13 @@ export const validateBody = <T extends object>(
  */
 export const validateCookies = (
   cookie: string[],
-  criteria?: ValidationCriteria,
+  criteria?: ValidationCriteria
 ) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const cookies = req.cookies
 
-    if (cookie.includes('jwt') && !(cookies['jwt'])) {
-      return next(new AuthenticationError());
+    if (cookie.includes('jwt') && !cookies['jwt']) {
+      return next(new AuthenticationError())
     }
 
     if (criteria === ValidationCriteria.ALL) {

@@ -1,12 +1,13 @@
 import { Role } from '@prisma/client'
 import bcrypt from 'bcrypt'
-import { NextFunction, Request, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 import {
   loginController,
   refreshTokenController,
-  registrationController,
+  registrationController
 } from '../../auth/auth.controller'
 import {
+  AuthenticationError,
   InvalidParameterError,
   ResourceNotFoundError
 } from '../../error/apiError'
@@ -16,8 +17,8 @@ import { prismaMock } from '../__mocks__/prismaMock'
 jest.mock('../../utils/auth', () => ({
   generateTokens: jest.fn().mockResolvedValue({
     accessToken: 'mockAccessToken',
-    refreshToken: 'mockRefreshToken',
-  }),
+    refreshToken: 'mockRefreshToken'
+  })
 }))
 
 jest.mock('../../utils/envs', () => ({
@@ -29,12 +30,12 @@ jest.mock('../../utils/envs', () => ({
     port: '3000',
     otpService: 'test email',
     otpUser: 'user@test.com',
-    otpPass: 'test password',
-  }),
+    otpPass: 'test password'
+  })
 }))
 
 jest.mock('jsonwebtoken', () => ({
-  verify: jest.fn().mockReturnValue({ username: 'username', role: 'role' }),
+  verify: jest.fn().mockReturnValue({ username: 'username', role: 'role' })
 }))
 
 jest.mock('../../utils/otp')
@@ -44,9 +45,9 @@ jest.mock('nodemailer', () => ({
       from: 'test@email.com',
       to: 'test@email.com',
       subject: 'Hackin2 - Verification Code',
-      text: `Your OTP code is: `,
-    }),
-  }),
+      text: `Your OTP code is: `
+    })
+  })
 }))
 
 describe('handleRegistration function', () => {
@@ -62,12 +63,12 @@ describe('handleRegistration function', () => {
         firstName: 'testFirstName',
         lastName: 'testLastName',
         password: 'testPassword',
-        role: Role.ENTERPRISE,
-      },
+        role: Role.ENTERPRISE
+      }
     }
     res = {
       status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
+      json: jest.fn()
     }
     next = jest.fn()
   })
@@ -79,7 +80,7 @@ describe('handleRegistration function', () => {
 
   it('should handle invalid email', async () => {
     req = {
-      body: { ...req.body, email: 'invalidEmail' },
+      body: { ...req.body, email: 'invalidEmail' }
     } as Request
 
     await registrationController(req, res, next)
@@ -98,16 +99,16 @@ describe('handleLogin function', () => {
     req = {
       body: {
         username: 'testUsername',
-        password: 'testPassword',
+        password: 'testPassword'
       },
       session: {
-        user: {},
-      },
+        user: {}
+      }
     }
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-      cookie: jest.fn(),
+      cookie: jest.fn()
     }
     next = jest.fn()
 
@@ -116,7 +117,7 @@ describe('handleLogin function', () => {
 
   afterEach(() => {
     jest.clearAllMocks()
-    bcryptCompare.mockRestore();
+    bcryptCompare.mockRestore()
   })
 
   test('should handle valid user', async () => {
@@ -131,7 +132,7 @@ describe('handleLogin function', () => {
       mfa: false,
       confirmed: false,
       createdAt: new Date(),
-      updatedAt: new Date(),
+      updatedAt: new Date()
     }
 
     const tokens = {
@@ -142,8 +143,8 @@ describe('handleLogin function', () => {
         userId: '1',
         revoked: false,
         createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+        updatedAt: new Date()
+      }
     }
 
     prismaMock.user.findUnique.mockResolvedValueOnce(user)
@@ -158,24 +159,24 @@ describe('handleLogin function', () => {
     expect(res.json).toHaveBeenCalledWith({
       user: user.username,
       role: user.role,
-      token: 'mockAccessToken',
+      token: 'mockAccessToken'
     })
     expect(res.cookie).toHaveBeenCalledWith('jwt', 'mockRefreshToken', {
       httpOnly: true,
       sameSite: 'none',
       secure: true,
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000
     })
   })
 
   it('should handle invalid input', async () => {
     const invalidReq = {
-      body: { username: 123, password: 'testPassword' },
+      body: { username: 123, password: 'testPassword' }
     } as Request
 
     await loginController(invalidReq, res, next)
 
-    expect(next).toHaveBeenCalledWith(new ResourceNotFoundError())
+    expect(next).toHaveBeenCalledWith(new AuthenticationError())
   })
 
   it('should handle invalid user', async () => {
@@ -183,7 +184,7 @@ describe('handleLogin function', () => {
 
     await loginController(req, res, next)
 
-    expect(next).toHaveBeenCalledWith(new ResourceNotFoundError())
+    expect(next).toHaveBeenCalledWith(new AuthenticationError())
   })
 
   it('should handle invalid password', async () => {
@@ -198,7 +199,7 @@ describe('handleLogin function', () => {
       mfa: false,
       confirmed: false,
       createdAt: new Date(),
-      updatedAt: new Date(),
+      updatedAt: new Date()
     }
 
     bcryptCompare.mockResolvedValue(false)
@@ -207,7 +208,7 @@ describe('handleLogin function', () => {
 
     await loginController(req, res, next)
 
-    expect(next).toHaveBeenCalledWith(new Error())
+    expect(next).toHaveBeenCalledWith(new AuthenticationError())
   })
 })
 
@@ -219,13 +220,13 @@ describe('handleRefreshToken', () => {
   beforeEach(() => {
     req = {
       cookies: {
-        jwt: 'mockToken',
-      },
+        jwt: 'mockToken'
+      }
     }
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
-      cookie: jest.fn(),
+      cookie: jest.fn()
     }
   })
 
@@ -245,7 +246,7 @@ describe('handleRefreshToken', () => {
       mfa: false,
       confirmed: false,
       createdAt: new Date(),
-      updatedAt: new Date(),
+      updatedAt: new Date()
     }
     const refreshToken = {
       id: '1',
@@ -253,7 +254,7 @@ describe('handleRefreshToken', () => {
       userId: '1',
       revoked: false,
       createdAt: new Date(),
-      updatedAt: new Date(),
+      updatedAt: new Date()
     }
     const newTokens = {
       accessToken: {
@@ -262,7 +263,7 @@ describe('handleRefreshToken', () => {
         userId: '1',
         revoked: false,
         createdAt: new Date(),
-        updatedAt: new Date(),
+        updatedAt: new Date()
       },
       refreshToken: {
         id: '1',
@@ -270,8 +271,8 @@ describe('handleRefreshToken', () => {
         userId: '1',
         revoked: false,
         createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+        updatedAt: new Date()
+      }
     }
 
     prismaMock.user.findUnique.mockResolvedValueOnce(user)
@@ -285,13 +286,13 @@ describe('handleRefreshToken', () => {
     expect(res.json).toHaveBeenCalledWith({
       user: user.username,
       role: user.role,
-      token: newTokens.accessToken.hashedToken,
+      token: newTokens.accessToken.hashedToken
     })
     expect(res.cookie).toHaveBeenCalledWith('jwt', 'mockRefreshToken', {
       httpOnly: true,
       sameSite: 'none',
       secure: true,
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000
     })
   })
 })

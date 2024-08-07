@@ -1,16 +1,17 @@
-import { Request, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 import {
   addCompanyMember,
   deleteCompanyMember,
   editCompanyMember,
   getCompanyMemberById,
-  getCompanyMembers,
+  getCompanyMembers
 } from './companyMember.service'
-import { SessionData } from 'express-session'
+import type { SessionData } from 'express-session'
 
 export const getCompanyMembersController = async (
   req: Request,
   res: Response,
+  next: NextFunction
 ) => {
   try {
     const session = req.session.user as SessionData['user']
@@ -19,20 +20,21 @@ export const getCompanyMembersController = async (
 
     if (companyMembers == null)
       return res.status(400).json({
-        error: 'Resource not found',
+        error: 'Resource not found'
       })
 
     res.status(200).json({
-      companyMembers: companyMembers,
+      companyMembers: companyMembers
     })
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' })
+    next(error)
   }
 }
 
 export const addCompanyMembersController = async (
   req: Request,
   res: Response,
+  next: NextFunction
 ) => {
   try {
     const session = req.session.user as SessionData['user']
@@ -47,13 +49,13 @@ export const addCompanyMembersController = async (
 
     res.status(200).json({ message: `Invitation sent` })
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' })
+    next(error)
   }
 }
 
 export const getCompanyMemberByIdController = async (
   req: Request,
-  res: Response,
+  res: Response
 ) => {
   try {
     const id = req.params.id
@@ -69,7 +71,7 @@ export const getCompanyMemberByIdController = async (
       return res.status(404).json({ error: 'Resource not found' })
 
     res.status(200).json({
-      member: companyMember,
+      member: companyMember
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
@@ -78,7 +80,7 @@ export const getCompanyMemberByIdController = async (
 
 export const editCompanyMemberController = async (
   req: Request | any,
-  res: Response,
+  res: Response
 ) => {
   try {
     const id = req.params.id
@@ -95,7 +97,7 @@ export const editCompanyMemberController = async (
       return res.status(404).json({ error: 'Resource not found' })
 
     res.status(200).json({
-      member: companyMember,
+      member: companyMember
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
@@ -104,7 +106,7 @@ export const editCompanyMemberController = async (
 
 export const deleteCompanyMemberController = async (
   req: Request | any,
-  res: Response,
+  res: Response
 ) => {
   try {
     const id = req.params.id
@@ -117,7 +119,7 @@ export const deleteCompanyMemberController = async (
     const member = await deleteCompanyMember(id)
 
     res.status(200).json({
-      message: `Member was successfully removed.`,
+      message: `Member was successfully removed.`
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })

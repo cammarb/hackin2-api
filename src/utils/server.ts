@@ -2,7 +2,7 @@ import compression from 'compression'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import { randomUUID } from 'crypto'
-import express, { Application } from 'express'
+import express, { type Application } from 'express'
 import fileUpload from 'express-fileupload'
 import session from 'express-session'
 import helmet from 'helmet'
@@ -15,17 +15,17 @@ import routes from './routes'
 const createServer = async () => {
   const app: Application = express()
 
-  await connectRedis();
+  await connectRedis()
 
   app.use(
     cors({
       origin: process.env.ORIGIN,
       methods: ['GET', 'POST', 'PUT'],
-      credentials: true,
-    }),
-  );
+      credentials: true
+    })
+  )
 
-  app.use(cookieParser());
+  app.use(cookieParser())
 
   app.use(
     session({
@@ -37,11 +37,11 @@ const createServer = async () => {
         httpOnly: true,
         sameSite: 'lax',
         secure: false,
-        maxAge: 24 * 60 * 60 * 1000,
+        maxAge: 24 * 60 * 60 * 1000
       },
-      genid: () => randomUUID(),
-    }),
-  );
+      genid: () => randomUUID()
+    })
+  )
 
   app.use(requestId)
   app.use(fileUpload({ useTempFiles: true, tempFileDir: '/tmp/' }))
@@ -51,7 +51,7 @@ const createServer = async () => {
   app.use(express.json())
   app.use(logger())
 
-  routes(app);
+  routes(app)
 
   app.use(logErrors)
   app.use(errorHandler)

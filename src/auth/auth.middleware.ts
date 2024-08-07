@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express'
+import type { Request, Response, NextFunction } from 'express'
 import { verify, TokenExpiredError, JsonWebTokenError } from 'jsonwebtoken'
 import { getEnvs } from '../utils/envs'
 import { redisClient } from '../utils/redis'
@@ -6,13 +6,13 @@ import {
   ForbiddenError,
   InvalidJWTError,
   JWTExpiredError,
-  UnauthorizedError,
+  UnauthorizedError
 } from '../error/apiError'
 
 const verifyJWT = async (
   req: Request | any,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const authHeader = req.headers && req.headers['authorization']
@@ -44,7 +44,7 @@ const verifyJWT = async (
 const checkSession = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const { id } = req.session

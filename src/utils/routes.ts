@@ -1,4 +1,4 @@
-import { Application, Router } from 'express'
+import { type Application, Router } from 'express'
 import { verifyJWT } from '../auth/auth.middleware'
 import { authRouter } from '../auth/auth.routes'
 import { bountyRouter } from '../bounty/bounty.routes'
@@ -9,6 +9,7 @@ import { scopeRouter } from '../scope/scope.routes'
 import { severityRewardRouter } from '../severityReward/severityReward.routes'
 import { submissionRouter } from '../submission/submission.routes'
 import { userRouter } from '../user/user.routes'
+import { companyMemberRouter } from '../companyMember/companyMember.routes'
 
 const routes = (app: Application) => {
   const apiRoutes: Router = Router()
@@ -19,6 +20,7 @@ const routes = (app: Application) => {
   apiRoutes.use('/auth', authRouter)
   apiRoutes.use('/users', verifyJWT, userRouter)
   apiRoutes.use('/companies', verifyJWT, checkEnterprise, companyRouter)
+  apiRoutes.use('/members', verifyJWT, checkEnterprise, companyMemberRouter)
   apiRoutes.use('/programs', verifyJWT, programRouter)
   apiRoutes.use('/bounties', verifyJWT, bountyRouter)
   apiRoutes.use('/submissions', verifyJWT, submissionRouter)

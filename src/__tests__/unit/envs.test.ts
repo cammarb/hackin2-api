@@ -3,8 +3,8 @@ import { promises } from 'fs'
 
 jest.mock('fs', () => ({
   promises: {
-    readFile: jest.fn(),
-  },
+    readFile: jest.fn()
+  }
 }))
 
 describe('getEnvs', () => {
@@ -52,7 +52,7 @@ describe('getEnvs', () => {
       origin: 'http://example.com',
       otpPass: 'test password',
       otpService: 'test email',
-      otpUser: 'user@test.com',
+      otpUser: 'user@test.com'
     })
   })
 

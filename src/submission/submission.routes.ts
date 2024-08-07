@@ -2,7 +2,7 @@ import { Router } from 'express'
 import {
   getSubmissionByIdController,
   addSumissionController,
-  getSubmissionsController,
+  getSubmissionsController
 } from './submission.controller'
 
 export const submissionRouter: Router = Router()

@@ -3,7 +3,7 @@ import {
   getUsersController,
   getUserByIdController,
   editUserController,
-  deleteUserController,
+  deleteUserController
 } from './user.controller'
 
 export const userRouter: Router = Router()

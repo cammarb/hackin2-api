@@ -1,4 +1,4 @@
-import { CompanyRole, Role } from '@prisma/client'
+import type { CompanyRole, Role } from '@prisma/client'
 
 declare module 'express-session' {
   interface SessionData {

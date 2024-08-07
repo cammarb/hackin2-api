@@ -1,10 +1,10 @@
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 import {
   addBounty,
   deleteBounty,
   editBounty,
   getBounties,
-  getBountyById,
+  getBountyById
 } from './bounty.service'
 
 export const getBountiesController = async (req: Request, res: Response) => {
@@ -60,7 +60,7 @@ export const editBountyController = async (req: Request, res: Response) => {
 
 export const addBountyController = async (
   req: Request | any,
-  res: Response,
+  res: Response
 ) => {
   try {
     const body = req.body

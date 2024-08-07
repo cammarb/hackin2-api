@@ -1,9 +1,9 @@
-import { Program, ProgramStatus, Severity } from '@prisma/client'
+import { type Program, ProgramStatus, Severity } from '@prisma/client'
 import prisma from '../utils/client'
-import {
+import type {
   NewProgramBody,
   ProgramQueryParams,
-  UpdateProgramBody,
+  UpdateProgramBody
 } from './program.dto'
 
 export const getPrograms = async (queryParams: ProgramQueryParams) => {
@@ -31,8 +31,8 @@ export const getPrograms = async (queryParams: ProgramQueryParams) => {
   programs = await prisma.program.findMany({
     where: {
       companyId: companyId,
-      programStatus: programStatus,
-    },
+      programStatus: programStatus
+    }
   })
 
   return programs
@@ -41,7 +41,7 @@ export const getPrograms = async (queryParams: ProgramQueryParams) => {
 export const getProgramById = async (id: string) => {
   const program = await prisma.program.findUnique({
     where: {
-      id: id,
+      id: id
     },
     select: {
       id: true,
@@ -55,17 +55,17 @@ export const getProgramById = async (id: string) => {
         select: {
           id: true,
           name: true,
-          website: true,
-        },
+          website: true
+        }
       },
       SeverityReward: {
         select: {
           min: true,
           max: true,
-          severity: true,
-        },
-      },
-    },
+          severity: true
+        }
+      }
+    }
   })
 
   return program
@@ -73,20 +73,20 @@ export const getProgramById = async (id: string) => {
 
 export const editProgram = async (
   id: string,
-  body: UpdateProgramBody,
+  body: UpdateProgramBody
 ): Promise<Program | null> => {
   const { name, description, programStatus, location } = body
 
   const updatedProgram = prisma.program.update({
     where: {
-      id: id,
+      id: id
     },
     data: {
       name: name,
       description: description,
       programStatus: programStatus,
-      location: location,
-    },
+      location: location
+    }
   })
 
   return updatedProgram
@@ -106,26 +106,26 @@ export const addProgram = async (companyId: string, body: NewProgramBody) => {
           {
             severity: Severity.LOW,
             min: 50,
-            max: 200,
+            max: 200
           },
           {
             severity: Severity.MEDIUM,
             min: 250,
-            max: 1000,
+            max: 1000
           },
           {
             severity: Severity.HIGH,
             min: 1500,
-            max: 4000,
+            max: 4000
           },
           {
             severity: Severity.CRITICAL,
             min: 5000,
-            max: 10000,
-          },
-        ],
-      },
-    },
+            max: 10000
+          }
+        ]
+      }
+    }
   })
 
   return program
@@ -134,8 +134,8 @@ export const addProgram = async (companyId: string, body: NewProgramBody) => {
 export const deleteProgram = async (id: string) => {
   const program = await prisma.program.delete({
     where: {
-      id: id,
-    },
+      id: id
+    }
   })
   return program
 }

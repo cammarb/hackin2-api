@@ -1,7 +1,7 @@
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 import {
   editCompanyController,
-  getCompanyByIdController,
+  getCompanyByIdController
 } from '../../company/company.controller'
 import { prismaMock } from '../__mocks__/prismaMock'
 import { CompanyRole, Role } from '@prisma/client'
@@ -12,15 +12,15 @@ const mockCompanyMembers = [
     companyId: 'testCompanyId',
     companyRole: CompanyRole.OWNER,
     createdAt: new Date(),
-    updatedAt: new Date(),
+    updatedAt: new Date()
   },
   {
     userId: '2',
     companyId: 'testCompanyId',
     companyRole: CompanyRole.MEMBER,
     createdAt: new Date(),
-    updatedAt: new Date(),
-  },
+    updatedAt: new Date()
+  }
 ]
 
 const mockCompany = {
@@ -30,7 +30,7 @@ const mockCompany = {
   CompanyMember: mockCompanyMembers,
   website: 'https://testCompany.com',
   createdAt: new Date(),
-  updatedAt: new Date(),
+  updatedAt: new Date()
 }
 
 describe('getCompany function', () => {
@@ -40,12 +40,12 @@ describe('getCompany function', () => {
   beforeEach(() => {
     req = {
       params: {
-        id: mockCompany.id,
-      },
+        id: mockCompany.id
+      }
     }
     res = {
       status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
+      json: jest.fn()
     }
   })
 
@@ -60,13 +60,13 @@ describe('getCompany function', () => {
 
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({
-      message: `Welcome to Company ${mockCompany.name}.`,
+      message: `Welcome to Company ${mockCompany.name}.`
     })
   })
 
   it('should handle errors', async () => {
     prismaMock.company.findUnique.mockRejectedValueOnce(
-      new Error('Internal Server Error'),
+      new Error('Internal Server Error')
     )
 
     await getCompanyByIdController(req as Request, res as Response)
@@ -83,15 +83,15 @@ describe('editCompany function', () => {
   beforeEach(() => {
     req = {
       params: {
-        id: mockCompany.id,
+        id: mockCompany.id
       },
       body: {
-        website: mockCompany.website,
-      },
+        website: mockCompany.website
+      }
     }
     res = {
       status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
+      json: jest.fn()
     }
   })
 
@@ -106,13 +106,13 @@ describe('editCompany function', () => {
 
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({
-      company: mockCompany,
+      company: mockCompany
     })
   })
 
   it('should handle errors', async () => {
     prismaMock.company.update.mockRejectedValueOnce(
-      new Error('Internal Server Error'),
+      new Error('Internal Server Error')
     )
 
     await editCompanyController(req as Request, res as Response)

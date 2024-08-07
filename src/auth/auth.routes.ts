@@ -4,14 +4,14 @@ import {
   validateCookies,
   ValidationCriteria
 } from '../middleware/params.middleware'
-import { LoginUserBody, NewUserBody } from '../user/user.dto'
+import type { LoginUserBody, NewUserBody } from '../user/user.dto'
 import {
   loginController,
   logoutController,
   refreshTokenController,
   registrationController,
   sessionController,
-  validateOTP,
+  validateOTP
 } from './auth.controller'
 
 export const authRouter: Router = Router()
@@ -19,20 +19,20 @@ export const authRouter: Router = Router()
 authRouter.post(
   '/login',
   validateBody<LoginUserBody>(['username', 'password'], ValidationCriteria.ALL),
-  loginController,
+  loginController
 )
 authRouter.post(
   '/register',
   validateBody<NewUserBody>(
     ['firstName', 'lastName', 'email', 'username', 'role', 'password'],
-    ValidationCriteria.ALL,
+    ValidationCriteria.ALL
   ),
-  registrationController,
+  registrationController
 )
 authRouter.get(
   '/refresh',
   validateCookies(['jwt'], ValidationCriteria.ALL),
-  refreshTokenController,
+  refreshTokenController
 )
 authRouter.post('/logout', logoutController)
 authRouter.get('/session', sessionController)

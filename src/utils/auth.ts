@@ -1,10 +1,10 @@
-import { User } from '@prisma/client'
-import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken'
+import type { User } from '@prisma/client'
+import jwt, { type JwtPayload, type SignOptions } from 'jsonwebtoken'
 import { getEnvs } from './envs'
 
 const generateToken = async (
   user: User,
-  expiration: SignOptions['expiresIn'],
+  expiration: SignOptions['expiresIn']
 ): Promise<string> => {
   if (!user || !expiration) {
     throw new Error('Invalid user object or expiration provided')
@@ -14,13 +14,13 @@ const generateToken = async (
 
     const payload: JwtPayload = {
       username: user.username,
-      role: user.role,
+      role: user.role
     }
 
     const options: SignOptions = {
       algorithm: 'RS256',
       expiresIn: expiration,
-      issuer: issuer,
+      issuer: issuer
     }
 
     return jwt.sign(payload, privateKey, options)
@@ -31,7 +31,7 @@ const generateToken = async (
 }
 
 const generateTokens = async (
-  user: User,
+  user: User
 ): Promise<{ accessToken: string; refreshToken: string }> => {
   if (!user) {
     throw new Error('Invalid user object provided')
@@ -42,7 +42,7 @@ const generateTokens = async (
 
     return {
       accessToken,
-      refreshToken,
+      refreshToken
     }
   } catch (error) {
     throw new Error('Failed to generate tokens')

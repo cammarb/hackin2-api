@@ -17,7 +17,7 @@ const disconnectRedis = async () => {
 
 const redisStore = new RedisStore({
   client: redisClient,
-  prefix: 'hackin2-api:',
+  prefix: 'hackin2-api:'
 })
 
 const redisSession = session({
@@ -29,9 +29,9 @@ const redisSession = session({
     httpOnly: true,
     sameSite: 'lax',
     secure: false,
-    maxAge: 24 * 60 * 60 * 1000,
+    maxAge: 24 * 60 * 60 * 1000
   },
-  genid: () => randomUUID(),
+  genid: () => randomUUID()
 })
 
 export { redisClient, redisStore, redisSession, connectRedis, disconnectRedis }

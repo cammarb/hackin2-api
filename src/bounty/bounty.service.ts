@@ -1,9 +1,9 @@
-import { Bounty, Severity, SeverityReward } from '@prisma/client'
+import { type Bounty, Severity, SeverityReward } from '@prisma/client'
 import prisma from '../utils/client'
-import {
+import type {
   AddBountyBody,
   BountyQueryParams,
-  UpdateBountyBody,
+  UpdateBountyBody
 } from './bounty.dto'
 
 export const getBounties = async (queryParams: BountyQueryParams) => {
@@ -38,10 +38,10 @@ export const getBounties = async (queryParams: BountyQueryParams) => {
   bounties = await prisma.bounty.findMany({
     where: {
       SeverityReward: {
-        severity: severity,
+        severity: severity
       },
-      programId: programId,
-    },
+      programId: programId
+    }
   })
 
   return bounties
@@ -50,8 +50,8 @@ export const getBounties = async (queryParams: BountyQueryParams) => {
 export const getBountyById = async (id: string) => {
   const bounty = await prisma.bounty.findUnique({
     where: {
-      id: id,
-    },
+      id: id
+    }
   })
 
   return bounty
@@ -61,13 +61,13 @@ export const editBounty = async (id: string, body: UpdateBountyBody) => {
   const { title, description, severityRewardId } = body
   const bounty = await prisma.bounty.update({
     where: {
-      id: id,
+      id: id
     },
     data: {
       title: title,
       description: description,
-      severityRewardId: severityRewardId,
-    },
+      severityRewardId: severityRewardId
+    }
   })
 
   return bounty
@@ -80,8 +80,8 @@ export const addBounty = async (body: AddBountyBody) => {
       title: title,
       description: description,
       severityRewardId: severityRewardId,
-      programId: programId,
-    },
+      programId: programId
+    }
   })
 
   return bounty
@@ -90,8 +90,8 @@ export const addBounty = async (body: AddBountyBody) => {
 export const deleteBounty = async (id: string) => {
   const bounty = await prisma.bounty.delete({
     where: {
-      id: id,
-    },
+      id: id
+    }
   })
 
   return bounty

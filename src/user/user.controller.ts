@@ -1,6 +1,6 @@
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 import { deleteUser, editUser, getUserById, getUsers } from './user.service'
-import { UserQueryParams } from './user.dto'
+import type { UserQueryParams } from './user.dto'
 
 export const getUsersController = async (req: Request, res: Response) => {
   try {
@@ -12,7 +12,7 @@ export const getUsersController = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Programs not found' })
 
     res.status(200).json({
-      users,
+      users
     })
   } catch (error) {
     return res.status(500).json({ error: 'Internal Server Error' })

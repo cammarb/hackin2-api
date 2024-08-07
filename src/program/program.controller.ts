@@ -1,18 +1,18 @@
-import { NextFunction, Request, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 import {
   addProgram,
   deleteProgram,
   editProgram,
   getProgramById,
-  getPrograms,
+  getPrograms
 } from './program.service'
-import { ProgramQueryParams } from './program.dto'
+import type { ProgramQueryParams } from './program.dto'
 import {
   InvalidParameterError,
   MissingBodyParameterError,
   MissingParameterError,
   NotFoundError,
-  ResourceNotFoundError,
+  ResourceNotFoundError
 } from '../error/apiError'
 
 export const addProgramController = async (req: Request, res: Response) => {
@@ -31,7 +31,7 @@ export const addProgramController = async (req: Request, res: Response) => {
 export const getProgramsController = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const queryParams = req.query as ProgramQueryParams
@@ -49,7 +49,7 @@ export const getProgramsController = async (
 export const getProgramByIdController = async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const id = req.params.id

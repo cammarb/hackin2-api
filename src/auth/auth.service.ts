@@ -1,7 +1,7 @@
-import { RefreshToken, User } from '@prisma/client'
+import type { RefreshToken, User } from '@prisma/client'
 import { compare } from 'bcrypt'
 import { AuthenticationError } from '../error/apiError'
-import { LoginUserBody } from '../user/user.dto'
+import type { LoginUserBody } from '../user/user.dto'
 import { generateTokens } from '../utils/auth'
 import prisma from '../utils/client'
 
@@ -10,7 +10,7 @@ export const loginService = async (body: LoginUserBody) => {
 
   const user = await prisma.user.findUnique({
     where: {
-      username: username,
+      username: username
     },
     include: {
       CompanyMember: {
@@ -39,11 +39,11 @@ export const refreshTokenCycleService = async (token: string, user: User) => {
   const [revokeToken, newTokens] = await Promise.all([
     prisma.refreshToken.update({
       where: {
-        hashedToken: token,
+        hashedToken: token
       },
       data: {
-        revoked: true,
-      },
+        revoked: true
+      }
     }),
     generateTokens(user)
   ])
@@ -51,8 +51,8 @@ export const refreshTokenCycleService = async (token: string, user: User) => {
   const newRefreshToken: RefreshToken = await prisma.refreshToken.create({
     data: {
       hashedToken: newTokens.refreshToken,
-      userId: user.id,
-    },
+      userId: user.id
+    }
   })
 
   return newTokens

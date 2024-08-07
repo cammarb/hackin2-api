@@ -1,7 +1,5 @@
 import { Role } from '@prisma/client'
-import {
-  Application
-} from 'express'
+import type { Application } from 'express'
 import nodemailer from 'nodemailer'
 import request from 'supertest'
 import prisma from '../../utils/client'
@@ -19,7 +17,7 @@ const userData = {
   firstName: 'Steve',
   lastName: 'Jobs',
   password: 'password',
-  role: Role.ENTERPRISE,
+  role: Role.ENTERPRISE
 }
 
 let app: Application
@@ -41,7 +39,7 @@ describe('POST /api/v1/auth/register', () => {
   afterAll(async () => {
     await redisClient.disconnect()
     await prisma.user.delete({
-      where: { username: 'steve.jobs' },
+      where: { username: 'steve.jobs' }
     })
   })
 
@@ -54,7 +52,7 @@ describe('POST /api/v1/auth/register', () => {
     expect(response.status).toBe(201)
 
     const user = await prisma.user.findUnique({
-      where: { username: 'steve.jobs' },
+      where: { username: 'steve.jobs' }
     })
 
     expect(user).toBeTruthy()
@@ -74,7 +72,7 @@ describe('POST /api/v1/auth/register', () => {
 
     expect(response.status).toBe(409)
     expect(response.body).toEqual({
-      error: { message: 'Unique constraint violation' },
+      message: 'Unique constraint violation'
     })
   })
 })

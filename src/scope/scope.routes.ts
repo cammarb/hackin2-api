@@ -3,7 +3,7 @@ import {
   addScopeController,
   deleteScopeController,
   getScopesController,
-  updateScopeController,
+  updateScopeController
 } from './scope.controller'
 
 export const scopeRouter: Router = Router()
