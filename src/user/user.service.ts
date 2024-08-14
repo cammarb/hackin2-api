@@ -1,13 +1,19 @@
 import type { Role, User } from '@prisma/client'
 import prisma from '../utils/client'
-import type { NewUserBody, UpdateUser, UserQueryParams } from './user.dto'
+import type {
+  NewUserBody,
+  UpdateUser,
+  UpdateUserPassword,
+  UserQueryParams
+} from './user.dto'
 import { validate } from 'email-validator'
+import { compare } from 'bcrypt'
+import { AuthenticationError } from '../error/apiError'
+import hashToken from '../utils/hash'
 
 export const getUsers = async (queryParams: UserQueryParams) => {
-  let users
-
   if (!queryParams) {
-    users = users = await prisma.user.findMany({
+    const users = await prisma.user.findMany({
       select: {
         firstName: true,
         lastName: true,
@@ -16,6 +22,7 @@ export const getUsers = async (queryParams: UserQueryParams) => {
         role: true
       }
     })
+    return users
   }
 
   const allowedParams = ['role']
@@ -30,7 +37,7 @@ export const getUsers = async (queryParams: UserQueryParams) => {
     role = queryParams.role as Role
   }
 
-  users = await prisma.user.findMany({
+  const users = await prisma.user.findMany({
     where: {
       role: role
     },
@@ -81,6 +88,37 @@ export const editUser = async (id: string, body: UpdateUser) => {
   })
 
   return user
+}
+
+export const editUserPassword = async (
+  id: string,
+  body: UpdateUserPassword
+) => {
+  const { currentPassword, newPassword } = body
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: id
+    }
+  })
+
+  if (!user) throw new AuthenticationError()
+
+  const isValidPassword = await compare(currentPassword, user.password)
+  if (!isValidPassword) throw new AuthenticationError()
+
+  const password = await hashToken(newPassword)
+
+  const updateUser = await prisma.user.update({
+    where: {
+      id: id
+    },
+    data: {
+      password: password
+    }
+  })
+
+  return updateUser
 }
 
 export const deleteUser = async (id: string) => {

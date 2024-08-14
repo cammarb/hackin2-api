@@ -1,7 +1,7 @@
 import compression from 'compression'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 import express, { type Application } from 'express'
 import fileUpload from 'express-fileupload'
 import session from 'express-session'
@@ -20,7 +20,7 @@ const createServer = async () => {
   app.use(
     cors({
       origin: process.env.ORIGIN,
-      methods: ['GET', 'POST', 'PUT'],
+      methods: ['GET', 'POST', 'PUT', 'PATCH'],
       credentials: true
     })
   )

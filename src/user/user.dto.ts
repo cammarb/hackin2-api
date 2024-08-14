@@ -7,6 +7,11 @@ export interface UpdateUser {
   lastName?: string
 }
 
+export interface UpdateUserPassword {
+  currentPassword: string
+  newPassword: string
+}
+
 export interface UserQueryParams {
   role?: string
 }
