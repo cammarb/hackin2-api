@@ -50,7 +50,7 @@ const checkSession = async (
     const { id } = req.session
     if (!id) throw new UnauthorizedError()
 
-    const userSession = await redisClient.get('hackin2-api:' + id)
+    const userSession = await redisClient.get(`hackin2-api:${id}`)
     if (!userSession) throw new ForbiddenError()
 
     next()

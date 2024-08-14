@@ -2,8 +2,6 @@ import type { Role, User } from '@prisma/client'
 import prisma from '../utils/client'
 import type { NewUserBody, UpdateUser, UserQueryParams } from './user.dto'
 import { validate } from 'email-validator'
-import { BadRequestError } from '../error/apiError'
-import { nextTick } from 'process'
 
 export const getUsers = async (queryParams: UserQueryParams) => {
   let users

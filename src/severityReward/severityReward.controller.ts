@@ -8,7 +8,7 @@ import {
 } from './severityReward.service'
 
 export const getSeverityRewardsController = async (
-  req: Request | any,
+  req: Request,
   res: Response
 ) => {
   try {

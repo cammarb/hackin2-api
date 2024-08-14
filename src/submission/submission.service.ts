@@ -1,12 +1,30 @@
 import prisma from '../utils/client'
-import type { SubmissionBody, SubmissionQueryParams } from './submission.dto'
+import type {
+  SubmissionBody,
+  SubmissionQueryParams,
+  UpdateSubmissionBody
+} from './submission.dto'
 import { cloudinary } from '../utils/cloudinary'
 import type { FileArray, UploadedFile } from 'express-fileupload'
+import { ConflictError } from '../error/apiError'
+import type { SubmissionStatus } from '@prisma/client'
 
 export const getSubmissionById = async (id: string) => {
   const submission = await prisma.submissions.findUnique({
     where: {
       id: id
+    },
+    include: {
+      User: {
+        select: {
+          username: true
+        }
+      },
+      Severity: {
+        select: {
+          severity: true
+        }
+      }
     }
   })
 
@@ -14,15 +32,17 @@ export const getSubmissionById = async (id: string) => {
 }
 
 export const getSubmissions = async (queryParams: SubmissionQueryParams) => {
-  let userId: string | undefined
+  let username: string | undefined
   let programId: string | undefined
 
-  if (queryParams.user) userId = queryParams.user
+  if (queryParams.user) username = queryParams.user
   if (queryParams.program) programId = queryParams.program
 
   const submissions = await prisma.submissions.findMany({
     where: {
-      userId: userId,
+      User: {
+        username: username
+      },
       programId: programId
     },
     include: {
@@ -35,6 +55,11 @@ export const getSubmissions = async (queryParams: SubmissionQueryParams) => {
         select: {
           severity: true
         }
+      },
+      User: {
+        select: {
+          username: true
+        }
       }
     }
   })
@@ -45,9 +70,23 @@ export const getSubmissions = async (queryParams: SubmissionQueryParams) => {
 export const addSumission = async (
   user: { id: string },
   body: SubmissionBody,
-  files: FileArray
+  files?: FileArray
 ) => {
+  /**
+   * Users can submit only once to a Program.
+   * We need to check this first before proceeding.
+   */
   const { programId, asset, severity, evidence, impact } = body
+  const userProgramSubmission = await prisma.submissions.findUnique({
+    where: {
+      programId_userId: {
+        userId: user.id,
+        programId: programId
+      }
+    }
+  })
+  if (userProgramSubmission)
+    throw new ConflictError('User already submitted to this program.')
 
   /**
    * 'fileUrls' will store an array of the files urls
@@ -82,4 +121,22 @@ export const addSumission = async (
   })
 
   return submission
+}
+
+export const updateSubmission = async (
+  id: string,
+  body: UpdateSubmissionBody
+) => {
+  const { status } = body
+
+  const submissions = await prisma.submissions.update({
+    where: {
+      id: id
+    },
+    data: {
+      status: status as SubmissionStatus
+    }
+  })
+
+  return submissions
 }

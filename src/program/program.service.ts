@@ -32,6 +32,13 @@ export const getPrograms = async (queryParams: ProgramQueryParams) => {
     where: {
       companyId: companyId,
       programStatus: programStatus
+    },
+    include: {
+      Company: {
+        select: {
+          name: true
+        }
+      }
     }
   })
 

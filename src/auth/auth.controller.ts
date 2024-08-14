@@ -10,9 +10,11 @@ import jwt, {
 import {
   BadRequestError,
   ConflictError,
+  ForbiddenError,
   InvalidJWTError,
   JWTExpiredError,
-  MissingBodyParameterError
+  MissingBodyParameterError,
+  UnauthorizedError
 } from '../error/apiError'
 import type { LoginUserBody, NewUserBody } from '../user/user.dto'
 import { createUser } from '../user/user.service'
@@ -101,7 +103,7 @@ export const refreshTokenController = async (
   next: NextFunction
 ) => {
   try {
-    const jwtCookie: string = req.cookies['jwt']
+    const jwtCookie: string = req.cookies.jwt
 
     const { publicKey } = await getEnvs()
 
@@ -116,7 +118,8 @@ export const refreshTokenController = async (
       include: {
         CompanyMember: {
           select: {
-            companyId: true
+            companyId: true,
+            companyRole: true
           }
         }
       }
@@ -154,8 +157,8 @@ export const logoutController = async (
   next: NextFunction
 ) => {
   try {
-    const jwtCookie = req.cookies['jwt']
-    const jwtHeader = req.headers['authorization']
+    const jwtCookie = req.cookies.jwt
+    const jwtHeader = req.headers.authorization
 
     if (!jwtCookie || !jwtHeader) {
       return res.sendStatus(204)
@@ -199,19 +202,13 @@ export const sessionController = async (
 ) => {
   try {
     const session = req.session
-    if (!session) return res.sendStatus(401)
+    if (!session) throw new UnauthorizedError()
 
     const sessionData: string | null = await redisClient.get(
-      'hackin2-api:' + session.id
+      `hackin2-api:${session.id}`
     )
-    if (!sessionData) res.sendStatus(403)
-    else {
-      const parsedSession = JSON.parse(sessionData)
-      return res.status(200).json({
-        user: parsedSession.user.username,
-        role: parsedSession.user.role
-      })
-    }
+    if (!sessionData) throw new ForbiddenError()
+    return res.status(200).json({ message: 'success' })
   } catch (error) {
     next(error)
   }
