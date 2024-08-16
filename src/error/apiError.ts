@@ -51,8 +51,8 @@ export class InternalServerError extends ApiError {
 }
 
 export class BadRequestError extends ApiError {
-  constructor(message: string) {
-    super(message, 400)
+  constructor(message?: string) {
+    super(message ? message : 'Bad Request', 400)
     Object.setPrototypeOf(this, BadRequestError.prototype)
   }
 }

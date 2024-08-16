@@ -15,7 +15,7 @@ const verifyJWT = async (
   next: NextFunction
 ) => {
   try {
-    const authHeader = req.headers && req.headers['authorization']
+    const authHeader = req.headers?.authorization
     const { publicKey } = await getEnvs()
 
     if (!authHeader || !publicKey)
@@ -30,7 +30,7 @@ const verifyJWT = async (
     req.username = decoded.username
     req.role = decoded.role
     next()
-  } catch (error: any) {
+  } catch (error) {
     if (error instanceof TokenExpiredError) {
       next(new JWTExpiredError(error.message))
     } else if (error instanceof JsonWebTokenError) {

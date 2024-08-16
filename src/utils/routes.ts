@@ -10,6 +10,7 @@ import { severityRewardRouter } from '../severityReward/severityReward.routes'
 import { submissionRouter } from '../submission/submission.routes'
 import { userRouter } from '../user/user.routes'
 import { companyMemberRouter } from '../companyMember/companyMember.routes'
+import { applicationRouter } from '../application/application.routes'
 
 const routes = (app: Application) => {
   const apiRoutes: Router = Router()
@@ -22,6 +23,7 @@ const routes = (app: Application) => {
   apiRoutes.use('/companies', verifyJWT, checkEnterprise, companyRouter)
   apiRoutes.use('/members', verifyJWT, checkEnterprise, companyMemberRouter)
   apiRoutes.use('/programs', verifyJWT, programRouter)
+  apiRoutes.use('/applications', verifyJWT, applicationRouter)
   apiRoutes.use('/bounties', verifyJWT, bountyRouter)
   apiRoutes.use('/submissions', verifyJWT, submissionRouter)
   apiRoutes.use('/severity-rewards', verifyJWT, severityRewardRouter)

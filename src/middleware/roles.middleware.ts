@@ -2,7 +2,7 @@ import type { CompanyMember, CompanyRole } from '@prisma/client'
 import type { NextFunction, Request, Response } from 'express'
 import { ResourceNotFoundError } from '../error/apiError'
 import prisma from '../utils/client'
-import { SessionData } from 'express-session'
+import type { SessionData } from 'express-session'
 
 const checkPentester = async (
   req: Request | any,

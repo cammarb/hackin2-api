@@ -122,7 +122,7 @@ export const validateCookies = (
   return (req: Request, res: Response, next: NextFunction) => {
     const cookies = req.cookies
 
-    if (cookie.includes('jwt') && !cookies['jwt']) {
+    if (cookie.includes('jwt') && !cookies.jwt) {
       return next(new AuthenticationError())
     }
 

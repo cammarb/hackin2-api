@@ -38,9 +38,15 @@ model User {
   updatedAt DateTime @updatedAt
   role      Role
 
-  RefreshToken  RefreshToken[]
+  RefreshToken RefreshToken[]
+
   CompanyMember CompanyMember?
-  Submissions   Submissions[]
+
+  Program     Program[]
+  Submissions Submissions[]
+  Bounty      Bounty[]
+
+  Application Application[]
 }
 
 model RefreshToken {
@@ -91,6 +97,7 @@ model Program {
   description   String
   programStatus ProgramStatus @default(DRAFT)
   location      String
+  Applications  Application[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
@@ -98,32 +105,8 @@ model Program {
   Bounty         Bounty[]
   SeverityReward SeverityReward[]
   Submissions    Submissions[]
-}
-
-model Submissions {
-  id               String           @id @unique @default(uuid())
-  programId        String
-  Program          Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
-  userId           String
-  User             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  asset            String
-  Severity         SeverityReward   @relation(fields: [severityRewardId], references: [id], onDelete: Cascade)
-  severityRewardId String
-  evidence         String
-  impact           String
-  findings         String[]
-  status           SubmissionStatus @default(PENDING)
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-
-  @@unique([programId, userId])
-}
-
-enum SubmissionStatus {
-  PENDING
-  REVIEWED
-  RESOLVED
-  REJECTED
+  User           User?            @relation(fields: [userId], references: [id])
+  userId         String?
 }
 
 model Scope {
@@ -154,6 +137,25 @@ model SeverityReward {
   @@unique([programId, severity])
 }
 
+model Application {
+  id        String            @id @unique @default(uuid())
+  User      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  Program   Program           @relation(fields: [programId], references: [id])
+  programId String
+  status    ApplicationStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@unique([programId, userId])
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 model Bounty {
   id               String         @id @unique @default(uuid())
   title            String
@@ -162,4 +164,39 @@ model Bounty {
   SeverityReward   SeverityReward @relation(fields: [severityRewardId], references: [id])
   programId        String
   Program          Program        @relation(fields: [programId], references: [id], onDelete: Cascade)
+  usersAssigned    String
+  User             User[]
+  status           BountyStatus   @default(PENDING)
+}
+
+enum BountyStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+}
+
+model Submissions {
+  id               String           @id @unique @default(uuid())
+  programId        String
+  Program          Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
+  userId           String
+  User             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  asset            String
+  Severity         SeverityReward   @relation(fields: [severityRewardId], references: [id], onDelete: Cascade)
+  severityRewardId String
+  evidence         String
+  impact           String
+  findings         String[]
+  status           SubmissionStatus @default(PENDING)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@unique([programId, userId])
+}
+
+enum SubmissionStatus {
+  PENDING
+  IN_REVIEW
+  REVIEWED
+  RESOLVED
 }
