@@ -21,8 +21,6 @@ Repository for the Hackin2 API, built using `Express.js` with `Typescript`. The 
 Hackin2 is a platform that helps companies and cybersecurity freelancers connect.
 This repository contains the backend API, which provides the necessary endpoints for the Hackin2 web application to interact with the database, cache storage, handle user authentication, authorization and manage security-related tasks.
 
-![diagram](./diagram.svg)
-
 ![diagram](Hackin2%20-%20Current%20infrastructure.drawio.svg)
 
 ## Features
