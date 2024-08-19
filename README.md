@@ -31,7 +31,7 @@ This repository contains the backend API, which provides the necessary endpoints
 - Role base access control: `COMPANY`, `PENTESTER`.
 - Programs management and tracking.
 - Findings reporting and management.
-- Security event logging and monitoring.
+- Security event logging and monitoring (TBD)
 - User activity and access control.
 - Customizable configuration options.
 
@@ -42,7 +42,7 @@ This repository contains the backend API, which provides the necessary endpoints
 To run the API locally, you need the following prerequisites:
 
 - git
-- Node.js (version >= 18)
+- Node.js (version >= 20)
 - npm
 
 ### Installation
@@ -50,7 +50,7 @@ To run the API locally, you need the following prerequisites:
 1. Clone this repository to your local machine:
 
    ```bash
-   git clone https://github.com/Hackin2-company/hackin2-api.git
+   git clone https://github.com/cammarb/hackin2-api.git
    cd hackin2-api
    ```
 
@@ -74,10 +74,6 @@ This section assumes **you know how to work with docker.**
      ```bash
      .generate_keys.sh
      ```
-   - Windows
-     ```powershell
-     generate_keys.ps1
-     ```
 
 2. Create docker images with compose
    
@@ -90,22 +86,7 @@ This section assumes **you know how to work with docker.**
 3. Create .env file
 
    Before running the API, you need to set up the configuration.
-   Copy the .env.example file and rename it to .env, then fill in the appropriate values for the environment variables:
-
-   ```
-   PORT=8000
-   DATABASE_USER=postgres
-   DATABASE_PASSWORD=postgres
-   DATABASE_DB=hackin2db
-   DATABASE_PORT=5432
-   DATABASE_URL=postgresql://postgres:postgres@localhost:DATABASE_PORT/hackin2db
-
-   ORIGIN='http://localhost:5173'
-   ISSUER='https://hackin2.com'
-
-   PUBKEY=public_key.pem
-   PRIVKEY=private_key.pem
-   ```
+   Copy the .env.example file and rename it to .env, then fill in the appropriate values for the environment variables
 
 #### Dev Container
 
