@@ -36,7 +36,8 @@ export const getApplicationsController = async (
   next: NextFunction
 ) => {
   try {
-    const applications = await getApplications()
+    const query = req.query
+    const applications = await getApplications(query)
     if (applications.length < 1) throw new ResourceNotFoundError()
 
     return res.status(200).json({ applications: applications })
@@ -69,7 +70,8 @@ export const updateApplicationController = async (
   try {
     const id = req.params.id
     const { status } = req.body
-    const application = await updateApplicaton(id, status)
+    const user = req.session.user as SessionData['user']
+    const application = await updateApplicaton(id, status, user.id)
     if (!application) throw new BadRequestError()
 
     return res.status(200).json({ application: application })

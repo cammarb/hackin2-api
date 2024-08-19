@@ -1,5 +1,10 @@
 import { Router } from 'express'
-import { validateBody, validateParams } from '../middleware/params.middleware'
+import {
+  validateBody,
+  validateParams,
+  validateQuery,
+  ValidationCriteria
+} from '../middleware/params.middleware'
 import {
   addApplicationController,
   getApplicationsController,
@@ -12,19 +17,25 @@ export const applicationRouter: Router = Router()
 
 applicationRouter.post(
   '/new',
-  validateBody(['userId', 'programId']),
+  validateUserSession,
+  validateBody(['programId'], ValidationCriteria.ALL),
   addApplicationController
 )
-applicationRouter.get('/', getApplicationsController)
+applicationRouter.get(
+  '/',
+  validateQuery(['program', 'user'], ValidationCriteria.AT_LEAST_ONE),
+  getApplicationsController
+)
 applicationRouter.get(
   '/:id',
   validateUserSession,
-  validateParams(['id']),
+  validateParams(['id'], ValidationCriteria.ALL),
   getApplicationsController
 )
 applicationRouter.patch(
   '/:id/edit',
+  validateUserSession,
   validateParams(['id']),
-  validateBody(['status']),
+  validateBody(['status'], ValidationCriteria.ALL),
   updateApplicationController
 )

@@ -44,9 +44,9 @@ model User {
 
   Program     Program[]
   Submissions Submissions[]
-  Bounty      Bounty[]
 
-  Application Application[]
+  Application      Application[]
+  BountyAssignment BountyAssignment[]
 }
 
 model RefreshToken {
@@ -157,22 +157,30 @@ enum ApplicationStatus {
 }
 
 model Bounty {
-  id               String         @id @unique @default(uuid())
+  id               String             @id @unique @default(uuid())
   title            String
   description      String
   severityRewardId String
-  SeverityReward   SeverityReward @relation(fields: [severityRewardId], references: [id])
+  SeverityReward   SeverityReward     @relation(fields: [severityRewardId], references: [id])
   programId        String
-  Program          Program        @relation(fields: [programId], references: [id], onDelete: Cascade)
-  usersAssigned    String
-  User             User[]
-  status           BountyStatus   @default(PENDING)
+  Program          Program            @relation(fields: [programId], references: [id], onDelete: Cascade)
+  assignedUsers    BountyAssignment[]
+  status           BountyStatus       @default(PENDING)
 }
 
 enum BountyStatus {
   PENDING
   IN_PROGRESS
   DONE
+}
+
+model BountyAssignment {
+  id         String   @id @unique @default(uuid())
+  bountyId   String
+  Bounty     Bounty   @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  userId     String
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignedAt DateTime @default(now())
 }
 
 model Submissions {
