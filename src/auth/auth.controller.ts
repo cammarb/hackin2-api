@@ -87,10 +87,16 @@ export const loginController = async (
       maxAge: 24 * 60 * 60 * 1000
     })
     res.status(200).json({
-      user: user.username,
-      role: user.role,
-      token: tokens.accessToken,
-      company: user.CompanyMember?.companyId
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        token: tokens.accessToken,
+        company: {
+          id: user.CompanyMember?.companyId,
+          role: user.CompanyMember?.companyRole
+        }
+      }
     })
   } catch (error) {
     next(error)
@@ -135,10 +141,16 @@ export const refreshTokenController = async (
       maxAge: 24 * 60 * 60 * 1000
     })
     res.status(200).json({
-      user: user.username,
-      role: user.role,
-      token: `${newTokens.accessToken}`,
-      company: user.CompanyMember?.companyId
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        token: `${newTokens.accessToken}`,
+        company: {
+          id: user.CompanyMember?.companyId,
+          role: user.CompanyMember?.companyRole
+        }
+      }
     })
   } catch (error) {
     if (error instanceof TokenExpiredError) {
