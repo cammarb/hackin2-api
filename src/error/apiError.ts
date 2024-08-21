@@ -80,7 +80,7 @@ export class MissingBodyParameterError extends BadRequestError {
 
 export class ResourceNotFoundError extends NotFoundError {
   constructor(resource?: string) {
-    super(`Resource not found ${resource ? resource : ''}`)
+    super(`Resource not found${resource ? resource : ''}`)
     Object.setPrototypeOf(this, ResourceNotFoundError.prototype)
   }
 }
