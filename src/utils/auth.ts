@@ -37,7 +37,7 @@ const generateTokens = async (
     throw new Error('Invalid user object provided')
   }
   try {
-    const accessToken = await generateToken(user, '5m')
+    const accessToken = await generateToken(user, '15m')
     const refreshToken = await generateToken(user, '8h')
 
     return {
