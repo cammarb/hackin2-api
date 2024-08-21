@@ -38,7 +38,7 @@ export const getApplicationsController = async (
   try {
     const query = req.query
     const applications = await getApplications(query)
-    if (applications.length < 1) throw new ResourceNotFoundError()
+    if (!applications) throw new ResourceNotFoundError()
 
     return res.status(200).json({ applications: applications })
   } catch (error) {

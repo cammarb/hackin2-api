@@ -11,23 +11,42 @@ export const addApplication = async (userId: string, programId: string) => {
   return application
 }
 
+// TODO: Add query type for application
 export const getApplications = async (query) => {
   const programId = query.program
   const userId = query.user
 
-  const applications = await prisma.application.findMany({
-    where: {
-      userId: userId,
-      programId: programId
-    },
-    include: {
-      Program: {
-        select: {
-          name: true
+  let applications
+
+  if (programId) {
+    applications = await prisma.application.findMany({
+      where: {
+        programId: programId
+      },
+      include: {
+        Program: {
+          select: {
+            name: true
+          }
         }
       }
-    }
-  })
+    })
+  }
+  if (userId) {
+    applications = await prisma.application.findMany({
+      where: {
+        userId: userId
+      },
+      include: {
+        Program: {
+          select: {
+            name: true
+          }
+        }
+      }
+    })
+  }
+
   return applications
 }
 

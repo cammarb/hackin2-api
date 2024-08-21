@@ -7,6 +7,7 @@ import {
 } from '../middleware/params.middleware'
 import {
   addApplicationController,
+  getApplicationByIdController,
   getApplicationsController,
   updateApplicationController
 } from './application.controller'
@@ -23,6 +24,7 @@ applicationRouter.post(
 )
 applicationRouter.get(
   '/',
+  validateUserSession,
   validateQuery(['program', 'user'], ValidationCriteria.AT_LEAST_ONE),
   getApplicationsController
 )
@@ -30,7 +32,7 @@ applicationRouter.get(
   '/:id',
   validateUserSession,
   validateParams(['id'], ValidationCriteria.ALL),
-  getApplicationsController
+  getApplicationByIdController
 )
 applicationRouter.patch(
   '/:id/edit',
