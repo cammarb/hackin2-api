@@ -1,5 +1,6 @@
 import type { ApplicationStatus } from '@prisma/client'
 import prisma from '../utils/client'
+import type { ApplicationQuery } from './application.dto'
 
 export const addApplication = async (userId: string, programId: string) => {
   const application = await prisma.application.create({
@@ -12,11 +13,12 @@ export const addApplication = async (userId: string, programId: string) => {
 }
 
 // TODO: Add query type for application
-export const getApplications = async (query) => {
+export const getApplications = async (query: ApplicationQuery) => {
   const programId = query.program
   const userId = query.user
 
-  let applications
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  let applications: any
 
   if (programId) {
     applications = await prisma.application.findMany({
@@ -24,9 +26,10 @@ export const getApplications = async (query) => {
         programId: programId
       },
       include: {
-        Program: {
+        User: {
           select: {
-            name: true
+            id: true,
+            username: true
           }
         }
       }
