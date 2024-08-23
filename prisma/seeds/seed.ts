@@ -125,6 +125,37 @@ async function main() {
     }
   })
 
+  const programB = await prisma.program.findFirst({
+    where: { name: 'Program B' },
+    select: {
+      id: true,
+      SeverityReward: {
+        select: {
+          id: true
+        },
+        take: 1
+      }
+    }
+  })
+
+  if (programB) {
+    const programId = programB.id
+    const severityRewardId = programB.SeverityReward[0].id
+
+    const bounty = await prisma.bounty.upsert({
+      where: {
+        id: programB?.SeverityReward[0].id
+      },
+      update: {},
+      create: {
+        programId,
+        title: 'Bounty Title',
+        description: 'Bounty description',
+        severityRewardId
+      }
+    })
+  }
+
   const pentesterUser = await prisma.user.upsert({
     where: { username: 'user.pentester' },
     update: {},

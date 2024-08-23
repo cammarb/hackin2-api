@@ -157,15 +157,18 @@ enum ApplicationStatus {
 }
 
 model Bounty {
-  id               String             @id @unique @default(uuid())
-  title            String
-  description      String
-  severityRewardId String
-  SeverityReward   SeverityReward     @relation(fields: [severityRewardId], references: [id])
-  programId        String
-  Program          Program            @relation(fields: [programId], references: [id], onDelete: Cascade)
-  assignedUsers    BountyAssignment[]
-  status           BountyStatus       @default(PENDING)
+  id                 String             @id @unique @default(uuid())
+  title              String
+  description        String
+  severityRewardId   String
+  SeverityReward     SeverityReward     @relation(fields: [severityRewardId], references: [id])
+  programId          String
+  Program            Program            @relation(fields: [programId], references: [id], onDelete: Cascade)
+  assignedUsers      BountyAssignment[]
+  status             BountyStatus       @default(PENDING)
+  requirements       String?
+  rules              String?
+  acceptanceCriteria String?
 }
 
 enum BountyStatus {
