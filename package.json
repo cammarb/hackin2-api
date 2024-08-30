@@ -7,6 +7,7 @@
   },
   "main": "server.ts",
   "scripts": {
+    "start:dev_env": "./dev-starter.sh",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "test": "dotenv -e .env.test -- jest",
     "test:seed": "dotenv -e .env.test -- ts-node prisma/seeds/testSeed.ts",
