@@ -110,11 +110,12 @@ model Program {
 }
 
 model Scope {
-  id          String  @id @unique @default(uuid())
+  id          String   @id @unique @default(uuid())
   name        String
   description String
   programId   String
-  Program     Program @relation(fields: [programId], references: [id])
+  Program     Program  @relation(fields: [programId], references: [id])
+  Bounty      Bounty[]
 }
 
 enum Severity {
@@ -160,12 +161,17 @@ model Bounty {
   id               String             @id @unique @default(uuid())
   title            String
   description      String
+  notes            String?
   severityRewardId String
   SeverityReward   SeverityReward     @relation(fields: [severityRewardId], references: [id])
   programId        String
   Program          Program            @relation(fields: [programId], references: [id], onDelete: Cascade)
   assignedUsers    BountyAssignment[]
   status           BountyStatus       @default(PENDING)
+  scope            Scope              @relation(fields: [scopeId], references: [id])
+  scopeId          String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 }
 
 enum BountyStatus {
