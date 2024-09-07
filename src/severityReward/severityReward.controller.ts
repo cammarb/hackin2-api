@@ -36,7 +36,7 @@ export const getSeverityRewardByIdController = async (
         .status(400)
         .json({ error: 'Request parameters or body missing' })
 
-    const severityReward = getSeverityRewardById(id)
+    const severityReward = await getSeverityRewardById(id)
 
     if (severityReward == null)
       return res.status(404).json({ error: 'Program not found' })

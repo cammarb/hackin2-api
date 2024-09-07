@@ -4,9 +4,9 @@ import {
   addBountyController,
   deleteBountyController,
   editBountyController,
-  getBountiesController
+  getBountiesController,
+  getBountyByIdController
 } from './bounty.controller'
-import { getBountyById } from './bounty.service'
 
 export const bountyRouter: Router = Router()
 
@@ -18,7 +18,7 @@ bountyRouter.get(
 bountyRouter.get(
   '/:id',
   allowedRoles(['OWNER', 'ADMIN', 'MEMBER']),
-  getBountyById
+  getBountyByIdController
 )
 bountyRouter.post('/new', allowedRoles(['OWNER', 'ADMIN']), addBountyController)
 bountyRouter.put(
