@@ -11,13 +11,6 @@ export const getBounties = async (queryParams: BountyQueryParams) => {
 
   if (!queryParams) bounties = await prisma.bounty.findMany()
 
-  const allowedParams = ['program', 'severity']
-  for (const param in queryParams) {
-    if (!allowedParams.includes(param)) {
-      throw new Error('Invalid query parameter')
-    }
-  }
-
   let severity: Severity | undefined
   let programId: string | undefined
 
@@ -41,6 +34,9 @@ export const getBounties = async (queryParams: BountyQueryParams) => {
         severity: severity
       },
       programId: programId
+    },
+    include: {
+      assignedUsers: true
     }
   })
 
@@ -51,6 +47,9 @@ export const getBountyById = async (id: string) => {
   const bounty = await prisma.bounty.findUnique({
     where: {
       id: id
+    },
+    include: {
+      assignedUsers: true
     }
   })
 

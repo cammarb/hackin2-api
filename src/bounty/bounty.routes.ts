@@ -7,12 +7,17 @@ import {
   getBountiesController,
   getBountyByIdController
 } from './bounty.controller'
+import {
+  validateQuery,
+  ValidationCriteria
+} from '../middleware/params.middleware'
 
 export const bountyRouter: Router = Router()
 
 bountyRouter.get(
   '/',
   allowedRoles(['OWNER', 'ADMIN', 'MEMBER']),
+  validateQuery(['program', 'severity'], ValidationCriteria.AT_LEAST_ONE),
   getBountiesController
 )
 bountyRouter.get(

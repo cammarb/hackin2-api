@@ -42,7 +42,7 @@ export const editBountyController = async (req: Request, res: Response) => {
   try {
     const id = req.params.id
     const body = req.body
-    if (!id || body)
+    if (!id || !body)
       return res
         .status(400)
         .json({ error: 'Request parameters or body missing' })

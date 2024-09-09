@@ -69,9 +69,8 @@ export const updateApplicationController = async (
 ) => {
   try {
     const id = req.params.id
-    const { status } = req.body
-    const user = req.session.user as SessionData['user']
-    const application = await updateApplicaton(id, status, user.id)
+    const { status, bountyId, user } = req.body
+    const application = await updateApplicaton(id, status, bountyId, user)
     if (!application) throw new BadRequestError()
 
     return res.status(200).json({ application: application })
