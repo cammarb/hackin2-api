@@ -97,7 +97,6 @@ model Program {
   description   String
   programStatus ProgramStatus @default(DRAFT)
   location      String
-  Applications  Application[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
@@ -142,13 +141,13 @@ model Application {
   id        String            @id @unique @default(uuid())
   User      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
-  Program   Program           @relation(fields: [programId], references: [id])
-  programId String
+  Bounty    Bounty            @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  bountyId  String
   status    ApplicationStatus @default(PENDING)
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
 
-  @@unique([programId, userId])
+  @@unique([bountyId, userId])
 }
 
 enum ApplicationStatus {
@@ -168,10 +167,12 @@ model Bounty {
   Program          Program            @relation(fields: [programId], references: [id], onDelete: Cascade)
   assignedUsers    BountyAssignment[]
   status           BountyStatus       @default(PENDING)
-  scope            Scope              @relation(fields: [scopeId], references: [id])
-  scopeId          String
+  scope            String?
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
+  Scope            Scope?             @relation(fields: [scopeId], references: [id])
+  scopeId          String?
+  Application      Application[]
 }
 
 enum BountyStatus {

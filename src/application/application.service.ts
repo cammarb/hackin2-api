@@ -2,11 +2,13 @@ import type { ApplicationStatus } from '@prisma/client'
 import prisma from '../utils/client'
 import type { ApplicationQuery } from './application.dto'
 
-export const addApplication = async (userId: string, programId: string) => {
+export const addApplication = async (userId: string, bountyId: string) => {
+  // const rowCount = await prisma.application.count()
+
   const application = await prisma.application.create({
     data: {
       userId,
-      programId
+      bountyId
     }
   })
   return application
@@ -15,15 +17,40 @@ export const addApplication = async (userId: string, programId: string) => {
 // TODO: Add query type for application
 export const getApplications = async (query: ApplicationQuery) => {
   const programId = query.program
+  const bountyId = query.bounty
   const userId = query.user
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   let applications: any
 
-  if (programId) {
+  if (!bountyId && !userId && programId) {
     applications = await prisma.application.findMany({
       where: {
-        programId: programId
+        Bounty: {
+          programId: programId
+        }
+      },
+      include: {
+        User: {
+          select: {
+            id: true,
+            username: true
+          }
+        },
+        Bounty: {
+          select: {
+            title: true,
+            programId: true
+          }
+        }
+      }
+    })
+  }
+
+  if (bountyId) {
+    applications = await prisma.application.findMany({
+      where: {
+        bountyId: bountyId
       },
       include: {
         User: {
@@ -41,9 +68,10 @@ export const getApplications = async (query: ApplicationQuery) => {
         userId: userId
       },
       include: {
-        Program: {
+        Bounty: {
           select: {
-            name: true
+            title: true,
+            programId: true
           }
         }
       }

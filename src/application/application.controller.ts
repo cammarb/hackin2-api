@@ -10,7 +10,7 @@ import {
   ConflictError,
   ResourceNotFoundError
 } from '../error/apiError'
-import type { SessionData } from 'express-session'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 
 export const addApplicationController = async (
   req: Request,
@@ -18,14 +18,20 @@ export const addApplicationController = async (
   next: NextFunction
 ) => {
   try {
-    const programId = req.body.programId
-    const { id } = req.session.user as SessionData['user']
+    const { bountyId, userId } = req.body
 
-    const application = await addApplication(id, programId)
+    const application = await addApplication(userId, bountyId)
     if (!application) throw new ConflictError()
 
     res.sendStatus(204)
   } catch (error) {
+    if (error instanceof PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        return next(
+          new ConflictError('You have already applied to this bounty.')
+        )
+      }
+    }
     next(error)
   }
 }

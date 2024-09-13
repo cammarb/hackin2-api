@@ -11,32 +11,30 @@ import {
   getApplicationsController,
   updateApplicationController
 } from './application.controller'
-import { checkSession } from '../auth/auth.middleware'
-import { validateUserSession } from '../middleware/session.middleware'
+import type { ApplicationQuery } from './application.dto'
 
 export const applicationRouter: Router = Router()
 
 applicationRouter.post(
   '/new',
-  validateUserSession,
-  validateBody(['programId'], ValidationCriteria.ALL),
+  validateBody(['userId', 'bountyId'], ValidationCriteria.ALL),
   addApplicationController
 )
 applicationRouter.get(
   '/',
-  validateUserSession,
-  validateQuery(['program', 'user'], ValidationCriteria.AT_LEAST_ONE),
+  validateQuery<ApplicationQuery>(
+    ['bounty', 'user', 'program'],
+    ValidationCriteria.AT_LEAST_ONE
+  ),
   getApplicationsController
 )
 applicationRouter.get(
   '/:id',
-  validateUserSession,
   validateParams(['id'], ValidationCriteria.ALL),
   getApplicationByIdController
 )
 applicationRouter.patch(
   '/:id/edit',
-  validateUserSession,
   validateParams(['id']),
   validateBody(['status'], ValidationCriteria.ALL),
   updateApplicationController
