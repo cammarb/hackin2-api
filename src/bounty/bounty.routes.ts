@@ -16,7 +16,10 @@ export const bountyRouter: Router = Router()
 
 bountyRouter.get(
   '/',
-  validateQuery(['program', 'severity'], ValidationCriteria.AT_LEAST_ONE),
+  validateQuery(
+    ['program', 'severity', 'status'],
+    ValidationCriteria.AT_LEAST_ONE
+  ),
   getBountiesController
 )
 bountyRouter.get(

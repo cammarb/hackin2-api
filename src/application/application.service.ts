@@ -96,7 +96,6 @@ export const updateApplicaton = async (
   bountyId?: string,
   userId?: string
 ) => {
-  console.log(id, status, bountyId, userId)
   if (status === 'ACCEPTED' && userId && bountyId) {
     const [updateApplication, assignBounty] = await Promise.all([
       await prisma.application.update({

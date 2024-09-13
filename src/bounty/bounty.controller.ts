@@ -123,7 +123,6 @@ export const getBountyAssignmentsController = async (
     const queryParams = req.query as BountyAssignmentsQuery
 
     const bountyAssingments = await getBountyAssignments(queryParams)
-    console.log(bountyAssingments)
 
     return res.status(200).json({ bountyAssignments: bountyAssingments })
   } catch (error) {

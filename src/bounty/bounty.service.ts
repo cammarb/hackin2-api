@@ -1,6 +1,7 @@
 import {
   type Bounty,
   BountyAssignment,
+  BountyStatus,
   Severity,
   SeverityReward
 } from '@prisma/client'
@@ -19,13 +20,14 @@ export const getBounties = async (queryParams: BountyQueryParams) => {
 
   let severity: Severity | undefined
   let programId: string | undefined
+  let status: BountyStatus | undefined
 
   if (queryParams.severity) {
     const severityParsed = queryParams.severity
       .toString()
       .toUpperCase() as Severity
     if (!Object.values(Severity).includes(severityParsed)) {
-      throw new Error('Invalid status value')
+      throw new Error('Invalid severity value')
     }
     severity = severityParsed
   }
@@ -34,12 +36,23 @@ export const getBounties = async (queryParams: BountyQueryParams) => {
     programId = queryParams.program
   }
 
+  if (queryParams.status) {
+    const statusParsed = queryParams.status
+      .toString()
+      .toUpperCase() as BountyStatus
+    if (!Object.values(BountyStatus).includes(statusParsed)) {
+      throw new Error('Invalid status value')
+    }
+    status = statusParsed
+  }
+
   bounties = await prisma.bounty.findMany({
     where: {
       SeverityReward: {
         severity: severity
       },
-      programId: programId
+      programId: programId,
+      status: status
     },
     include: {
       assignedUsers: true

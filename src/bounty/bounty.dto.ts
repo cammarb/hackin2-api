@@ -1,6 +1,7 @@
 export interface BountyQueryParams {
   severity?: string
   program?: string
+  status?: string
 }
 
 export interface UpdateBountyBody {
