@@ -182,11 +182,12 @@ enum BountyStatus {
 }
 
 model BountyAssignment {
-  id       String @id @unique @default(uuid())
+  id       String       @id @unique @default(uuid())
   bountyId String
-  Bounty   Bounty @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  Bounty   Bounty       @relation(fields: [bountyId], references: [id], onDelete: Cascade)
   userId   String
-  User     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status   BountyStatus @default(IN_PROGRESS)
 
   assignedAt DateTime @default(now())
 
