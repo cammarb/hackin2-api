@@ -1,8 +1,14 @@
-import { type Bounty, Severity, SeverityReward } from '@prisma/client'
+import {
+  type Bounty,
+  BountyAssignment,
+  Severity,
+  SeverityReward
+} from '@prisma/client'
 import prisma from '../utils/client'
 import type {
   AddBountyBody,
   BountyQueryParams,
+  BountyAssignmentsQuery,
   UpdateBountyBody
 } from './bounty.dto'
 
@@ -94,4 +100,26 @@ export const deleteBounty = async (id: string) => {
   })
 
   return bounty
+}
+
+export const getBountyAssignments = async (query: BountyAssignmentsQuery) => {
+  const { bounty, user } = query
+
+  let bountyAssignment: object | null = null
+  if (bounty) {
+    bountyAssignment = await prisma.bountyAssignment.findMany({
+      where: {
+        bountyId: bounty
+      }
+    })
+  }
+  if (user) {
+    bountyAssignment = await prisma.bountyAssignment.findMany({
+      where: {
+        userId: user
+      }
+    })
+  }
+
+  return bountyAssignment
 }

@@ -181,12 +181,15 @@ enum BountyStatus {
 }
 
 model BountyAssignment {
-  id         String   @id @unique @default(uuid())
-  bountyId   String
-  Bounty     Bounty   @relation(fields: [bountyId], references: [id], onDelete: Cascade)
-  userId     String
-  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id       String @id @unique @default(uuid())
+  bountyId String
+  Bounty   Bounty @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  userId   String
+  User     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   assignedAt DateTime @default(now())
+
+  @@index([bountyId, userId])
 }
 
 model Submissions {

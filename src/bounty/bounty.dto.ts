@@ -15,3 +15,8 @@ export interface AddBountyBody {
   severityRewardId: string
   programId: string
 }
+
+export interface BountyAssignmentsQuery {
+  bounty?: string
+  user?: string
+}

@@ -38,8 +38,6 @@ export const getProgramsController = async (
 
     const programs = await getPrograms(queryParams)
 
-    if (programs.length == 0) throw new ResourceNotFoundError()
-
     res.status(200).json({ programs: programs })
   } catch (error) {
     next(error)
