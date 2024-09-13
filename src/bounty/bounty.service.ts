@@ -76,13 +76,14 @@ export const getBountyById = async (id: string) => {
 }
 
 export const editBounty = async (id: string, body: UpdateBountyBody) => {
-  const { title, description, severityRewardId } = body
+  const { title, description, severityRewardId, status } = body
   const bounty = await prisma.bounty.update({
     where: {
       id: id
     },
     data: {
       title: title,
+      status: status,
       description: description,
       severityRewardId: severityRewardId
     }

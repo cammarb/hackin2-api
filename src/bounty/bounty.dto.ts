@@ -1,3 +1,5 @@
+import type { BountyStatus } from '@prisma/client'
+
 export interface BountyQueryParams {
   severity?: string
   program?: string
@@ -7,6 +9,7 @@ export interface BountyQueryParams {
 export interface UpdateBountyBody {
   title?: string
   description?: string
+  status?: BountyStatus
   severityRewardId?: string
 }
 
