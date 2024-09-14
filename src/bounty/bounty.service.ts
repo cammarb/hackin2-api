@@ -124,6 +124,13 @@ export const getBountyAssignments = async (query: BountyAssignmentsQuery) => {
     bountyAssignment = await prisma.bountyAssignment.findMany({
       where: {
         bountyId: bounty
+      },
+      include: {
+        User: {
+          select: {
+            username: true
+          }
+        }
       }
     })
   }
@@ -131,6 +138,13 @@ export const getBountyAssignments = async (query: BountyAssignmentsQuery) => {
     bountyAssignment = await prisma.bountyAssignment.findMany({
       where: {
         userId: user
+      },
+      include: {
+        Bounty: {
+          select: {
+            title: true
+          }
+        }
       }
     })
   }

@@ -11,7 +11,6 @@ export const bountyAssignmentRouter: Router = Router()
 
 bountyAssignmentRouter.get(
   '/',
-  allowedRoles(['OWNER', 'ADMIN', 'MEMBER']),
   validateQuery(['bounty', 'user'], ValidationCriteria.AT_LEAST_ONE),
   getBountyAssignmentsController
 )

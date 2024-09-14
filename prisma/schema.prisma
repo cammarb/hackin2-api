@@ -125,14 +125,13 @@ enum Severity {
 }
 
 model SeverityReward {
-  id          String        @id @unique @default(uuid())
-  severity    Severity
-  min         Decimal
-  max         Decimal
-  programId   String
-  Program     Program       @relation(fields: [programId], references: [id])
-  Bounty      Bounty[]
-  Submissions Submissions[]
+  id        String   @id @unique @default(uuid())
+  severity  Severity
+  min       Decimal
+  max       Decimal
+  programId String
+  Program   Program  @relation(fields: [programId], references: [id])
+  Bounty    Bounty[]
 
   @@unique([programId, severity])
 }
@@ -189,28 +188,31 @@ model BountyAssignment {
   User     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   status   BountyStatus @default(IN_PROGRESS)
 
-  assignedAt DateTime @default(now())
+  assignedAt  DateTime      @default(now())
+  Submissions Submissions[]
 
   @@index([bountyId, userId])
 }
 
 model Submissions {
-  id               String           @id @unique @default(uuid())
-  programId        String
-  Program          Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
-  userId           String
-  User             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  asset            String
-  Severity         SeverityReward   @relation(fields: [severityRewardId], references: [id], onDelete: Cascade)
-  severityRewardId String
-  evidence         String
-  impact           String
-  findings         String[]
-  status           SubmissionStatus @default(PENDING)
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  id                 String           @id @unique @default(uuid())
+  bountyAssignmentId String
+  BountyAssignment   BountyAssignment @relation(fields: [bountyAssignmentId], references: [id], onDelete: Cascade)
+  userId             String
+  User               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([programId, userId])
+  asset    String
+  evidence String
+  impact   String
+  findings String[]
+  status   SubmissionStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Program   Program? @relation(fields: [programId], references: [id])
+  programId String?
+
+  @@unique([bountyAssignmentId, userId])
 }
 
 enum SubmissionStatus {
