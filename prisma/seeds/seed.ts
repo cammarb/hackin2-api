@@ -1,4 +1,6 @@
 import {
+  ApplicationStatus,
+  BountyStatus,
   CompanyRole,
   PrismaClient,
   ProgramStatus,
@@ -38,6 +40,19 @@ async function main() {
       email: 'user.member@code.berlin',
       password: hashedPassword,
       role: Role.ENTERPRISE
+    }
+  })
+
+  const pentesterUser = await prisma.user.upsert({
+    where: { username: 'user.pentester' },
+    update: {},
+    create: {
+      firstName: 'User',
+      lastName: 'Pentester',
+      username: 'user.pentester',
+      email: 'user.pentester@code.berlin',
+      password: hashedPassword,
+      role: Role.PENTESTER
     }
   })
 
@@ -125,18 +140,44 @@ async function main() {
     }
   })
 
-  const pentesterUser = await prisma.user.upsert({
-    where: { username: 'user.pentester' },
-    update: {},
-    create: {
-      firstName: 'User',
-      lastName: 'Pentester',
-      username: 'user.pentester',
-      email: 'user.pentester@code.berlin',
-      password: hashedPassword,
-      role: Role.PENTESTER
+  const program = await prisma.program.findFirst({
+    include: {
+      SeverityReward: {
+        select: {
+          id: true
+        }
+      }
     }
   })
+
+  if (program && program.SeverityReward.length > 0) {
+    const bounty = await prisma.bounty.create({
+      data: {
+        title: 'Retrieve folder',
+        description: 'Retrieve folder in second floor room.',
+        notes:
+          'Take into consideration that taking pictures of individuals is not permitted.',
+        programId: program?.id,
+        status: BountyStatus.IN_PROGRESS,
+        severityRewardId: program?.SeverityReward[0].id
+      }
+    })
+
+    const bountyApplication = await prisma.application.create({
+      data: {
+        userId: pentesterUser.id,
+        bountyId: bounty.id
+      }
+    })
+
+    const bountyAssignment = await prisma.bountyAssignment.create({
+      data: {
+        userId: pentesterUser.id,
+        bountyId: bounty.id,
+        applicationId: bountyApplication.id
+      }
+    })
+  }
 }
 
 main()

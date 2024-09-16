@@ -137,14 +137,15 @@ model SeverityReward {
 }
 
 model Application {
-  id        String            @id @unique @default(uuid())
-  User      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
-  Bounty    Bounty            @relation(fields: [bountyId], references: [id], onDelete: Cascade)
-  bountyId  String
-  status    ApplicationStatus @default(PENDING)
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  id               String             @id @unique @default(uuid())
+  User             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  Bounty           Bounty             @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  bountyId         String
+  status           ApplicationStatus  @default(PENDING)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  BountyAssignment BountyAssignment[]
 
   @@unique([bountyId, userId])
 }
@@ -159,14 +160,13 @@ model Bounty {
   id               String             @id @unique @default(uuid())
   title            String
   description      String
-  notes            String?
+  notes            String
   severityRewardId String
   SeverityReward   SeverityReward     @relation(fields: [severityRewardId], references: [id])
   programId        String
   Program          Program            @relation(fields: [programId], references: [id], onDelete: Cascade)
   assignedUsers    BountyAssignment[]
   status           BountyStatus       @default(PENDING)
-  scope            String?
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   Scope            Scope?             @relation(fields: [scopeId], references: [id])
@@ -188,8 +188,11 @@ model BountyAssignment {
   User     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   status   BountyStatus @default(IN_PROGRESS)
 
-  assignedAt  DateTime      @default(now())
-  Submissions Submissions[]
+  assignedAt DateTime @default(now())
+
+  applicationId String
+  Application   Application   @relation(fields: [applicationId], references: [id])
+  Submissions   Submissions[]
 
   @@index([bountyId, userId])
 }
