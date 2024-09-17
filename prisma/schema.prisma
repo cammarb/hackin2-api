@@ -41,9 +41,7 @@ model User {
   RefreshToken RefreshToken[]
 
   CompanyMember CompanyMember?
-
-  Program     Program[]
-  Submissions Submissions[]
+  Program       Program[]
 
   Application      Application[]
   BountyAssignment BountyAssignment[]
@@ -78,6 +76,7 @@ model CompanyMember {
   companyRole CompanyRole
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  Payments    Payments[]
 
   @@id([userId, companyId])
 }
@@ -103,9 +102,11 @@ model Program {
   Scope          Scope[]
   Bounty         Bounty[]
   SeverityReward SeverityReward[]
-  Submissions    Submissions[]
-  User           User?            @relation(fields: [userId], references: [id])
-  userId         String?
+
+  User   User?   @relation(fields: [userId], references: [id])
+  userId String?
+
+  @@index([programStatus])
 }
 
 model Scope {
@@ -137,15 +138,16 @@ model SeverityReward {
 }
 
 model Application {
-  id               String             @id @unique @default(uuid())
-  User             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId           String
-  Bounty           Bounty             @relation(fields: [bountyId], references: [id], onDelete: Cascade)
-  bountyId         String
-  status           ApplicationStatus  @default(PENDING)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  BountyAssignment BountyAssignment[]
+  id        String            @id @unique @default(uuid())
+  User      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  Bounty    Bounty            @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  bountyId  String
+  status    ApplicationStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  BountyAssignment BountyAssignment?
 
   @@unique([bountyId, userId])
 }
@@ -190,19 +192,19 @@ model BountyAssignment {
 
   assignedAt DateTime @default(now())
 
-  applicationId String
+  applicationId String        @unique
   Application   Application   @relation(fields: [applicationId], references: [id])
   Submissions   Submissions[]
 
-  @@index([bountyId, userId])
+  Payment Payments?
+
+  @@index([bountyId, userId, status])
 }
 
 model Submissions {
   id                 String           @id @unique @default(uuid())
-  bountyAssignmentId String
+  bountyAssignmentId String           @unique
   BountyAssignment   BountyAssignment @relation(fields: [bountyAssignmentId], references: [id], onDelete: Cascade)
-  userId             String
-  User               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   asset    String
   evidence String
@@ -212,10 +214,6 @@ model Submissions {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Program   Program? @relation(fields: [programId], references: [id])
-  programId String?
-
-  @@unique([bountyAssignmentId, userId])
 }
 
 enum SubmissionStatus {
@@ -223,4 +221,20 @@ enum SubmissionStatus {
   IN_REVIEW
   REVIEWED
   RESOLVED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAYED
+}
+
+model Payments {
+  id                     String           @id @unique @default(uuid())
+  amount                 BigInt
+  status                 PaymentStatus    @default(PENDING)
+  bountyAssignmentId     String           @unique
+  bountyAssignment       BountyAssignment @relation(fields: [bountyAssignmentId], references: [id])
+  payedByCompanyMemberId String
+  PayedByCompanyMember   CompanyMember    @relation(fields: [payedByCompanyMemberId], references: [userId])
+  payedAt                DateTime         @default(now())
 }

@@ -6,9 +6,8 @@ export interface SubmissionQueryParams {
 }
 
 export interface SubmissionBody {
-  programId: string
+  bountyAssignmentId: string
   asset: string
-  severity: string
   evidence: string
   impact: string
 }

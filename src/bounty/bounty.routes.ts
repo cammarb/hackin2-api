@@ -11,6 +11,7 @@ import {
   validateQuery,
   ValidationCriteria
 } from '../middleware/params.middleware'
+import { validateUserSession } from '../middleware/session.middleware'
 
 export const bountyRouter: Router = Router()
 
@@ -24,7 +25,8 @@ bountyRouter.get(
 )
 bountyRouter.get(
   '/:id',
-  allowedRoles(['OWNER', 'ADMIN', 'MEMBER']),
+  validateUserSession,
+  // allowedRoles(['OWNER', 'ADMIN', 'MEMBER']),
   getBountyByIdController
 )
 bountyRouter.post('/new', allowedRoles(['OWNER', 'ADMIN']), addBountyController)

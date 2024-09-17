@@ -12,64 +12,44 @@ import type {
   BountyAssignmentsQuery,
   UpdateBountyBody
 } from './bounty.dto'
+import type { SessionData } from 'express-session'
 
-export const getBounties = async (queryParams: BountyQueryParams) => {
-  let bounties: Bounty[]
+export const getBounties = async (
+  queryParams: BountyQueryParams,
+  user: SessionData['user']
+) => {
+  const { severity, program, status } = queryParams
+  let statusParsed: BountyStatus | undefined
 
-  if (!queryParams) bounties = await prisma.bounty.findMany()
-
-  let severity: Severity | undefined
-  let programId: string | undefined
-  let status: BountyStatus | undefined
-
-  if (queryParams.severity) {
-    const severityParsed = queryParams.severity
-      .toString()
-      .toUpperCase() as Severity
-    if (!Object.values(Severity).includes(severityParsed)) {
-      throw new Error('Invalid severity value')
-    }
-    severity = severityParsed
-  }
-
-  if (queryParams.program) {
-    programId = queryParams.program
-  }
-
-  if (queryParams.status) {
-    const statusParsed = queryParams.status
-      .toString()
-      .toUpperCase() as BountyStatus
+  if (status) {
+    statusParsed = status.toString().toUpperCase() as BountyStatus
     if (!Object.values(BountyStatus).includes(statusParsed)) {
       throw new Error('Invalid status value')
     }
-    status = statusParsed
   }
 
-  bounties = await prisma.bounty.findMany({
+  const bounties = await prisma.bounty.findMany({
     where: {
-      SeverityReward: {
-        severity: severity
-      },
-      programId: programId,
-      status: status
+      ...(severity && {
+        SeverityReward: {
+          severity: severity as Severity
+        }
+      }),
+      ...(program && { programId: program }),
+      ...(statusParsed && { status: statusParsed })
     },
-    include: {
-      assignedUsers: true
-    }
+    include: user.role === 'ENTERPRISE' ? { assignedUsers: true } : undefined
   })
 
   return bounties
 }
 
-export const getBountyById = async (id: string) => {
+export const getBountyById = async (id: string, user: SessionData['user']) => {
   const bounty = await prisma.bounty.findUnique({
     where: {
       id: id
     },
-    include: {
-      assignedUsers: true
-    }
+    include: user.role === 'ENTERPRISE' ? { assignedUsers: true } : undefined
   })
 
   return bounty
@@ -93,13 +73,14 @@ export const editBounty = async (id: string, body: UpdateBountyBody) => {
 }
 
 export const addBounty = async (body: AddBountyBody) => {
-  const { title, description, severityRewardId, programId } = body
+  const { title, description, severityRewardId, programId, notes } = body
   const bounty = await prisma.bounty.create({
     data: {
       title: title,
       description: description,
       severityRewardId: severityRewardId,
-      programId: programId
+      programId: programId,
+      notes: notes
     }
   })
 
@@ -119,35 +100,38 @@ export const deleteBounty = async (id: string) => {
 export const getBountyAssignments = async (query: BountyAssignmentsQuery) => {
   const { bounty, user } = query
 
-  let bountyAssignment: object | null = null
-  if (bounty) {
-    bountyAssignment = await prisma.bountyAssignment.findMany({
-      where: {
-        bountyId: bounty
-      },
-      include: {
-        User: {
-          select: {
-            username: true
+  const bountyAssignment = await prisma.bountyAssignment.findMany({
+    where: {
+      bountyId: bounty
+    },
+    include: bounty
+      ? {
+          User: {
+            select: {
+              username: true
+            }
           }
         }
-      }
-    })
-  }
-  if (user) {
-    bountyAssignment = await prisma.bountyAssignment.findMany({
-      where: {
-        userId: user
-      },
-      include: {
-        Bounty: {
-          select: {
-            title: true
+      : user
+        ? {
+            Bounty: {
+              select: {
+                title: true
+              }
+            }
           }
-        }
-      }
-    })
-  }
+        : undefined
+  })
+
+  return bountyAssignment
+}
+
+export const getBountyAssignmentById = async (id: string) => {
+  const bountyAssignment = await prisma.bountyAssignment.findUnique({
+    where: {
+      id: id
+    }
+  })
 
   return bountyAssignment
 }

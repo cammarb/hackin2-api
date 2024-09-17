@@ -80,6 +80,7 @@ async function main() {
             name: 'Program A',
             description: 'This is the description for Program A',
             location: 'Berlin',
+            programStatus: ProgramStatus.ACTIVE,
             SeverityReward: {
               create: [
                 {
@@ -109,7 +110,7 @@ async function main() {
             name: 'Program B',
             description: 'This is the description for Program B',
             location: 'Berlin',
-            programStatus: ProgramStatus.ACTIVE,
+
             SeverityReward: {
               create: [
                 {
@@ -166,7 +167,8 @@ async function main() {
     const bountyApplication = await prisma.application.create({
       data: {
         userId: pentesterUser.id,
-        bountyId: bounty.id
+        bountyId: bounty.id,
+        status: ApplicationStatus.ACCEPTED
       }
     })
 

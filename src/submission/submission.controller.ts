@@ -15,19 +15,18 @@ export const addSumissionController = async (
   next: NextFunction
 ) => {
   try {
-    const user = req.session.user as SessionData['user']
     const body = req.body
     const files = req.files
 
     if (!body) return res.status(400).json({ error: 'All fields are required' })
 
-    const submission = await addSumission(user, body, files ? files : undefined)
+    const submission = await addSumission(body, files ? files : undefined)
 
     return res.status(200).json({ message: 'Submission Report sent' })
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError) {
       if (error.code === 'P2002')
-        next(new ConflictError('Unique constraint violation'))
+        next(new ConflictError('User already submitted to this Bounty'))
     } else next(error)
   }
 }

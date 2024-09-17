@@ -4,11 +4,13 @@ import {
   deleteBounty,
   editBounty,
   getBounties,
+  getBountyAssignmentById,
   getBountyAssignments,
   getBountyById
 } from './bounty.service'
 import type { BountyAssignmentsQuery } from './bounty.dto'
 import { MissingParameterError, ResourceNotFoundError } from '../error/apiError'
+import type { SessionData } from 'express-session'
 
 export const getBountiesController = async (
   req: Request,
@@ -16,9 +18,10 @@ export const getBountiesController = async (
   next: NextFunction
 ) => {
   try {
+    const user = req.session.user as SessionData['user']
     const queryParams = req.query
 
-    const bounties = await getBounties(queryParams)
+    const bounties = await getBounties(queryParams, user)
 
     if (bounties.length <= 0)
       return res.status(200).json({ message: 'No bounties yet' })
@@ -34,12 +37,13 @@ export const getBountyByIdController = async (
   next: NextFunction
 ) => {
   try {
+    const user = req.session.user as SessionData['user']
     const id = req.params.id
     if (!id) throw MissingParameterError
 
-    const bounty = await getBountyById(id)
+    const bounty = await getBountyById(id, user)
 
-    if (bounty == null) throw ResourceNotFoundError
+    if (bounty == null) throw new ResourceNotFoundError('bounty')
 
     return res.status(200).json({ bounty: bounty })
   } catch (error) {
@@ -125,6 +129,22 @@ export const getBountyAssignmentsController = async (
     const bountyAssingments = await getBountyAssignments(queryParams)
 
     return res.status(200).json({ bountyAssignments: bountyAssingments })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const getBountyAssignmentByIdController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const params = req.params.id
+
+    const bountyAssingment = await getBountyAssignmentById(params)
+
+    return res.status(200).json({ bountyAssignment: bountyAssingment })
   } catch (error) {
     next(error)
   }

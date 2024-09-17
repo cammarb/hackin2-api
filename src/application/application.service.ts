@@ -73,6 +73,11 @@ export const getApplications = async (query: ApplicationQuery) => {
             title: true,
             programId: true
           }
+        },
+        BountyAssignment: {
+          select: {
+            id: true
+          }
         }
       }
     })
