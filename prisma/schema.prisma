@@ -192,9 +192,9 @@ model BountyAssignment {
 
   assignedAt DateTime @default(now())
 
-  applicationId String        @unique
-  Application   Application   @relation(fields: [applicationId], references: [id])
-  Submissions   Submissions[]
+  applicationId String       @unique
+  Application   Application  @relation(fields: [applicationId], references: [id])
+  Submission    Submissions?
 
   Payment Payments?
 

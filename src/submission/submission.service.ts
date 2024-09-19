@@ -13,18 +13,6 @@ export const getSubmissionById = async (id: string) => {
   const submission = await prisma.submissions.findUnique({
     where: {
       id: id
-    },
-    include: {
-      User: {
-        select: {
-          username: true
-        }
-      },
-      Severity: {
-        select: {
-          severity: true
-        }
-      }
     }
   })
 
@@ -32,34 +20,17 @@ export const getSubmissionById = async (id: string) => {
 }
 
 export const getSubmissions = async (queryParams: SubmissionQueryParams) => {
-  let username: string | undefined
-  let programId: string | undefined
+  let userId: string | undefined
+  let bountyId: string | undefined
 
-  if (queryParams.user) username = queryParams.user
-  if (queryParams.program) programId = queryParams.program
+  if (queryParams.user) userId = queryParams.user
+  if (queryParams.bounty) bountyId = queryParams.bounty
 
   const submissions = await prisma.submissions.findMany({
     where: {
-      User: {
-        username: username
-      },
-      programId: programId
-    },
-    include: {
-      Program: {
-        select: {
-          name: true
-        }
-      },
-      Severity: {
-        select: {
-          severity: true
-        }
-      },
-      User: {
-        select: {
-          username: true
-        }
+      BountyAssignment: {
+        bountyId: bountyId,
+        userId: userId
       }
     }
   })
@@ -73,7 +44,7 @@ export const addSumission = async (body: SubmissionBody, files?: FileArray) => {
    * We need to check this first before proceeding.
    */
   const { bountyAssignmentId, asset, evidence, impact } = body
-  console.log(body)
+
   const userProgramSubmission = await prisma.submissions.findUnique({
     where: {
       bountyAssignmentId: bountyAssignmentId

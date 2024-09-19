@@ -2,7 +2,7 @@ import {
   type Bounty,
   BountyAssignment,
   BountyStatus,
-  Severity,
+  type Severity,
   SeverityReward
 } from '@prisma/client'
 import prisma from '../utils/client'
@@ -130,6 +130,9 @@ export const getBountyAssignmentById = async (id: string) => {
   const bountyAssignment = await prisma.bountyAssignment.findUnique({
     where: {
       id: id
+    },
+    include: {
+      Submission: true
     }
   })
 

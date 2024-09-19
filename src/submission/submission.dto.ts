@@ -1,7 +1,7 @@
 import type { SubmissionStatus } from '@prisma/client'
 
 export interface SubmissionQueryParams {
-  program?: string
+  bounty?: string
   user?: string
 }
 
