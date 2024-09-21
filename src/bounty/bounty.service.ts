@@ -101,35 +101,39 @@ export const getBountyAssignments = async (query: BountyAssignmentsQuery) => {
   const { bounty, user } = query
 
   const bountyAssignment = await prisma.bountyAssignment.findMany({
-    where: {
-      bountyId: bounty
-    },
-    include: bounty
-      ? {
-          User: {
+    where: bounty ? { bountyId: bounty } : { userId: user },
+    include: {
+      Submission: true,
+      User: bounty
+        ? {
             select: {
               username: true
             }
           }
-        }
-      : user
+        : false,
+      Bounty: user
         ? {
-            Bounty: {
-              select: {
-                title: true
-              }
+            select: {
+              title: true
             }
           }
-        : undefined
+        : false
+    }
   })
 
   return bountyAssignment
 }
 
-export const getBountyAssignmentById = async (id: string) => {
+export const getBountyAssignmentById = async (
+  bountyId: string,
+  userId: string
+) => {
   const bountyAssignment = await prisma.bountyAssignment.findUnique({
     where: {
-      id: id
+      bountyId_userId: {
+        bountyId: bountyId,
+        userId: userId
+      }
     },
     include: {
       Submission: true

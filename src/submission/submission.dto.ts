@@ -3,10 +3,12 @@ import type { SubmissionStatus } from '@prisma/client'
 export interface SubmissionQueryParams {
   bounty?: string
   user?: string
+  program?: string
 }
 
 export interface SubmissionBody {
-  bountyAssignmentId: string
+  bountyId: string
+  userId: string
   asset: string
   evidence: string
   impact: string

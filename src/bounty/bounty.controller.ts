@@ -140,9 +140,10 @@ export const getBountyAssignmentByIdController = async (
   next: NextFunction
 ) => {
   try {
-    const params = req.params.id
+    const bountyId = req.params.bountyId
+    const userId = req.query.userId as string
 
-    const bountyAssingment = await getBountyAssignmentById(params)
+    const bountyAssingment = await getBountyAssignmentById(bountyId, userId)
 
     return res.status(200).json({ bountyAssignment: bountyAssingment })
   } catch (error) {

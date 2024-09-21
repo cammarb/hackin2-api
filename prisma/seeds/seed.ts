@@ -152,8 +152,15 @@ async function main() {
   })
 
   if (program && program.SeverityReward.length > 0) {
-    const bounty = await prisma.bounty.create({
-      data: {
+    const bounty = await prisma.bounty.upsert({
+      where: {
+        title_programId: {
+          title: 'Retrieve folder',
+          programId: program.id
+        }
+      },
+      update: {},
+      create: {
         title: 'Retrieve folder',
         description: 'Retrieve folder in second floor room.',
         notes:
@@ -164,16 +171,27 @@ async function main() {
       }
     })
 
-    const bountyApplication = await prisma.application.create({
-      data: {
+    const bountyApplication = await prisma.application.upsert({
+      where: {
+        bountyId_userId: {
+          bountyId: bounty.id,
+          userId: pentesterUser.id
+        }
+      },
+      update: {},
+      create: {
         userId: pentesterUser.id,
         bountyId: bounty.id,
         status: ApplicationStatus.ACCEPTED
       }
     })
 
-    const bountyAssignment = await prisma.bountyAssignment.create({
-      data: {
+    const bountyAssignment = await prisma.bountyAssignment.upsert({
+      where: {
+        bountyId_userId: { bountyId: bounty.id, userId: pentesterUser.id }
+      },
+      update: {},
+      create: {
         userId: pentesterUser.id,
         bountyId: bounty.id,
         applicationId: bountyApplication.id

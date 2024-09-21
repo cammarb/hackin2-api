@@ -17,4 +17,8 @@ bountyAssignmentRouter.get(
   validateQuery(['bounty', 'user'], ValidationCriteria.AT_LEAST_ONE),
   getBountyAssignmentsController
 )
-bountyAssignmentRouter.get('/:id', getBountyAssignmentByIdController)
+bountyAssignmentRouter.get(
+  '/:bountyId',
+  validateQuery(['userId'], ValidationCriteria.ALL),
+  getBountyAssignmentByIdController
+)

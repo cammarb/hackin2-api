@@ -6,7 +6,7 @@ import {
   updateSubmission
 } from './submission.service'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
-import { ConflictError } from '../error/apiError'
+import { ConflictError, ResourceNotFoundError } from '../error/apiError'
 import type { SessionData } from 'express-session'
 
 export const addSumissionController = async (
@@ -37,8 +37,7 @@ export const getSubmissionsController = async (req: Request, res: Response) => {
 
     const submissions = await getSubmissions(queryParams)
 
-    if (submissions == null)
-      return res.status(400).json({ error: 'Resource not found' })
+    if (submissions.length <= 0) throw new ResourceNotFoundError('submissions')
 
     return res.status(200).json({ submissions: submissions })
   } catch (error) {

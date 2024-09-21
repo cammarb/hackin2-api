@@ -20,19 +20,23 @@ export const getSubmissionById = async (id: string) => {
 }
 
 export const getSubmissions = async (queryParams: SubmissionQueryParams) => {
-  let userId: string | undefined
-  let bountyId: string | undefined
+  const { user, bounty, program } = queryParams
 
-  if (queryParams.user) userId = queryParams.user
-  if (queryParams.bounty) bountyId = queryParams.bounty
+  let filterBy = {}
+
+  if (user) {
+    filterBy = { userId: user }
+  } else if (bounty) {
+    filterBy = { bountyId: bounty }
+  } else if (program) {
+    filterBy = { Bounty: { programId: program } }
+  }
 
   const submissions = await prisma.submissions.findMany({
     where: {
-      BountyAssignment: {
-        bountyId: bountyId,
-        userId: userId
-      }
-    }
+      BountyAssignment: filterBy
+    },
+    include: {}
   })
 
   return submissions
@@ -43,11 +47,14 @@ export const addSumission = async (body: SubmissionBody, files?: FileArray) => {
    * Users can submit only once to a Program.
    * We need to check this first before proceeding.
    */
-  const { bountyAssignmentId, asset, evidence, impact } = body
+  const { bountyId, userId, asset, evidence, impact } = body
 
-  const userProgramSubmission = await prisma.submissions.findUnique({
+  const userProgramSubmission = await prisma.submission.findUnique({
     where: {
-      bountyAssignmentId: bountyAssignmentId
+      bountyId_userId: {
+        bountyId: bountyId,
+        userId: userId
+      }
     }
   })
   if (userProgramSubmission)
@@ -73,10 +80,11 @@ export const addSumission = async (body: SubmissionBody, files?: FileArray) => {
     fileUrls = uploadResults.map((result) => result.secure_url)
   }
 
-  const submission = await prisma.submissions.create({
+  const submission = await prisma.submission.create({
     data: {
+      bountyId: bountyId,
+      userId: userId,
       asset: asset,
-      bountyAssignmentId: bountyAssignmentId,
       evidence: evidence,
       impact: impact,
       findings: fileUrls

@@ -159,21 +159,29 @@ enum ApplicationStatus {
 }
 
 model Bounty {
-  id               String             @id @unique @default(uuid())
-  title            String
-  description      String
-  notes            String
+  id          String @id @unique @default(uuid())
+  title       String
+  description String
+  notes       String
+
   severityRewardId String
-  SeverityReward   SeverityReward     @relation(fields: [severityRewardId], references: [id])
-  programId        String
-  Program          Program            @relation(fields: [programId], references: [id], onDelete: Cascade)
-  assignedUsers    BountyAssignment[]
-  status           BountyStatus       @default(PENDING)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  Scope            Scope?             @relation(fields: [scopeId], references: [id])
-  scopeId          String?
-  Application      Application[]
+  SeverityReward   SeverityReward @relation(fields: [severityRewardId], references: [id])
+
+  programId String
+  Program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  status BountyStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Scope   Scope?  @relation(fields: [scopeId], references: [id])
+  scopeId String?
+
+  assignedUsers BountyAssignment[]
+  Application   Application[]
+
+  @@unique([title, programId])
 }
 
 enum BountyStatus {
@@ -183,28 +191,31 @@ enum BountyStatus {
 }
 
 model BountyAssignment {
-  id       String       @id @unique @default(uuid())
   bountyId String
-  Bounty   Bounty       @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  Bounty   Bounty @relation(fields: [bountyId], references: [id], onDelete: Cascade)
   userId   String
-  User     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status   BountyStatus @default(IN_PROGRESS)
+  User     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status BountyStatus @default(IN_PROGRESS)
 
   assignedAt DateTime @default(now())
 
-  applicationId String       @unique
-  Application   Application  @relation(fields: [applicationId], references: [id])
-  Submission    Submissions?
+  applicationId String      @unique
+  Application   Application @relation(fields: [applicationId], references: [id])
+
+  Submission Submission?
 
   Payment Payments?
 
-  @@index([bountyId, userId, status])
+  @@id([bountyId, userId])
+  @@index([status])
 }
 
-model Submissions {
-  id                 String           @id @unique @default(uuid())
-  bountyAssignmentId String           @unique
-  BountyAssignment   BountyAssignment @relation(fields: [bountyAssignmentId], references: [id], onDelete: Cascade)
+model Submission {
+  id               String           @id @unique @default(uuid())
+  bountyId         String
+  userId           String
+  BountyAssignment BountyAssignment @relation(fields: [bountyId, userId], references: [bountyId, userId], onDelete: Cascade)
 
   asset    String
   evidence String
@@ -214,6 +225,8 @@ model Submissions {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([bountyId, userId])
 }
 
 enum SubmissionStatus {
@@ -229,12 +242,18 @@ enum PaymentStatus {
 }
 
 model Payments {
-  id                     String           @id @unique @default(uuid())
-  amount                 BigInt
-  status                 PaymentStatus    @default(PENDING)
-  bountyAssignmentId     String           @unique
-  bountyAssignment       BountyAssignment @relation(fields: [bountyAssignmentId], references: [id])
+  id     String        @id @unique @default(uuid())
+  amount BigInt
+  status PaymentStatus @default(PENDING)
+
+  bountyId         String
+  userId           String
+  BountyAssignment BountyAssignment @relation(fields: [bountyId, userId], references: [bountyId, userId], onDelete: Cascade)
+
   payedByCompanyMemberId String
-  PayedByCompanyMember   CompanyMember    @relation(fields: [payedByCompanyMemberId], references: [userId])
-  payedAt                DateTime         @default(now())
+  PayedByCompanyMember   CompanyMember @relation(fields: [payedByCompanyMemberId], references: [userId])
+
+  payedAt DateTime @default(now())
+
+  @@unique([bountyId, userId])
 }
