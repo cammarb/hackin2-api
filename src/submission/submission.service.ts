@@ -10,7 +10,7 @@ import { ConflictError } from '../error/apiError'
 import type { SubmissionStatus } from '@prisma/client'
 
 export const getSubmissionById = async (id: string) => {
-  const submission = await prisma.submissions.findUnique({
+  const submission = await prisma.submission.findUnique({
     where: {
       id: id
     }
@@ -32,7 +32,7 @@ export const getSubmissions = async (queryParams: SubmissionQueryParams) => {
     filterBy = { Bounty: { programId: program } }
   }
 
-  const submissions = await prisma.submissions.findMany({
+  const submissions = await prisma.submission.findMany({
     where: {
       BountyAssignment: filterBy
     },
@@ -100,7 +100,7 @@ export const updateSubmission = async (
 ) => {
   const { status } = body
 
-  const submissions = await prisma.submissions.update({
+  const submissions = await prisma.submission.update({
     where: {
       id: id
     },

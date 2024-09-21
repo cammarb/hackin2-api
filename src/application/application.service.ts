@@ -106,7 +106,8 @@ export const updateApplicaton = async (
       await prisma.bountyAssignment.create({
         data: {
           bountyId: bountyId,
-          userId: userId
+          userId: userId,
+          applicationId: id
         }
       })
     ])
