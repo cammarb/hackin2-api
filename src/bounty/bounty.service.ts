@@ -104,6 +104,7 @@ export const getBountyAssignments = async (query: BountyAssignmentsQuery) => {
     where: bounty ? { bountyId: bounty } : { userId: user },
     include: {
       Submission: true,
+      Payment: true,
       User: bounty
         ? {
             select: {
