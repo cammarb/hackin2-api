@@ -20,6 +20,8 @@ declare global {
     interface Request {
       id?: string
       err?: string
+      username?: string
+      role?: string
     }
   }
 }

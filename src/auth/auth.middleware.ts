@@ -9,11 +9,7 @@ import {
   UnauthorizedError
 } from '../error/apiError'
 
-const verifyJWT = async (
-  req: Request | any,
-  res: Response,
-  next: NextFunction
-) => {
+const verifyJWT = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers?.authorization
     const { publicKey } = await getEnvs()

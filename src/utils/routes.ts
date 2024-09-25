@@ -12,6 +12,7 @@ import { userRouter } from '../user/user.routes'
 import { companyMemberRouter } from '../companyMember/companyMember.routes'
 import { applicationRouter } from '../application/application.routes'
 import { bountyAssignmentRouter } from '../bountyAssignment/bountyAssignment.routes'
+import { paymentRouter } from '../payment/payment.routes'
 
 const routes = (app: Application) => {
   const apiRoutes: Router = Router()
@@ -30,6 +31,7 @@ const routes = (app: Application) => {
   apiRoutes.use('/submissions', verifyJWT, submissionRouter)
   apiRoutes.use('/severity-rewards', verifyJWT, severityRewardRouter)
   apiRoutes.use('/scopes', verifyJWT, scopeRouter)
+  apiRoutes.use('/payments', verifyJWT, paymentRouter)
 
   app.get('/', (req, res) => {
     res.redirect(301, '/api/v1')

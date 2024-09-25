@@ -38,9 +38,11 @@ export const registrationController = async (
 
     body.password = await hashToken(body.password)
     const otp = generateOTP()
+
     const user: User = await createUser(body)
     await sendOTPEmail(user.email, otp)
     await redisClient.set(user.email, otp, { EX: 300 })
+
     return res.status(201).json({ success: 'User created successfully' })
   } catch (err) {
     if (err instanceof PrismaClientKnownRequestError) {

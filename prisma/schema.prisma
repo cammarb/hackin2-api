@@ -26,17 +26,18 @@ enum CompanyRole {
 }
 
 model User {
-  id        String   @id @unique @default(uuid())
-  firstName String
-  lastName  String
-  username  String   @unique
-  email     String   @unique
-  password  String
-  mfa       Boolean  @default(false)
-  confirmed Boolean  @default(false) // User must confirm the account through email
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  role      Role
+  id              String   @id @unique @default(uuid())
+  firstName       String
+  lastName        String
+  username        String   @unique
+  email           String   @unique
+  password        String
+  mfa             Boolean  @default(false)
+  confirmed       Boolean  @default(false) // User must confirm the account through email
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  role            Role
+  stripeAccountId String?  @unique
 
   RefreshToken RefreshToken[]
 
@@ -58,9 +59,10 @@ model RefreshToken {
 }
 
 model Company {
-  id      String  @id @unique @default(uuid())
-  name    String  @unique
-  website String?
+  id              String  @id @unique @default(uuid())
+  name            String  @unique
+  website         String?
+  stripeAccountId String  @unique
 
   CompanyMember CompanyMember[]
   Program       Program[]
@@ -131,7 +133,7 @@ model SeverityReward {
   min       Decimal
   max       Decimal
   programId String
-  Program   Program  @relation(fields: [programId], references: [id])
+  Program   Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
   Bounty    Bounty[]
 
   @@unique([programId, severity])
@@ -250,8 +252,9 @@ model Payments {
   userId           String
   BountyAssignment BountyAssignment @relation(fields: [bountyId, userId], references: [bountyId, userId], onDelete: Cascade)
 
-  payedByCompanyMemberId String
-  PayedByCompanyMember   CompanyMember @relation(fields: [payedByCompanyMemberId], references: [userId])
+  companyId            String
+  memberId             String
+  PayedByCompanyMember CompanyMember @relation(fields: [companyId, memberId], references: [companyId, userId])
 
   payedAt DateTime @default(now())
 

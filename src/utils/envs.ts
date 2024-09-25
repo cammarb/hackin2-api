@@ -1,15 +1,19 @@
-import { promises } from 'fs'
+import { promises } from 'node:fs'
 
-const getEnvs = async () => {
+export const getEnvs = async () => {
   try {
     const port = process.env.PORT
-    const privateKeyPath = process.env.PRIVKEY
-    const publicKeyPath = process.env.PUBKEY
+    const publicKeyPath = process.env.PUB_KEY_PATH
+    const privateKeyPath = process.env.PPRI_KEY_PATH
     const issuer = process.env.ISSUER
     const origin = process.env.ORIGIN
     const otpService = process.env.OTP_SERVICE
     const otpUser = process.env.OTP_USER
     const otpPass = process.env.OTP_PASS
+    const cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME
+    const cloudinaryApiKey = process.env.CLOUDINARY_API_KEY
+    const cloudinaryApiSecret = process.env.CLOUDINARY_API_SECRET
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 
     if (
       !privateKeyPath ||
@@ -19,7 +23,11 @@ const getEnvs = async () => {
       !port ||
       !otpService ||
       !otpUser ||
-      !otpPass
+      !otpPass ||
+      !cloudinaryCloudName ||
+      !cloudinaryApiKey ||
+      !cloudinaryApiSecret ||
+      !stripeSecretKey
     ) {
       throw new Error('Missing env variables')
     }
@@ -36,11 +44,14 @@ const getEnvs = async () => {
       origin,
       otpService,
       otpUser,
-      otpPass
+      otpPass,
+      cloudinaryCloudName,
+      cloudinaryApiKey,
+      cloudinaryApiSecret,
+      stripeSecretKey
     }
   } catch (error) {
-    throw error
+    console.error('Failed to load environment variables', error)
+    process.exit(1)
   }
 }
-
-export { getEnvs }

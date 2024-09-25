@@ -62,6 +62,7 @@ async function main() {
     create: {
       name: 'Hackin2',
       website: 'hackin2.com',
+      stripeAccountId: 'testStripeAccountId',
       CompanyMember: {
         create: [
           {
