@@ -1,5 +1,4 @@
-import { Role } from '@prisma/client'
-import { Request } from 'express'
+import type { CompanyRole, Role } from '@prisma/client'
 
 declare module 'express-session' {
   interface SessionData {
@@ -8,7 +7,10 @@ declare module 'express-session' {
       id: string
       username: string
       role: Role
-      company?: string
+      company?: {
+        id: string
+        role: CompanyRole
+      }
     }
   }
 }

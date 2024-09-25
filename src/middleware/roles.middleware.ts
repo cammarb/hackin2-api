@@ -1,18 +1,19 @@
-import { Request, Response, NextFunction } from 'express'
-import { CompanyMember, CompanyRole, User } from '@prisma/client'
-import prisma from '../utils/client'
+import type { CompanyMember, CompanyRole } from '@prisma/client'
+import type { NextFunction, Request, Response } from 'express'
 import { ResourceNotFoundError } from '../error/apiError'
+import prisma from '../utils/client'
+import type { SessionData } from 'express-session'
 
 const checkPentester = async (
   req: Request | any,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
-    const userSession = req.session
+    const userSession = req.session.user as SessionData['user']
 
-    const username = userSession.user.username
-    const role = userSession.user.role
+    const username = userSession.username
+    const role = userSession.role
 
     if (!username || !role) {
       return res.status(400).json({ error: 'payload not provided' })
@@ -20,7 +21,7 @@ const checkPentester = async (
 
     const user = await prisma.user.findUnique({
       where: { username: username },
-      select: { id: true, role: true },
+      select: { id: true, role: true }
     })
 
     if (!user) {
@@ -42,10 +43,10 @@ const checkPentester = async (
 const checkEnterprise = async (
   req: Request | any,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
-    const userSession = req.session.user
+    const userSession = req.session.user as SessionData['user']
 
     const username = userSession.username
     const role = userSession.role
@@ -56,7 +57,7 @@ const checkEnterprise = async (
 
     const user = await prisma.user.findUnique({
       where: { username: username },
-      select: { id: true, role: true },
+      select: { id: true, role: true }
     })
 
     if (!user) throw new ResourceNotFoundError()
@@ -65,7 +66,7 @@ const checkEnterprise = async (
     if (role === userRole && userRole === 'ENTERPRISE') {
       const companyMember: CompanyMember | null =
         await prisma.companyMember.findUnique({
-          where: { userId: user.id },
+          where: { userId: user.id }
         })
       if (!companyMember) {
         return res.status(404).json({ error: 'Member not found' })
@@ -84,16 +85,18 @@ const allowedRoles =
   (roles: string[]) =>
   async (req: Request | any, res: Response, next: NextFunction) => {
     try {
-      const userId = req.userId
-      const companyId = req.companyId
-      const companyRole = req.companyRole
+      const userSession = req.session.user as SessionData['user']
+
+      const userId = userSession.id
+      const companyId = userSession.company?.id
+      const companyRole = userSession.company?.role
 
       const companyMember = await prisma.companyMember.findUnique({
         where: {
           userId: userId,
           companyId: companyId,
-          companyRole: companyRole as CompanyRole,
-        },
+          companyRole: companyRole as CompanyRole
+        }
       })
 
       if (!companyMember) {
@@ -106,9 +109,8 @@ const allowedRoles =
         return res.status(403).json({ error: 'Unauthorized' })
       }
     } catch (error) {
-      console.error('Error in role middleware:', error)
       return res.status(500).json({ error: 'Internal server error' })
     }
   }
 
-export { checkEnterprise, allowedRoles, checkPentester }
+export { allowedRoles, checkEnterprise, checkPentester }

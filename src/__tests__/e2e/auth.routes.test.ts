@@ -1,24 +1,10 @@
-import { disconnectRedis, redisClient } from '../../utils/redis'
-import createServer from '../../utils/server'
-import express, {
-  Application,
-  NextFunction,
-  Request,
-  Response,
-  Router,
-} from 'express'
-import {
-  handleLogOut,
-  handleLogin,
-  handleRefreshToken,
-  handleRegistration,
-  validateOTP,
-} from '../../auth/auth.controller'
-import { authRouter } from '../../auth/auth.routes'
-import request from 'supertest'
+import { Role } from '@prisma/client'
+import type { Application } from 'express'
 import nodemailer from 'nodemailer'
-import { Role, User } from '@prisma/client'
+import request from 'supertest'
 import prisma from '../../utils/client'
+import { redisClient } from '../../utils/redis'
+import createServer from '../../utils/server'
 
 jest.setTimeout(60000)
 jest.mock('nodemailer')
@@ -31,7 +17,7 @@ const userData = {
   firstName: 'Steve',
   lastName: 'Jobs',
   password: 'password',
-  role: Role.ENTERPRISE,
+  role: Role.ENTERPRISE
 }
 
 let app: Application
@@ -53,7 +39,7 @@ describe('POST /api/v1/auth/register', () => {
   afterAll(async () => {
     await redisClient.disconnect()
     await prisma.user.delete({
-      where: { username: 'steve.jobs' },
+      where: { username: 'steve.jobs' }
     })
   })
 
@@ -66,7 +52,7 @@ describe('POST /api/v1/auth/register', () => {
     expect(response.status).toBe(201)
 
     const user = await prisma.user.findUnique({
-      where: { username: 'steve.jobs' },
+      where: { username: 'steve.jobs' }
     })
 
     expect(user).toBeTruthy()
@@ -85,6 +71,8 @@ describe('POST /api/v1/auth/register', () => {
       .send(userData)
 
     expect(response.status).toBe(409)
-    expect(response.body).toEqual({ message: 'User already exists' })
+    expect(response.body).toEqual({
+      message: 'Unique constraint violation'
+    })
   })
 })

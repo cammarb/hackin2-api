@@ -1,12 +1,12 @@
-import { Request, Response, NextFunction } from 'express'
+import type { Request, Response, NextFunction } from 'express'
 import { getEnvs } from '../../utils/envs'
 import { verifyJWT } from '../../auth/auth.middleware'
 import { generateToken, generateTokens } from '../../utils/auth'
-import { Role, User } from '@prisma/client'
+import { Role, type User } from '@prisma/client'
 import {
   InvalidJWTError,
   JWTExpiredError,
-  UnauthorizedError,
+  UnauthorizedError
 } from '../../error/apiError'
 
 const privateKey = `-----BEGIN PRIVATE KEY-----
@@ -59,16 +59,16 @@ const testUser: User = {
   mfa: true,
   confirmed: true,
   createdAt: new Date(),
-  updatedAt: new Date(),
+  updatedAt: new Date()
 }
 
 jest.mock('../../utils/envs', () => ({
-  getEnvs: jest.fn(),
+  getEnvs: jest.fn()
 }))
 
 let tokens = {
   accessToken: '',
-  refreshToken: '',
+  refreshToken: ''
 }
 
 let expiredToken = ''
@@ -87,7 +87,7 @@ describe('verifyJWT middleware function', () => {
       port: '3000',
       otpService: 'test email',
       otpUser: 'user@test.com',
-      otpPass: 'test password',
+      otpPass: 'test password'
     })
 
     tokens = await generateTokens(testUser)
@@ -97,12 +97,12 @@ describe('verifyJWT middleware function', () => {
   beforeEach(async () => {
     req = {
       headers: {
-        authorization: `Bearer ${tokens.accessToken}`,
-      },
+        authorization: `Bearer ${tokens.accessToken}`
+      }
     }
     res = {
       status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
+      json: jest.fn()
     }
     next = jest.fn()
   })
@@ -120,7 +120,7 @@ describe('verifyJWT middleware function', () => {
       await verifyJWT(req, res, next)
     } catch (error) {
       expect(next).toHaveBeenCalledWith(
-        new UnauthorizedError('Missing Authorization Headers'),
+        new UnauthorizedError('Missing Authorization Headers')
       )
     }
   })

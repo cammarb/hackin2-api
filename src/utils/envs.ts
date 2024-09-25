@@ -26,7 +26,7 @@ const getEnvs = async () => {
 
     const [privateKey, publicKey] = await Promise.all([
       promises.readFile(privateKeyPath, { encoding: 'utf-8' }),
-      promises.readFile(publicKeyPath, { encoding: 'utf-8' }),
+      promises.readFile(publicKeyPath, { encoding: 'utf-8' })
     ])
     return {
       port,
@@ -36,7 +36,7 @@ const getEnvs = async () => {
       origin,
       otpService,
       otpUser,
-      otpPass,
+      otpPass
     }
   } catch (error) {
     throw error

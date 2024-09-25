@@ -1,6 +1,13 @@
-import { Request, Response } from 'express'
-import { deleteUser, editUser, getUserById, getUsers } from './user.service'
-import { UserQueryParams } from './user.dto'
+import type { NextFunction, Request, Response } from 'express'
+import {
+  deleteUser,
+  editUser,
+  editUserPassword,
+  getUserById,
+  getUsers
+} from './user.service'
+import type { UserQueryParams } from './user.dto'
+import type { SessionData } from 'express-session'
 
 export const getUsersController = async (req: Request, res: Response) => {
   try {
@@ -8,22 +15,25 @@ export const getUsersController = async (req: Request, res: Response) => {
 
     const users = await getUsers(queryParams)
 
-    if (users.length == 0)
+    if (users.length === 0)
       return res.status(404).json({ error: 'Programs not found' })
 
     res.status(200).json({
-      users,
+      users
     })
   } catch (error) {
     return res.status(500).json({ error: 'Internal Server Error' })
   }
 }
 
-export const getUserByIdController = async (req: Request, res: Response) => {
+export const getUserByIdController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const id: string = req.params.id
-    if (!id)
-      return res.status(400).json({ error: 'Request parameters missing' })
+    // const id: string = req.params.id
+    const { id } = req.session.user as SessionData['user']
 
     const user = await getUserById(id)
 
@@ -31,7 +41,7 @@ export const getUserByIdController = async (req: Request, res: Response) => {
 
     res.status(200).json({ user: user })
   } catch (error) {
-    return res.status(500).json({ error: 'Internal Server Error' })
+    next(error)
   }
 }
 
@@ -51,6 +61,25 @@ export const editUserController = async (req: Request, res: Response) => {
   }
 }
 
+export const editUserPasswordController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const id: string = req.params.id
+    const body = req.body
+    if (!id || !body)
+      return res
+        .status(400)
+        .json({ error: 'Request parameters or body missing' })
+
+    const user = await editUserPassword(id, body)
+    res.status(200)
+  } catch (error) {
+    return res.status(500).json({ error: error })
+  }
+}
+
 export const deleteUserController = async (req: Request, res: Response) => {
   try {
     const id: string = req.params.id
@@ -60,7 +89,7 @@ export const deleteUserController = async (req: Request, res: Response) => {
     const user = await deleteUser(id)
     if (!user) return res.sendStatus(404).json({ error: 'User not found' })
 
-    res.status(200).json({ message: `User deleted` })
+    res.status(200).json({ message: 'User deleted' })
   } catch (error) {
     return res.status(500).json({ error: 'Internal Server Error' })
   }

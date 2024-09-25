@@ -1,4 +1,4 @@
-import { Severity } from '@prisma/client'
+import type { Severity } from '@prisma/client'
 
 export interface SeverityRewardQueryParams {
   program?: string

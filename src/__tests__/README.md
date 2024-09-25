@@ -16,6 +16,7 @@ This creates PostgreSQL and Redis containers from the compose file, and then mig
 
 ```bash
 ./integration-starter.sh
+npm run test:e2e
 ```
 
 ## All tests

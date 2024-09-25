@@ -1,6 +1,6 @@
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 import { addScope, deleteScope, getScopes } from './scope.service'
-import { ScopeQueryParams } from './scope.dto'
+import type { ScopeQueryParams } from './scope.dto'
 
 export const addScopeController = async (req: Request | any, res: Response) => {
   try {
@@ -56,7 +56,7 @@ export const getScopesController = async (req: Request, res: Response) => {
 
 export const deleteScopeController = async (
   req: Request | any,
-  res: Response,
+  res: Response
 ) => {
   try {
     const id = req.params.id

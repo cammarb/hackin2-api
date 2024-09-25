@@ -1,10 +1,10 @@
-import { Role, User } from '@prisma/client'
+import { Role, type User } from '@prisma/client'
 import { getEnvs } from '../../utils/envs'
 import { generateToken, generateTokens } from '../../utils/auth'
-import { JwtPayload, verify } from 'jsonwebtoken'
+import { type JwtPayload, verify } from 'jsonwebtoken'
 
 jest.mock('../../utils/envs', () => ({
-  getEnvs: jest.fn(),
+  getEnvs: jest.fn()
 }))
 
 const privateKey = `-----BEGIN PRIVATE KEY-----
@@ -57,7 +57,7 @@ const testUser: User = {
   mfa: true,
   confirmed: true,
   createdAt: new Date(),
-  updatedAt: new Date(),
+  updatedAt: new Date()
 }
 
 describe('Auth utils test', () => {
@@ -71,7 +71,7 @@ describe('Auth utils test', () => {
       port: '3000',
       otpService: 'test email',
       otpUser: 'user@test.com',
-      otpPass: 'test password',
+      otpPass: 'test password'
     })
   })
 
@@ -80,7 +80,7 @@ describe('Auth utils test', () => {
     expect(token).toBeDefined()
 
     const decoded = verify(token, publicKey, {
-      algorithms: ['RS256'],
+      algorithms: ['RS256']
     }) as JwtPayload
     expect(decoded.username).toBe(testUser.username)
     expect(decoded.role).toBe(testUser.role)
@@ -89,7 +89,7 @@ describe('Auth utils test', () => {
 
   test('Throw error when User is invalid', async () => {
     await expect(
-      generateToken(undefined as unknown as User, '5m'),
+      generateToken(undefined as unknown as User, '5m')
     ).rejects.toThrow('Invalid user object or expiration provided')
   })
 
@@ -101,7 +101,7 @@ describe('Auth utils test', () => {
     expect(refreshToken).toBeDefined()
 
     const decodedAccessToken = verify(accessToken, publicKey, {
-      algorithms: ['RS256'],
+      algorithms: ['RS256']
     }) as JwtPayload
     expect(decodedAccessToken.username).toBe(testUser.username)
     expect(decodedAccessToken.role).toBe(testUser.role)
@@ -109,7 +109,7 @@ describe('Auth utils test', () => {
     expect(decodedAccessToken.exp).toBe(accessTokenExp)
 
     const decodedRefreshToken = verify(refreshToken, publicKey, {
-      algorithms: ['RS256'],
+      algorithms: ['RS256']
     }) as JwtPayload
     expect(decodedRefreshToken.username).toBe(testUser.username)
     expect(decodedRefreshToken.role).toBe(testUser.role)

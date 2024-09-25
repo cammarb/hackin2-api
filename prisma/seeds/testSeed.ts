@@ -4,7 +4,7 @@ import {
   ProgramStatus,
   Role,
   Severity,
-  User,
+  User
 } from '@prisma/client'
 import hashToken from '../../src/utils/hash'
 
@@ -12,7 +12,7 @@ const prisma = new PrismaClient()
 
 async function main() {
   const password = 'testpassword'
-  let hashedPassword = await hashToken(password)
+  const hashedPassword = await hashToken(password)
 
   const adminUser = await prisma.user.upsert({
     where: { username: 'john.doe' },
@@ -23,8 +23,8 @@ async function main() {
       username: 'john.doe',
       email: 'john.doe@email.com',
       password: hashedPassword,
-      role: Role.ENTERPRISE,
-    },
+      role: Role.ENTERPRISE
+    }
   })
 
   const company = await prisma.company.upsert({
@@ -36,8 +36,8 @@ async function main() {
       CompanyMember: {
         create: {
           userId: adminUser.id,
-          companyRole: CompanyRole.OWNER,
-        },
+          companyRole: CompanyRole.OWNER
+        }
       },
       Program: {
         create: [
@@ -50,25 +50,25 @@ async function main() {
                 {
                   severity: Severity.LOW,
                   min: 50,
-                  max: 200,
+                  max: 200
                 },
                 {
                   severity: Severity.MEDIUM,
                   min: 250,
-                  max: 1000,
+                  max: 1000
                 },
                 {
                   severity: Severity.HIGH,
                   min: 1500,
-                  max: 4000,
+                  max: 4000
                 },
                 {
                   severity: Severity.CRITICAL,
                   min: 5000,
-                  max: 10000,
-                },
-              ],
-            },
+                  max: 10000
+                }
+              ]
+            }
           },
           {
             name: 'Program B',
@@ -80,29 +80,29 @@ async function main() {
                 {
                   severity: Severity.LOW,
                   min: 50,
-                  max: 200,
+                  max: 200
                 },
                 {
                   severity: Severity.MEDIUM,
                   min: 250,
-                  max: 1000,
+                  max: 1000
                 },
                 {
                   severity: Severity.HIGH,
                   min: 1500,
-                  max: 4000,
+                  max: 4000
                 },
                 {
                   severity: Severity.CRITICAL,
                   min: 5000,
-                  max: 10000,
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
+                  max: 10000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
   })
 
   const pentesterUser = await prisma.user.upsert({
@@ -114,8 +114,8 @@ async function main() {
       username: 'jane.doe',
       email: 'jane.doe@email.com',
       password: hashedPassword,
-      role: Role.PENTESTER,
-    },
+      role: Role.PENTESTER
+    }
   })
 }
 

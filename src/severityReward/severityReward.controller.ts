@@ -1,15 +1,15 @@
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 import {
   addSeverityReward,
   deleteSeverityReward,
   getSeverityRewardById,
   getSeverityRewards,
-  updateSeverityReward,
+  updateSeverityReward
 } from './severityReward.service'
 
 export const getSeverityRewardsController = async (
-  req: Request | any,
-  res: Response,
+  req: Request,
+  res: Response
 ) => {
   try {
     const queryParams = req.query
@@ -27,7 +27,7 @@ export const getSeverityRewardsController = async (
 
 export const getSeverityRewardByIdController = async (
   req: Request,
-  res: Response,
+  res: Response
 ) => {
   try {
     const id = req.params.id
@@ -36,7 +36,7 @@ export const getSeverityRewardByIdController = async (
         .status(400)
         .json({ error: 'Request parameters or body missing' })
 
-    const severityReward = getSeverityRewardById(id)
+    const severityReward = await getSeverityRewardById(id)
 
     if (severityReward == null)
       return res.status(404).json({ error: 'Program not found' })
@@ -49,7 +49,7 @@ export const getSeverityRewardByIdController = async (
 
 export const addSeverityRewardController = async (
   req: Request,
-  res: Response,
+  res: Response
 ) => {
   try {
     const body = req.body
@@ -70,7 +70,7 @@ export const addSeverityRewardController = async (
 
 export const updateSeverityRewardController = async (
   req: Request,
-  res: Response,
+  res: Response
 ) => {
   try {
     const id = req.params.id
@@ -90,7 +90,7 @@ export const updateSeverityRewardController = async (
 
 export const deleteSeverityRewardController = async (
   req: Request,
-  res: Response,
+  res: Response
 ) => {
   try {
     const id = req.params.id

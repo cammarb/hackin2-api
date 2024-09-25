@@ -1,9 +1,9 @@
 import prisma from '../utils/client'
-import { ScopeBody, ScopeQueryParams } from './scope.dto'
+import type { ScopeBody, ScopeQueryParams } from './scope.dto'
 
 export const addScope = async (
   queryParams: ScopeQueryParams,
-  body: ScopeBody,
+  body: ScopeBody
 ) => {
   const { name, description } = body
   let programId: string | undefined
@@ -16,8 +16,8 @@ export const addScope = async (
     data: {
       programId: programId,
       name: name,
-      description: description,
-    },
+      description: description
+    }
   })
 
   return scope
@@ -28,12 +28,12 @@ export const updateScope = async (id: string, body: ScopeBody) => {
 
   const scope = await prisma.scope.update({
     where: {
-      id: id,
+      id: id
     },
     data: {
       name: name,
-      description: description,
-    },
+      description: description
+    }
   })
 
   return scope
@@ -44,8 +44,8 @@ export const getScopes = async (queryParams: ScopeQueryParams) => {
 
   const scopes = await prisma.scope.findMany({
     where: {
-      programId: programId,
-    },
+      programId: programId
+    }
   })
 
   return scopes
@@ -54,8 +54,8 @@ export const getScopes = async (queryParams: ScopeQueryParams) => {
 export const deleteScope = async (id: string) => {
   const scope = await prisma.scope.delete({
     where: {
-      id: id,
-    },
+      id: id
+    }
   })
 
   return scope

@@ -5,7 +5,7 @@ import {
   deleteCompanyMemberController,
   editCompanyMemberController,
   getCompanyMemberByIdController,
-  getCompanyMembersController,
+  getCompanyMembersController
 } from './companyMember.controller'
 
 export const companyMemberRouter: Router = Router()
@@ -13,25 +13,25 @@ export const companyMemberRouter: Router = Router()
 companyMemberRouter.get(
   '/',
   allowedRoles(['OWNER', 'ADMIN', 'MEMBER']),
-  getCompanyMembersController,
+  getCompanyMembersController
 )
 companyMemberRouter.post(
   '/new',
   allowedRoles(['OWNER', 'ADMIN']),
-  addCompanyMembersController,
+  addCompanyMembersController
 )
 companyMemberRouter.get(
   '/:id',
   allowedRoles(['OWNER', 'ADMIN', 'MEMBER']),
-  getCompanyMemberByIdController,
+  getCompanyMemberByIdController
 )
 companyMemberRouter.put(
   '/:id',
   allowedRoles(['OWNER']),
-  editCompanyMemberController,
+  editCompanyMemberController
 )
 companyMemberRouter.delete(
   '/:id',
   allowedRoles(['OWNER', 'ADMIN']),
-  deleteCompanyMemberController,
+  deleteCompanyMemberController
 )

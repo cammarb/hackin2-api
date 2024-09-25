@@ -1,10 +1,10 @@
-import { Application, json } from 'express'
+import { type Application, json } from 'express'
 import createServer from '../../utils/server'
 import request from 'supertest'
 import { redisClient } from '../../utils/redis'
 import prisma from '../../utils/client'
 import { generateTokens } from '../../utils/auth'
-import { User } from '@prisma/client'
+import type { User } from '@prisma/client'
 
 jest.setTimeout(30000)
 jest.unmock('../../utils/client')
@@ -15,7 +15,7 @@ let programs: any
 let companyId: string
 let tokens = {
   accessToken: '',
-  refreshToken: '',
+  refreshToken: ''
 }
 
 describe('GET /programs', () => {

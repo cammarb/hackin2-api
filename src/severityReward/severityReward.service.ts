@@ -1,12 +1,12 @@
-import { Severity, SeverityReward } from '@prisma/client'
+import { Severity, type SeverityReward } from '@prisma/client'
 import prisma from '../utils/client'
-import {
+import type {
   SeverityRewardBody,
-  SeverityRewardQueryParams,
+  SeverityRewardQueryParams
 } from './severityReward.dto'
 
 export const getSeverityRewards = async (
-  queryParams: SeverityRewardQueryParams,
+  queryParams: SeverityRewardQueryParams
 ) => {
   const allowedParams = ['program', 'severity']
   for (const param in queryParams) {
@@ -35,8 +35,8 @@ export const getSeverityRewards = async (
   const severityRewards = await prisma.severityReward.findMany({
     where: {
       programId: programId,
-      severity: severity as Severity,
-    },
+      severity: severity as Severity
+    }
   })
 
   return severityRewards
@@ -46,8 +46,8 @@ export const getSeverityRewardById = async (id: string) => {
   const severityReward: SeverityReward | null =
     await prisma.severityReward.findUnique({
       where: {
-        id: id,
-      },
+        id: id
+      }
     })
 
   return severityReward
@@ -64,8 +64,8 @@ export const addSeverityReward = async (body: SeverityRewardBody) => {
       severity: severity,
       min: min,
       max: max,
-      programId: program,
-    },
+      programId: program
+    }
   })
 
   return severityReward
@@ -74,17 +74,17 @@ export const addSeverityReward = async (body: SeverityRewardBody) => {
 export const updateSeverityReward = async (
   id: string,
   min: number,
-  max: number,
+  max: number
 ) => {
   const severityReward: SeverityReward | null =
     await prisma.severityReward.update({
       where: {
-        id: id,
+        id: id
       },
       data: {
         min: min,
-        max: max,
-      },
+        max: max
+      }
     })
 
   return severityReward
@@ -94,8 +94,8 @@ export const deleteSeverityReward = async (id: string) => {
   const severityReward: SeverityReward | null =
     await prisma.severityReward.delete({
       where: {
-        id: id,
-      },
+        id: id
+      }
     })
 
   return severityReward

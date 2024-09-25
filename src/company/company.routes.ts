@@ -2,7 +2,7 @@ import { Router } from 'express'
 import {
   editCompanyController,
   getCompaniesController,
-  getCompanyByIdController,
+  getCompanyByIdController
 } from './company.controller'
 import { allowedRoles } from '../middleware/roles.middleware'
 
