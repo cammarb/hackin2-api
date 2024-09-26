@@ -24,4 +24,21 @@ declare global {
       role?: string
     }
   }
+
+  namespace NodeJS {
+    interface ProcessEnv {
+      PORT: string
+      PUB_KEY_PATH: string
+      PRIV_KEY_PATH: string
+      ISSUER: string
+      ORIGIN: string
+      OTP_SERVICE: string
+      OTP_USER: string
+      OTP_PASS: string
+      CLOUDINARY_CLOUD_NAME: string
+      CLOUDINARY_API_KEY: string
+      CLOUDINARY_API_SECRET: string
+      STRIPE_SECRET_KEY: string
+    }
+  }
 }
