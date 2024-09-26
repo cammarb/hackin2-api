@@ -21,7 +21,6 @@ import { createUser } from '../user/user.service'
 import { generateTokens } from '../utils/auth'
 import prisma from '../utils/client'
 import { validateEmail } from '../utils/emailValidator'
-import { getEnvs } from '../utils/envs'
 import hashToken from '../utils/hash'
 import { generateOTP, sendOTPEmail } from '../utils/otp'
 import { redisClient } from '../utils/redis'
@@ -113,9 +112,10 @@ export const refreshTokenController = async (
   try {
     const jwtCookie: string = req.cookies.jwt
 
-    const { publicKey } = await getEnvs()
-
-    const decoded: JwtPayload = jwt.verify(jwtCookie, publicKey) as JwtPayload
+    const decoded: JwtPayload = jwt.verify(
+      jwtCookie,
+      process.env.PUBLIC_KEY
+    ) as JwtPayload
 
     if (!decoded) return res.sendStatus(401)
 

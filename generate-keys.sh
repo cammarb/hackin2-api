@@ -6,11 +6,20 @@ if ! command -v openssl &> /dev/null; then
     exit 1
 fi
 
-# Generate private key
-openssl genpkey -algorithm RSA -out private_key.pem
+# Generate private key and save it in a variable
+PRIVATE_KEY=$(openssl genpkey -algorithm RSA -outform PEM)
 
-# Extract public key from private key
-openssl rsa -pubout -in private_key.pem -out public_key.pem
+# Extract public key from private key and save it in a variable
+PUBLIC_KEY=$(echo "$PRIVATE_KEY" | openssl rsa -pubout -outform PEM 2>/dev/null)
 
-echo "Private and public keys generated successfully:"
-ls -l private_key.pem public_key.pem
+# Check if the keys were generated successfully
+if [[ -z "$PRIVATE_KEY" || -z "$PUBLIC_KEY" ]]; then
+    echo "Error: Key generation failed."
+    exit 1
+fi
+
+# Write the keys to the .env file
+echo "PRIVATE_KEY=\"$(echo "$PRIVATE_KEY")\"" >> .env
+echo "PUBLIC_KEY=\"$(echo "$PUBLIC_KEY")\"" >> .env
+
+echo "Private and public keys generated and saved to .env successfully."

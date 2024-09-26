@@ -11,7 +11,6 @@ import { requestId } from '../middleware/requestId.middleware'
 import { logger } from './logger'
 import { connectRedis, redisStore } from './redis'
 import routes from './routes'
-import { getEnvs } from './envs'
 
 const createServer = async () => {
   const app: Application = express()

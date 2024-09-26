@@ -28,8 +28,8 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       PORT: string
-      PUB_KEY_PATH: string
-      PRIV_KEY_PATH: string
+      PUBLIC_KEY: string
+      PRIVATE_KEY: string
       ISSUER: string
       ORIGIN: string
       OTP_SERVICE: string

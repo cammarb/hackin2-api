@@ -1,6 +1,5 @@
 import type { Request, Response, NextFunction } from 'express'
 import { verify, TokenExpiredError, JsonWebTokenError } from 'jsonwebtoken'
-import { getEnvs } from '../utils/envs'
 import { redisClient } from '../utils/redis'
 import {
   ForbiddenError,
@@ -12,14 +11,13 @@ import {
 const verifyJWT = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers?.authorization
-    const { publicKey } = await getEnvs()
 
-    if (!authHeader || !publicKey)
+    if (!authHeader)
       throw new UnauthorizedError('Missing Authorization Headers')
 
     const token = authHeader.split(' ')[1]
 
-    const decoded = verify(token, publicKey) as {
+    const decoded = verify(token, process.env.PUBLIC_KEY) as {
       username: string
       role: string
     }
