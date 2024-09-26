@@ -18,7 +18,7 @@ Repository for the Hackin2 API, built using `Express.js` with `Typescript`. The 
 
 ## Introduction
 
-Hackin2 is a platform that helps companies and cybersecurity freelancers connect.
+Hackin2 is a platform that helps companies and physical pentesters connect.
 This repository contains the backend API, which provides the necessary endpoints for the Hackin2 web application to interact with the database, cache storage, handle user authentication, authorization and manage security-related tasks.
 
 ![diagram](./diagram.svg)
@@ -30,6 +30,7 @@ This repository contains the backend API, which provides the necessary endpoints
 - User authentication and authorization with `JWT` and `Sessions`.
 - Role base access control: `COMPANY`, `PENTESTER`.
 - Programs management and tracking.
+- Bounty creating and management.
 - Findings reporting and management.
 - Security event logging and monitoring.
 - User activity and access control.
@@ -42,7 +43,7 @@ This repository contains the backend API, which provides the necessary endpoints
 To run the API locally, you need the following prerequisites:
 
 - git
-- Node.js (version >= 18)
+- Node.js (version >= 20)
 - npm
 
 ### Installation
@@ -50,7 +51,7 @@ To run the API locally, you need the following prerequisites:
 1. Clone this repository to your local machine:
 
    ```bash
-   git clone https://github.com/Hackin2-company/hackin2-api.git
+   git clone https://github.com/cammarb/hackin2-api.git
    cd hackin2-api
    ```
 
@@ -68,44 +69,17 @@ You can setup the project manually or by opening the devcontainer enviroment
 
 This section assumes **you know how to work with docker.**
 
-1. Generate private/public keys
+1. Run the dev-starter script
 
-   - MacOS/Linux
-     ```bash
-     .generate_keys.sh
-     ```
-   - Windows
-     ```powershell
-     generate_keys.ps1
-     ```
+```bash
+./dev-starter.sh
+```
 
-2. Create docker images with compose
-   
-   Run this command in your terminal
+If you open the file you'll see that this is creating the .env file from the .env.example. 
+To make the app run, the contents in the .env file are sufficient, however to be able to send e-mails,
+save images to Cloudinary and make payments with Stripe, you'll need your API keys.
 
-   ```bash
-   docker compose up -d
-   ```
-
-3. Create .env file
-
-   Before running the API, you need to set up the configuration.
-   Copy the .env.example file and rename it to .env, then fill in the appropriate values for the environment variables:
-
-   ```
-   PORT=8000
-   DATABASE_USER=postgres
-   DATABASE_PASSWORD=postgres
-   DATABASE_DB=hackin2db
-   DATABASE_PORT=5432
-   DATABASE_URL=postgresql://postgres:postgres@localhost:DATABASE_PORT/hackin2db
-
-   ORIGIN='http://localhost:5173'
-   ISSUER='https://hackin2.com'
-
-   PUBKEY=public_key.pem
-   PRIVKEY=private_key.pem
-   ```
+If you encounter an error or problem, please create an issue.
 
 #### Dev Container
 
