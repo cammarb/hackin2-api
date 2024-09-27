@@ -57,26 +57,66 @@ export const stripePaymentService = async (body: StripePaymentBody) => {
   } = body
   const amountParsed = Number.parseInt(amount)
 
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: amountParsed,
-    currency: 'usd',
-    automatic_payment_methods: {
+  const product = await stripe.products.create({
+    name: 'Bounty'
+  })
+
+  const price = await stripe.prices.create({
+    currency: 'EUR',
+    custom_unit_amount: {
       enabled: true
     },
-    on_behalf_of: pentesterStripeAccountId,
-    customer: companyStripeAccountId
+    product: product.id
   })
 
-  const newPayment = await prisma.payments.create({
-    data: {
-      amount: paymentIntent.amount,
-      bountyId: bountyId,
-      userId: userId,
-      memberId: memberId,
-      companyId: companyId,
-      status: 'PAYED'
-    }
+  const paymentLink = await stripe.paymentLinks.create({
+    line_items: [
+      {
+        price: price.id,
+        quantity: 1
+      }
+    ]
   })
 
-  return paymentIntent
+  // const paymentIntent = await stripe.paymentIntents.create({
+  //   amount: amountParsed,
+  //   currency: 'usd',
+  //   automatic_payment_methods: {
+  //     enabled: true
+  //   },
+  //   on_behalf_of: pentesterStripeAccountId,
+  //   customer: companyStripeAccountId
+  // })
+
+  // const newPayment = await prisma.payments.create({
+  //   data: {
+  //     amount: paymentIntent.amount,
+  //     bountyId: bountyId,
+  //     userId: userId,
+  //     memberId: memberId,
+  //     companyId: companyId,
+  //     status: 'PAYED'
+  //   }
+  // })
+
+  return paymentLink
+}
+
+export const retrieveStripeAccount = async (stripeAccount: string) => {
+  const account = await stripe.accounts.retrieve(stripeAccount)
+
+  return account
+}
+
+export const stripeTransferPentester = async (
+  pentesterStripeAccount: string,
+  amount: number
+) => {
+  const transfer = await stripe.transfers.create({
+    amount: amount,
+    currency: 'eur',
+    destination: pentesterStripeAccount
+  })
+
+  return transfer
 }

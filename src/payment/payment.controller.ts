@@ -1,8 +1,10 @@
 import type { NextFunction, Request, Response } from 'express'
 import {
+  retrieveStripeAccount,
   stripeCreateAccountLinkService,
   stripeCreateAccountService,
-  stripePaymentService
+  stripePaymentService,
+  stripeTransferPentester
 } from './payment.service'
 
 export const stripeCreateAccountController = async (
@@ -44,11 +46,43 @@ export const stripePaymentController = async (
 ) => {
   try {
     const body = req.body
-    console.log(body)
 
     const payment = await stripePaymentService(body)
 
     return res.send({ success: true, payment })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const stripeRetrieveAccount = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = req.params.id
+
+    const account = await retrieveStripeAccount(id)
+
+    return res.send({ success: true, account })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const stripeTransferPentesterController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const stripeAccount = req.body.stripeAccount
+    const amount = req.body.amount
+
+    const tranfer = await stripeTransferPentester(stripeAccount, amount)
+
+    return res.send({ success: true, tranfer })
   } catch (error) {
     next(error)
   }
