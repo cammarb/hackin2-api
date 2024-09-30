@@ -63,7 +63,7 @@ model Company {
   name            String  @unique
   website         String?
   email           String
-  stripeAccountId String? @unique
+  stripeAccountId String  @unique
 
   CompanyMember CompanyMember[]
   Program       Program[]
