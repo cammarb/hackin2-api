@@ -106,7 +106,8 @@ export const stripeNewCheckoutSessionController = async (
       amount
     )
 
-    return res.send({ success: true, checkoutSession })
+    res.redirect(checkoutSession.url as string)
+    // return res.send({ checkoutSession })
   } catch (error) {
     next(error)
   }
@@ -122,7 +123,7 @@ export const stripeGetCheckoutSessionController = async (
 
     const checkoutSession = await stripeGetCheckoutSession(sessionId)
 
-    return res.send({ success: true, checkoutSession })
+    return res.status(200).json({ checkoutSession })
   } catch (error) {
     next(error)
   }
