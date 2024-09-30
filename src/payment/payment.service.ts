@@ -125,3 +125,15 @@ export const stripeGetPayments = async (account: string) => {
 
   return session
 }
+
+export const stripeNewCustomerAccount = async (body: {
+  email: string
+  name: string
+}) => {
+  const customer = await stripe.customers.create({
+    email: body.email,
+    name: body.name
+  })
+
+  return customer
+}

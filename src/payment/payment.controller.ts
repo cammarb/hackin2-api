@@ -6,6 +6,7 @@ import {
   stripeGetCheckoutSession,
   stripeGetPayments,
   stripeNewCheckoutSession,
+  stripeNewCustomerAccount,
   stripePaymentService,
   stripeTransferPentester
 } from './payment.service'
@@ -141,6 +142,22 @@ export const stripeGetPaymentsController = async (
     const sessions = await stripeGetPayments(account)
 
     return res.status(200).json({ sessions })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const stripeNewCustomerAccountController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const body = req.body
+
+    const customer = await stripeNewCustomerAccount(body)
+
+    return res.status(200).json({ customer })
   } catch (error) {
     next(error)
   }

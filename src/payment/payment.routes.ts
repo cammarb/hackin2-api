@@ -5,6 +5,7 @@ import {
   stripeGetCheckoutSessionController,
   stripeGetPaymentsController,
   stripeNewCheckoutSessionController,
+  stripeNewCustomerAccountController,
   stripePaymentController,
   stripeRetrieveAccount,
   stripeTransferPentesterController
@@ -30,6 +31,9 @@ paymentRouter.post(
   stripeCreateAccountLinkController
 )
 paymentRouter.get('/stripeConnectedAccounts/:id', stripeRetrieveAccount)
+
+paymentRouter.post('/stripeCustomer/new', stripeNewCustomerAccountController)
+paymentRouter.get('/stripeCustomer/:id', stripeRetrieveAccount)
 
 paymentRouter.post('/new', stripeNewCheckoutSessionController)
 paymentRouter.get('/:id', stripeGetCheckoutSessionController)
