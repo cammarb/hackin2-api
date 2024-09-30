@@ -4,6 +4,7 @@ import {
   stripeCreateAccountLinkService,
   stripeCreateAccountService,
   stripeGetCheckoutSession,
+  stripeGetPayments,
   stripeNewCheckoutSession,
   stripePaymentService,
   stripeTransferPentester
@@ -106,8 +107,8 @@ export const stripeNewCheckoutSessionController = async (
       amount
     )
 
-    res.redirect(checkoutSession.url as string)
-    // return res.send({ checkoutSession })
+    // res.redirect(checkoutSession.url as string)
+    return res.send({ checkoutSession })
   } catch (error) {
     next(error)
   }
@@ -124,6 +125,22 @@ export const stripeGetCheckoutSessionController = async (
     const checkoutSession = await stripeGetCheckoutSession(sessionId)
 
     return res.status(200).json({ checkoutSession })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const stripeGetPaymentsController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const account = req.query.account as string
+
+    const sessions = await stripeGetPayments(account)
+
+    return res.status(200).json({ sessions })
   } catch (error) {
     next(error)
   }

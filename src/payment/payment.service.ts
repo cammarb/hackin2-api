@@ -89,6 +89,7 @@ export const stripeNewCheckoutSession = async (
     payment_method_types: ['card'],
     mode: 'payment',
     client_reference_id: enterpriseStripeAccount,
+    customer: enterpriseStripeAccount,
     line_items: [
       {
         price_data: {
@@ -103,7 +104,7 @@ export const stripeNewCheckoutSession = async (
     ],
     payment_intent_data: {
       transfer_data: {
-        destination: pentesterStripeAccount // Pentester's Stripe account ID
+        destination: pentesterStripeAccount
       }
     },
     success_url: `http://localhost:${process.env.PORT}/api/v1/payments/success?session_id={CHECKOUT_SESSION_ID}`, // Redirect URL after success
@@ -115,6 +116,12 @@ export const stripeNewCheckoutSession = async (
 
 export const stripeGetCheckoutSession = async (sessionId: string) => {
   const session = await stripe.checkout.sessions.retrieve(sessionId)
+
+  return session
+}
+
+export const stripeGetPayments = async (account: string) => {
+  const session = await stripe.checkout.sessions.list({ customer: account })
 
   return session
 }

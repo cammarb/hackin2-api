@@ -3,6 +3,7 @@ import {
   stripeCreateAccountController,
   stripeCreateAccountLinkController,
   stripeGetCheckoutSessionController,
+  stripeGetPaymentsController,
   stripeNewCheckoutSessionController,
   stripePaymentController,
   stripeRetrieveAccount,
@@ -11,12 +12,25 @@ import {
 
 export const paymentRouter: Router = Router()
 
-paymentRouter.post('/stripeAccounts/new', stripeCreateAccountController)
+/**Connected Accounts in this context will be assigned
+ * to users with PENTESTER role.
+ * Customers will be assigned to ENTERPRISE users.
+ *
+ * This is because connected accounts should be able
+ * to retrieve money to their preffered accounts
+ * and customers should only be able to pay directly
+ * to the connected accounts.
+ */
 paymentRouter.post(
-  '/stripeAccounts/link/new',
+  '/stripeConnectedAccounts/new',
+  stripeCreateAccountController
+)
+paymentRouter.post(
+  '/stripeConnectedAccounts/link/new',
   stripeCreateAccountLinkController
 )
-paymentRouter.get('/stripeAccounts/:id', stripeRetrieveAccount)
+paymentRouter.get('/stripeConnectedAccounts/:id', stripeRetrieveAccount)
 
 paymentRouter.post('/new', stripeNewCheckoutSessionController)
 paymentRouter.get('/:id', stripeGetCheckoutSessionController)
+paymentRouter.get('/', stripeGetPaymentsController)
