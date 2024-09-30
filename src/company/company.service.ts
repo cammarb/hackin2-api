@@ -1,6 +1,29 @@
 import type { Company } from '@prisma/client'
 import prisma from '../utils/client'
 import type { EditCompanyBody } from './company.dto'
+import { stripeNewCustomerAccount } from '../payment/payment.service'
+
+export const newCompany = async (body: {
+  name: string
+  website: string
+  email: string
+  stripeAccountId: string
+}) => {
+  const { name, website, email, stripeAccountId } = body
+
+  const customerAccount = await stripeNewCustomerAccount({ email, name })
+
+  const company = await prisma.company.create({
+    data: {
+      name: name,
+      email: email,
+      website: website,
+      stripeAccountId: customerAccount.id
+    }
+  })
+
+  return company
+}
 
 export const getCompanies = async () => {
   const companies = await prisma.company.findMany()

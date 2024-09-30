@@ -62,7 +62,8 @@ model Company {
   id              String  @id @unique @default(uuid())
   name            String  @unique
   website         String?
-  stripeAccountId String  @unique
+  email           String
+  stripeAccountId String? @unique
 
   CompanyMember CompanyMember[]
   Program       Program[]

@@ -1,5 +1,21 @@
-import type { Request, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 import { editCompany, getCompanies, getCompanyById } from './company.service'
+
+export const newCompanyController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const company = await getCompanies()
+
+    if (!company) return res.status(404).json({ error: 'Resource not found' })
+
+    return res.status(200).json({ company: company })
+  } catch (error) {
+    next(error)
+  }
+}
 
 export const getCompaniesController = async (req: Request, res: Response) => {
   try {
