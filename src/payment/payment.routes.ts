@@ -2,6 +2,8 @@ import { Router } from 'express'
 import {
   stripeCreateAccountController,
   stripeCreateAccountLinkController,
+  stripeGetCheckoutSessionController,
+  stripeNewCheckoutSessionController,
   stripePaymentController,
   stripeRetrieveAccount,
   stripeTransferPentesterController
@@ -9,8 +11,12 @@ import {
 
 export const paymentRouter: Router = Router()
 
-paymentRouter.post('/createAccount', stripeCreateAccountController)
-paymentRouter.post('/createAccountLink', stripeCreateAccountLinkController)
-paymentRouter.post('/new', stripePaymentController)
-paymentRouter.get('/:id', stripeRetrieveAccount)
-paymentRouter.post('/transfer', stripeTransferPentesterController)
+paymentRouter.post('/stripeAccounts/new', stripeCreateAccountController)
+paymentRouter.post(
+  '/stripeAccounts/link/new',
+  stripeCreateAccountLinkController
+)
+paymentRouter.get('/stripeAccounts/:id', stripeRetrieveAccount)
+
+paymentRouter.post('/new', stripeNewCheckoutSessionController)
+paymentRouter.get('/:id', stripeGetCheckoutSessionController)

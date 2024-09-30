@@ -3,6 +3,8 @@ import {
   retrieveStripeAccount,
   stripeCreateAccountLinkService,
   stripeCreateAccountService,
+  stripeGetCheckoutSession,
+  stripeNewCheckoutSession,
   stripePaymentService,
   stripeTransferPentester
 } from './payment.service'
@@ -83,6 +85,44 @@ export const stripeTransferPentesterController = async (
     const tranfer = await stripeTransferPentester(stripeAccount, amount)
 
     return res.send({ success: true, tranfer })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const stripeNewCheckoutSessionController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const enterpriseStripeAccount = req.body.enterpriseStripeAccount
+    const pentesterStripeAccount = req.body.pentesterStripeAccount
+    const amount = req.body.amount
+
+    const checkoutSession = await stripeNewCheckoutSession(
+      enterpriseStripeAccount,
+      pentesterStripeAccount,
+      amount
+    )
+
+    return res.send({ success: true, checkoutSession })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const stripeGetCheckoutSessionController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const sessionId = req.params.id
+
+    const checkoutSession = await stripeGetCheckoutSession(sessionId)
+
+    return res.send({ success: true, checkoutSession })
   } catch (error) {
     next(error)
   }

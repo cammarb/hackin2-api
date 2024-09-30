@@ -57,49 +57,7 @@ export const stripePaymentService = async (body: StripePaymentBody) => {
   } = body
   const amountParsed = Number.parseInt(amount)
 
-  const product = await stripe.products.create({
-    name: 'Bounty'
-  })
-
-  const price = await stripe.prices.create({
-    currency: 'EUR',
-    custom_unit_amount: {
-      enabled: true
-    },
-    product: product.id
-  })
-
-  const paymentLink = await stripe.paymentLinks.create({
-    line_items: [
-      {
-        price: price.id,
-        quantity: 1
-      }
-    ]
-  })
-
-  // const paymentIntent = await stripe.paymentIntents.create({
-  //   amount: amountParsed,
-  //   currency: 'usd',
-  //   automatic_payment_methods: {
-  //     enabled: true
-  //   },
-  //   on_behalf_of: pentesterStripeAccountId,
-  //   customer: companyStripeAccountId
-  // })
-
-  // const newPayment = await prisma.payments.create({
-  //   data: {
-  //     amount: paymentIntent.amount,
-  //     bountyId: bountyId,
-  //     userId: userId,
-  //     memberId: memberId,
-  //     companyId: companyId,
-  //     status: 'PAYED'
-  //   }
-  // })
-
-  return paymentLink
+  return 0
 }
 
 export const retrieveStripeAccount = async (stripeAccount: string) => {
@@ -110,6 +68,7 @@ export const retrieveStripeAccount = async (stripeAccount: string) => {
 
 export const stripeTransferPentester = async (
   pentesterStripeAccount: string,
+  onBehafOfEnterpriseStripeAccount: string,
   amount: number
 ) => {
   const transfer = await stripe.transfers.create({
@@ -119,4 +78,43 @@ export const stripeTransferPentester = async (
   })
 
   return transfer
+}
+
+export const stripeNewCheckoutSession = async (
+  enterpriseStripeAccount: string,
+  pentesterStripeAccount: string,
+  amount: number
+) => {
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    mode: 'payment',
+    client_reference_id: enterpriseStripeAccount,
+    line_items: [
+      {
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: 'Bounty Payment'
+          },
+          unit_amount: amount
+        },
+        quantity: 1
+      }
+    ],
+    payment_intent_data: {
+      transfer_data: {
+        destination: pentesterStripeAccount // Pentester's Stripe account ID
+      }
+    },
+    success_url: `http://localhost:${process.env.PORT}/api/v1/payments/success?session_id={CHECKOUT_SESSION_ID}`, // Redirect URL after success
+    cancel_url: `http://localhost:${process.env.PORT}/api/v1/payments/cancel` // Redirect URL if user cancels
+  })
+
+  return session
+}
+
+export const stripeGetCheckoutSession = async (sessionId: string) => {
+  const session = await stripe.checkout.sessions.retrieve(sessionId)
+
+  return session
 }
