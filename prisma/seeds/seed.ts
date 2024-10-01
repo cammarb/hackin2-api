@@ -51,6 +51,7 @@ async function main() {
       lastName: 'Pentester',
       username: 'user.pentester',
       email: 'user.pentester@code.berlin',
+      stripeAccountId: 'acct_1Q2xjUQtZSE0pPgU',
       password: hashedPassword,
       role: Role.PENTESTER
     }

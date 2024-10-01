@@ -83,7 +83,7 @@ export const loginController = async (
 
     res.cookie('jwt', tokens.refreshToken, {
       httpOnly: true,
-      sameSite: 'none',
+      sameSite: 'lax',
       secure: true,
       maxAge: 24 * 60 * 60 * 1000
     })
@@ -138,7 +138,7 @@ export const refreshTokenController = async (
 
     res.cookie('jwt', newTokens.refreshToken, {
       httpOnly: true,
-      sameSite: 'none',
+      sameSite: 'lax',
       secure: true,
       maxAge: 24 * 60 * 60 * 1000
     })
@@ -194,7 +194,7 @@ export const logoutController = async (
       res.removeHeader('authorization')
       res.clearCookie('jwt', {
         httpOnly: true,
-        sameSite: 'none',
+        sameSite: 'lax',
         secure: true
       })
       res.clearCookie('connect.sid', {

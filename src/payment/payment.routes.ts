@@ -10,6 +10,10 @@ import {
   stripeRetrieveAccount,
   stripeTransferPentesterController
 } from './payment.controller'
+import {
+  validateBody,
+  ValidationCriteria
+} from '../middleware/params.middleware'
 
 export const paymentRouter: Router = Router()
 
@@ -35,6 +39,13 @@ paymentRouter.get('/stripeConnectedAccounts/:id', stripeRetrieveAccount)
 paymentRouter.post('/stripeCustomer/new', stripeNewCustomerAccountController)
 paymentRouter.get('/stripeCustomer/:id', stripeRetrieveAccount)
 
-paymentRouter.post('/new', stripeNewCheckoutSessionController)
+paymentRouter.post(
+  '/new',
+  validateBody(
+    ['companyId', 'userId', 'amount', 'programId', 'bountyId'],
+    ValidationCriteria.ALL
+  ),
+  stripeNewCheckoutSessionController
+)
 paymentRouter.get('/:id', stripeGetCheckoutSessionController)
 paymentRouter.get('/', stripeGetPaymentsController)

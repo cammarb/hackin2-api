@@ -20,7 +20,7 @@ const createServer = async () => {
   app.use(
     cors({
       origin: process.env.ORIGIN,
-      methods: ['GET', 'POST', 'PUT', 'PATCH'],
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'OPTIONS'],
       credentials: true
     })
   )

@@ -245,9 +245,10 @@ enum PaymentStatus {
 }
 
 model Payments {
-  id     String        @id @unique @default(uuid())
-  amount BigInt
-  status PaymentStatus @default(PENDING)
+  id               String        @id @unique @default(uuid())
+  stripeCheckoutId String        @unique
+  amount           BigInt
+  status           PaymentStatus @default(PENDING)
 
   bountyId         String
   userId           String
@@ -260,4 +261,5 @@ model Payments {
   payedAt DateTime @default(now())
 
   @@unique([bountyId, userId])
+  @@index([stripeCheckoutId, bountyId, userId])
 }

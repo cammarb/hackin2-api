@@ -98,18 +98,12 @@ export const stripeNewCheckoutSessionController = async (
   next: NextFunction
 ) => {
   try {
-    const enterpriseStripeAccount = req.body.enterpriseStripeAccount
-    const pentesterStripeAccount = req.body.pentesterStripeAccount
-    const amount = req.body.amount
+    const body = req.body
 
-    const checkoutSession = await stripeNewCheckoutSession(
-      enterpriseStripeAccount,
-      pentesterStripeAccount,
-      amount
-    )
+    const checkoutSession = await stripeNewCheckoutSession(body)
 
-    res.redirect(checkoutSession.url as string)
-    //return res.send({ checkoutSession })
+    // res.redirect(302, checkoutSession.url as string)
+    res.status(200).json({ url: checkoutSession.url })
   } catch (error) {
     next(error)
   }

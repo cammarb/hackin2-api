@@ -1,6 +1,7 @@
 import type { StripeAccountBody, StripePaymentBody } from './payment.dto'
 import { stripe } from '../utils/stripe'
 import prisma from '../utils/client'
+import { NotFoundError } from '../error/apiError'
 
 export const stripeCreateAccountService = async (body: {
   email: string
@@ -80,11 +81,29 @@ export const stripeTransferPentester = async (
   return transfer
 }
 
-export const stripeNewCheckoutSession = async (
-  enterpriseStripeAccount: string,
-  pentesterStripeAccount: string,
+export const stripeNewCheckoutSession = async (body: {
+  companyId: string
+  userId: string
   amount: number
-) => {
+  programId: string
+  bountyId: string
+}) => {
+  const { companyId, userId, amount, programId, bountyId } = body
+
+  const [company, user] = await Promise.all([
+    prisma.company.findUnique({ where: { id: companyId } }),
+    prisma.user.findUnique({ where: { id: userId } })
+  ])
+
+  if (!company || !user) {
+    throw new NotFoundError('Company or user could not be found.')
+  }
+
+  const enterpriseStripeAccount = company.stripeAccountId as string
+  const pentesterStripeAccount = user.stripeAccountId as string
+
+  console.log(enterpriseStripeAccount, pentesterStripeAccount)
+
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     mode: 'payment',
@@ -107,7 +126,7 @@ export const stripeNewCheckoutSession = async (
         destination: pentesterStripeAccount
       }
     },
-    success_url: `http://localhost:${process.env.PORT}/api/v1/payments/success?session_id={CHECKOUT_SESSION_ID}`, // Redirect URL after success
+    success_url: `${process.env.ORIGIN}/programs/${programId}/payments/{CHECKOUT_SESSION_ID}`, // Redirect URL after success
     cancel_url: `http://localhost:${process.env.PORT}/api/v1/payments/cancel` // Redirect URL if user cancels
   })
 

@@ -163,7 +163,7 @@ describe('handleLogin function', () => {
     })
     expect(res.cookie).toHaveBeenCalledWith('jwt', 'mockRefreshToken', {
       httpOnly: true,
-      sameSite: 'none',
+      sameSite: 'lax',
       secure: true,
       maxAge: 24 * 60 * 60 * 1000
     })
@@ -290,7 +290,7 @@ describe('handleRefreshToken', () => {
     })
     expect(res.cookie).toHaveBeenCalledWith('jwt', 'mockRefreshToken', {
       httpOnly: true,
-      sameSite: 'none',
+      sameSite: 'lax',
       secure: true,
       maxAge: 24 * 60 * 60 * 1000
     })
