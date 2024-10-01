@@ -108,8 +108,8 @@ export const stripeNewCheckoutSessionController = async (
       amount
     )
 
-    // res.redirect(checkoutSession.url as string)
-    return res.send({ checkoutSession })
+    res.redirect(checkoutSession.url as string)
+    //return res.send({ checkoutSession })
   } catch (error) {
     next(error)
   }

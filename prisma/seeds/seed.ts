@@ -62,7 +62,8 @@ async function main() {
     create: {
       name: 'Hackin2',
       website: 'hackin2.com',
-      stripeAccountId: 'testStripeAccountId',
+      stripeAccountId: 'cus_QwZW1fxF5sdkHz',
+      email: 'user.admin@code.berlin',
       CompanyMember: {
         create: [
           {
