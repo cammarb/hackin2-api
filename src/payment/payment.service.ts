@@ -81,6 +81,10 @@ export const stripeTransferPentester = async (
   return transfer
 }
 
+/**
+ * `userId` refers to the ID of the PENTESTER user the payment is for.
+ *
+ */
 export const stripeNewCheckoutSession = async (body: {
   companyId: string
   userId: string
@@ -101,8 +105,6 @@ export const stripeNewCheckoutSession = async (body: {
 
   const enterpriseStripeAccount = company.stripeAccountId as string
   const pentesterStripeAccount = user.stripeAccountId as string
-
-  console.log(enterpriseStripeAccount, pentesterStripeAccount)
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
@@ -126,8 +128,8 @@ export const stripeNewCheckoutSession = async (body: {
         destination: pentesterStripeAccount
       }
     },
-    success_url: `${process.env.ORIGIN}/programs/${programId}/payments/{CHECKOUT_SESSION_ID}`, // Redirect URL after success
-    cancel_url: `http://localhost:${process.env.PORT}/api/v1/payments/cancel` // Redirect URL if user cancels
+    success_url: `${process.env.ORIGIN}/programs/${programId}/payments/{CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.ORIGIN}/programs/${programId}/payments/new`
   })
 
   return session
