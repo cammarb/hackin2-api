@@ -69,7 +69,6 @@ export const retrieveStripeAccount = async (stripeAccount: string) => {
 
 export const stripeTransferPentester = async (
   pentesterStripeAccount: string,
-  onBehafOfEnterpriseStripeAccount: string,
   amount: number
 ) => {
   const transfer = await stripe.transfers.create({

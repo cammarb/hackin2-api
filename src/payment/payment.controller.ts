@@ -166,7 +166,6 @@ export const stripeWebhook = async (
   next: NextFunction
 ) => {
   try {
-    console.log('start stripe webhook')
     const payload = req.body
     const sig = req.headers['stripe-signature'] as string
     const event = stripe.webhooks.constructEvent(
