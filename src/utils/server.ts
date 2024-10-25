@@ -56,7 +56,7 @@ const createServer = async () => {
       res: express.Response,
       next: express.NextFunction
     ): void => {
-      if (req.originalUrl === '/stripe_webhooks') {
+      if (req.originalUrl === '/api/v1/stripe_webhooks') {
         next()
       } else {
         express.json()(req, res, next)
@@ -65,11 +65,6 @@ const createServer = async () => {
   )
   app.use(logger())
 
-  app.post(
-    '/stripe_webhooks',
-    express.raw({ type: 'application/json' }),
-    stripeWebhook
-  )
   routes(app)
 
   app.use(logErrors)

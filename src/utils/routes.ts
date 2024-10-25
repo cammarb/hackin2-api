@@ -13,6 +13,7 @@ import { companyMemberRouter } from '../companyMember/companyMember.routes'
 import { applicationRouter } from '../application/application.routes'
 import { bountyAssignmentRouter } from '../bountyAssignment/bountyAssignment.routes'
 import { paymentRouter } from '../payment/payment.routes'
+import { stripeWebhook } from '../payment/payment.controller'
 
 const routes = (app: Application) => {
   const apiRoutes: Router = Router()
@@ -20,6 +21,12 @@ const routes = (app: Application) => {
   apiRoutes.get('/', (req, res) => {
     res.status(200).json({ message: 'Welcome to the Hackin2 API.' })
   })
+  apiRoutes.post(
+    '/stripe_webhooks',
+    raw({ type: 'application/json' }),
+    stripeWebhook
+  )
+
   apiRoutes.use('/auth', authRouter)
   apiRoutes.use('/users', verifyJWT, userRouter)
   apiRoutes.use('/companies', verifyJWT, checkEnterprise, companyRouter)

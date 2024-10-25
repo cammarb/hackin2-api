@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express'
 import {
+  getPaymentByCheckoutSessionId,
   retrieveStripeAccount,
   stripeCreateAccountLinkService,
   stripeCreateAccountService,
@@ -112,17 +113,17 @@ export const stripeNewCheckoutSessionController = async (
   }
 }
 
-export const stripeGetCheckoutSessionController = async (
+export const getPaymentByIdController = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const sessionId = req.params.id
+    const checkoutSessionId = req.params.id
 
-    const checkoutSession = await stripeGetCheckoutSession(sessionId)
+    const payment = await getPaymentByCheckoutSessionId(checkoutSessionId)
 
-    return res.status(200).json({ checkoutSession })
+    return res.status(200).json({ payment: payment })
   } catch (error) {
     next(error)
   }

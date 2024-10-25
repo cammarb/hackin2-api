@@ -1,8 +1,8 @@
 import { Router } from 'express'
 import {
+  getPaymentByIdController,
   stripeCreateAccountController,
   stripeCreateAccountLinkController,
-  stripeGetCheckoutSessionController,
   stripeGetPaymentsController,
   stripeNewCheckoutSessionController,
   stripeNewCustomerAccountController,
@@ -15,6 +15,7 @@ import {
   validateBody,
   ValidationCriteria
 } from '../middleware/params.middleware'
+import { getPaymentByCheckoutSessionId } from './payment.service'
 
 export const paymentRouter: Router = Router()
 
@@ -48,5 +49,5 @@ paymentRouter.post(
   ),
   stripeNewCheckoutSessionController
 )
-paymentRouter.get('/:id', stripeGetCheckoutSessionController)
+paymentRouter.get('/checkoutSession/:id', getPaymentByIdController)
 paymentRouter.get('/', stripeGetPaymentsController)

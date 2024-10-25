@@ -247,7 +247,7 @@ enum PaymentStatus {
 model Payments {
   id               String        @id @unique @default(uuid())
   stripeCheckoutId String        @unique
-  amount           BigInt
+  amount           Int
   status           PaymentStatus @default(PENDING)
 
   bountyId         String

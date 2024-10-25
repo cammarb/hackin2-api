@@ -165,3 +165,15 @@ export const stripeNewCustomerAccount = async (body: {
 
   return customer
 }
+
+export const getPaymentByCheckoutSessionId = async (
+  checkoutSessionId: string
+) => {
+  const payment = await prisma.payments.findUnique({
+    where: {
+      stripeCheckoutId: checkoutSessionId
+    }
+  })
+
+  return payment
+}
