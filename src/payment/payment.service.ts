@@ -87,12 +87,13 @@ export const stripeTransferPentester = async (
  */
 export const stripeNewCheckoutSession = async (body: {
   companyId: string
+  memberId: string
   userId: string
   amount: number
   programId: string
   bountyId: string
 }) => {
-  const { companyId, userId, amount, programId, bountyId } = body
+  const { companyId, memberId, userId, amount, programId, bountyId } = body
 
   const [company, user] = await Promise.all([
     prisma.company.findUnique({ where: { id: companyId } }),
@@ -123,12 +124,19 @@ export const stripeNewCheckoutSession = async (body: {
         quantity: 1
       }
     ],
+    metadata: {
+      bountyId: bountyId,
+      programId: programId,
+      userId: userId,
+      companyId: companyId,
+      memberId: memberId
+    },
     payment_intent_data: {
       transfer_data: {
         destination: pentesterStripeAccount
       }
     },
-    success_url: `${process.env.ORIGIN}/programs/${programId}/payments/{CHECKOUT_SESSION_ID}`,
+    success_url: `${process.env.ORIGIN}/programs/${programId}/payments/success/{CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.ORIGIN}/programs/${programId}/payments/new`
   })
 

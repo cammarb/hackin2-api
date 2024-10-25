@@ -10,6 +10,9 @@ import {
   stripePaymentService,
   stripeTransferPentester
 } from './payment.service'
+import { stripe } from '../utils/stripe'
+import type Stripe from 'stripe'
+import prisma from '../utils/client'
 
 export const stripeCreateAccountController = async (
   req: Request,
@@ -152,6 +155,49 @@ export const stripeNewCustomerAccountController = async (
     const customer = await stripeNewCustomerAccount(body)
 
     return res.status(200).json({ customer })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const stripeWebhook = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    console.log('start stripe webhook')
+    const payload = req.body
+    const sig = req.headers['stripe-signature'] as string
+    const event = stripe.webhooks.constructEvent(
+      payload,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET as string
+    )
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object as Stripe.Checkout.Session
+
+      const paymentIntentId = session.payment_intent as string
+      const paymentIntent =
+        await stripe.paymentIntents.retrieve(paymentIntentId)
+
+      await prisma.payments.create({
+        data: {
+          stripeCheckoutId: session.id as string,
+          amount: paymentIntent.amount,
+          companyId: session.metadata?.companyId as string,
+          memberId: session.metadata?.memberId as string,
+          userId: session.metadata?.userId as string,
+          bountyId: session.metadata?.bountyId as string,
+          status: 'PAYED'
+        }
+      })
+
+      console.log(
+        `Payment recorded successfully for Checkout Session ID: ${session.id}`
+      )
+    }
+    return res.sendStatus(200)
   } catch (error) {
     next(error)
   }

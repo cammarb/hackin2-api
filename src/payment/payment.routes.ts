@@ -8,7 +8,8 @@ import {
   stripeNewCustomerAccountController,
   stripePaymentController,
   stripeRetrieveAccount,
-  stripeTransferPentesterController
+  stripeTransferPentesterController,
+  stripeWebhook
 } from './payment.controller'
 import {
   validateBody,
@@ -42,7 +43,7 @@ paymentRouter.get('/stripeCustomer/:id', stripeRetrieveAccount)
 paymentRouter.post(
   '/new',
   validateBody(
-    ['companyId', 'userId', 'amount', 'programId', 'bountyId'],
+    ['companyId', 'memberId', 'userId', 'amount', 'programId', 'bountyId'],
     ValidationCriteria.ALL
   ),
   stripeNewCheckoutSessionController

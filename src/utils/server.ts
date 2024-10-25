@@ -11,6 +11,8 @@ import { requestId } from '../middleware/requestId.middleware'
 import { logger } from './logger'
 import { connectRedis, redisStore } from './redis'
 import routes from './routes'
+import { stripeWebhook } from '../payment/payment.controller'
+import { raw } from '@prisma/client/runtime/library'
 
 const createServer = async () => {
   const app: Application = express()
@@ -48,9 +50,26 @@ const createServer = async () => {
   app.disable('x-powered-by')
   app.use(compression())
   app.use(helmet())
-  app.use(express.json())
+  app.use(
+    (
+      req: express.Request,
+      res: express.Response,
+      next: express.NextFunction
+    ): void => {
+      if (req.originalUrl === '/stripe_webhooks') {
+        next()
+      } else {
+        express.json()(req, res, next)
+      }
+    }
+  )
   app.use(logger())
 
+  app.post(
+    '/stripe_webhooks',
+    express.raw({ type: 'application/json' }),
+    stripeWebhook
+  )
   routes(app)
 
   app.use(logErrors)
