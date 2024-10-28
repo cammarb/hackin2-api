@@ -1,10 +1,10 @@
 import type { NextFunction, Request, Response } from 'express'
 import {
   getPaymentByCheckoutSessionId,
+  getPayments,
   retrieveStripeAccount,
   stripeCreateAccountLinkService,
   stripeCreateAccountService,
-  stripeGetCheckoutSession,
   stripeGetPayments,
   stripeNewCheckoutSession,
   stripeNewCustomerAccount,
@@ -186,6 +186,7 @@ export const stripeWebhook = async (
           stripeCheckoutId: session.id as string,
           amount: paymentIntent.amount,
           companyId: session.metadata?.companyId as string,
+          programId: session.metadata?.programId as string,
           memberId: session.metadata?.memberId as string,
           userId: session.metadata?.userId as string,
           bountyId: session.metadata?.bountyId as string,
@@ -196,8 +197,39 @@ export const stripeWebhook = async (
       console.log(
         `Payment recorded successfully for Checkout Session ID: ${session.id}`
       )
+
+      await prisma.bountyAssignment.update({
+        where: {
+          bountyId_userId: {
+            bountyId: session.metadata?.bountyId as string,
+            userId: session.metadata?.userId as string
+          }
+        },
+        data: {
+          status: 'DONE'
+        }
+      })
     }
     return res.sendStatus(200)
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const getPaymentsController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const query = req.query as {
+      user?: string
+      bounty?: string
+      program?: string
+    }
+
+    const payments = await getPayments(query)
+    return res.status(200).json({ payments: payments })
   } catch (error) {
     next(error)
   }

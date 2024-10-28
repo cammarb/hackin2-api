@@ -1,21 +1,19 @@
 import { Router } from 'express'
 import {
   getPaymentByIdController,
+  getPaymentsController,
   stripeCreateAccountController,
   stripeCreateAccountLinkController,
   stripeGetPaymentsController,
   stripeNewCheckoutSessionController,
   stripeNewCustomerAccountController,
-  stripePaymentController,
-  stripeRetrieveAccount,
-  stripeTransferPentesterController,
-  stripeWebhook
+  stripeRetrieveAccount
 } from './payment.controller'
 import {
   validateBody,
+  validateQuery,
   ValidationCriteria
 } from '../middleware/params.middleware'
-import { getPaymentByCheckoutSessionId } from './payment.service'
 
 export const paymentRouter: Router = Router()
 
@@ -40,6 +38,7 @@ paymentRouter.get('/stripeConnectedAccounts/:id', stripeRetrieveAccount)
 
 paymentRouter.post('/stripeCustomer/new', stripeNewCustomerAccountController)
 paymentRouter.get('/stripeCustomer/:id', stripeRetrieveAccount)
+paymentRouter.get('/stripeCustomer', stripeGetPaymentsController)
 
 paymentRouter.post(
   '/new',
@@ -50,4 +49,8 @@ paymentRouter.post(
   stripeNewCheckoutSessionController
 )
 paymentRouter.get('/checkoutSession/:id', getPaymentByIdController)
-paymentRouter.get('/', stripeGetPaymentsController)
+paymentRouter.get(
+  '/',
+  validateQuery(['user', 'bounty', 'program'], ValidationCriteria.AT_LEAST_ONE),
+  getPaymentsController
+)

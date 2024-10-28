@@ -106,8 +106,9 @@ model Program {
   Bounty         Bounty[]
   SeverityReward SeverityReward[]
 
-  User   User?   @relation(fields: [userId], references: [id])
-  userId String?
+  User     User?      @relation(fields: [userId], references: [id])
+  userId   String?
+  Payments Payments[]
 
   @@index([programStatus])
 }
@@ -250,6 +251,9 @@ model Payments {
   amount           Int
   status           PaymentStatus @default(PENDING)
 
+  programId String
+  Program   Program @relation(fields: [programId], references: [id])
+
   bountyId         String
   userId           String
   BountyAssignment BountyAssignment @relation(fields: [bountyId, userId], references: [bountyId, userId], onDelete: Cascade)
@@ -261,5 +265,5 @@ model Payments {
   payedAt DateTime @default(now())
 
   @@unique([bountyId, userId])
-  @@index([stripeCheckoutId, bountyId, userId])
+  @@index([stripeCheckoutId, bountyId, userId, programId])
 }

@@ -172,8 +172,84 @@ export const getPaymentByCheckoutSessionId = async (
   const payment = await prisma.payments.findUnique({
     where: {
       stripeCheckoutId: checkoutSessionId
+    },
+    include: {
+      PayedByCompanyMember: {
+        select: {
+          User: {
+            select: {
+              username: true
+            }
+          }
+        }
+      },
+      BountyAssignment: {
+        select: {
+          Bounty: {
+            select: {
+              title: true
+            }
+          },
+          User: {
+            select: {
+              username: true
+            }
+          }
+        }
+      }
     }
   })
 
   return payment
+}
+
+export const getPayments = async (query: {
+  user?: string
+  bounty?: string
+  program?: string
+}) => {
+  const { user, bounty, program } = query
+
+  const payments = await prisma.payments.findMany({
+    where: program
+      ? {
+          programId: program
+        }
+      : user
+        ? {
+            userId: user
+          }
+        : bounty
+          ? {
+              bountyId: bounty
+            }
+          : {},
+    include: {
+      PayedByCompanyMember: {
+        select: {
+          User: {
+            select: {
+              username: true
+            }
+          }
+        }
+      },
+      BountyAssignment: {
+        select: {
+          Bounty: {
+            select: {
+              title: true
+            }
+          },
+          User: {
+            select: {
+              username: true
+            }
+          }
+        }
+      }
+    }
+  })
+
+  return payments
 }
