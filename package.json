@@ -12,7 +12,7 @@
     "test": "dotenv -e .env.test -- jest",
     "test:seed": "dotenv -e .env.test -- ts-node prisma/seeds/testSeed.ts",
     "test:unit": "dotenv -e .env.test -- jest unit",
-    "test:e2e": "dotenv -e .env.test -- npx prisma migrate deploy && dotenv -e .env.test -- jest e2e --forceExit --detectOpenHandles",
+    "test:e2e": "dotenv -e .env.test -- jest e2e --forceExit --detectOpenHandles",
     "build": "tsc",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down"

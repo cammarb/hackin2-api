@@ -23,7 +23,8 @@ async function main() {
       username: 'john.doe',
       email: 'john.doe@email.com',
       password: hashedPassword,
-      role: Role.ENTERPRISE
+      role: Role.ENTERPRISE,
+      stripeAccountId: 'john.doeStripeAccountId'
     }
   })
 
@@ -33,6 +34,8 @@ async function main() {
     create: {
       name: 'TestCompany',
       website: 'testcompany.com',
+      stripeAccountId: 'companyStripeAccountId',
+      email: 'companyEmail',
       CompanyMember: {
         create: {
           userId: adminUser.id,
@@ -114,7 +117,8 @@ async function main() {
       username: 'jane.doe',
       email: 'jane.doe@email.com',
       password: hashedPassword,
-      role: Role.PENTESTER
+      role: Role.PENTESTER,
+      stripeAccountId: 'jane.doeStripeAccountId'
     }
   })
 }

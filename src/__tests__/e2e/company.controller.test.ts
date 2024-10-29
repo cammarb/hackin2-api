@@ -4,7 +4,7 @@ import {
   getCompanyByIdController
 } from '../../company/company.controller'
 import { prismaMock } from '../__mocks__/prismaMock'
-import { CompanyRole, Role } from '@prisma/client'
+import { type Company, CompanyRole } from '@prisma/client'
 
 const mockCompanyMembers = [
   {
@@ -23,14 +23,14 @@ const mockCompanyMembers = [
   }
 ]
 
-const mockCompany = {
+const mockCompany: Company = {
   id: 'testId',
   name: 'Test Company',
-  ownerId: 'testOwnerId',
-  CompanyMember: mockCompanyMembers,
+  email: 'company@email.com',
   website: 'https://testCompany.com',
   createdAt: new Date(),
-  updatedAt: new Date()
+  updatedAt: new Date(),
+  stripeAccountId: 'companyStripeAccountId'
 }
 
 describe('getCompany function', () => {

@@ -23,7 +23,15 @@ describe('GET /programs', () => {
     app = await createServer()
     const users = await prisma.user.findMany()
     user = users[0]
-    const prismaPrograms = await prisma.program.findMany()
+    const prismaPrograms = await prisma.program.findMany({
+      include: {
+        Company: {
+          select: {
+            name: true
+          }
+        }
+      }
+    })
     companyId = prismaPrograms[0].companyId
     programs = JSON.parse(JSON.stringify(prismaPrograms))
     tokens = await generateTokens(user)

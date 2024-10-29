@@ -45,7 +45,7 @@ jest.mock('nodemailer', () => ({
       from: 'test@email.com',
       to: 'test@email.com',
       subject: 'Hackin2 - Verification Code',
-      text: `Your OTP code is: `
+      text: 'Your OTP code is: '
     })
   })
 }))
@@ -132,7 +132,8 @@ describe('handleLogin function', () => {
       mfa: false,
       confirmed: false,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      stripeAccountId: 'testStripeAccountId'
     }
 
     const tokens = {
@@ -157,9 +158,16 @@ describe('handleLogin function', () => {
 
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({
-      user: user.username,
-      role: user.role,
-      token: 'mockAccessToken'
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        token: tokens.accessToken,
+        company: {
+          id: undefined,
+          role: undefined
+        }
+      }
     })
     expect(res.cookie).toHaveBeenCalledWith('jwt', 'mockRefreshToken', {
       httpOnly: true,
@@ -199,7 +207,8 @@ describe('handleLogin function', () => {
       mfa: false,
       confirmed: false,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      stripeAccountId: 'testStripeAccountId'
     }
 
     bcryptCompare.mockResolvedValue(false)
@@ -246,7 +255,8 @@ describe('handleRefreshToken', () => {
       mfa: false,
       confirmed: false,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      stripeAccountId: 'testStripeAccountId'
     }
     const refreshToken = {
       id: '1',
@@ -284,9 +294,16 @@ describe('handleRefreshToken', () => {
 
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({
-      user: user.username,
-      role: user.role,
-      token: newTokens.accessToken.hashedToken
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        token: newTokens.accessToken.hashedToken,
+        company: {
+          id: undefined,
+          role: undefined
+        }
+      }
     })
     expect(res.cookie).toHaveBeenCalledWith('jwt', 'mockRefreshToken', {
       httpOnly: true,
