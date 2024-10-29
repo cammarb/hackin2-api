@@ -39,7 +39,8 @@ describe('CheckEnterprise middleware function', () => {
       mfa: false,
       confirmed: false,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      stripeAccountId: 'testStripeAccountId'
     }
 
     prismaMock.user.findUnique.mockResolvedValueOnce(null)
@@ -60,7 +61,8 @@ describe('CheckEnterprise middleware function', () => {
       mfa: false,
       confirmed: false,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      stripeAccountId: 'testStripeAccountId'
     }
     const companyMember = {
       userId: '1',
@@ -91,7 +93,8 @@ describe('CheckEnterprise middleware function', () => {
       mfa: false,
       confirmed: false,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      stripeAccountId: 'testStripeAccountId'
     }
     prismaMock.user.findUnique.mockResolvedValue(user)
 
