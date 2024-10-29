@@ -54,7 +54,7 @@ jobs:
     name: Deploy to Azure Staging
     runs-on: ubuntu-latest
     needs: integration-test
-    if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'pull_request' }}
+    if: ${{ github.ref != 'refs/head/main' }}
     
     steps:
       - name: Check out code
