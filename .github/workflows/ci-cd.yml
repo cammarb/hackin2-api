@@ -75,8 +75,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/${{ env.DOCKER_IMAGE_NAME }}:${TAG_NAME} .
-          docker push ghcr.io/${{ github.repository }}/${{ env.DOCKER_IMAGE_NAME }}:${TAG_NAME}
+          docker build -t ghcr.io/${{ github.repository }}/${{ env.DOCKER_IMAGE_NAME }}:latest .
+          docker push ghcr.io/${{ github.repository }}/${{ env.DOCKER_IMAGE_NAME }}:latest
 
       - name: Deploy to Azure Web App (Staging)
         uses: azure/webapps-deploy@v2
