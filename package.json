@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "API for the Hackin2 Platform.",
   "repository": {
-    "url": "https://github.com/cammarb/Hackin2-API"
+    "url": "https://github.com/cammarb/hackin2-api"
   },
   "main": "server.ts",
   "scripts": {
