@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node-postgres
 {
-	"name": "Node.js & PostgreSQL",
+	"name": "Node.js, PostgreSQL, PgAdmin and Redis",
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "app",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
@@ -15,17 +15,14 @@
 		3000,
 		5432,
 		8080,
-		6379,
-		5540
+		6379
 	],
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "sudo npm i && sudo chmod +x generate_keys.sh && sudo ./generate_keys.sh && sudo cp .env.example -r .env && sudo npx prisma db push && sudo npx prisma db seed",
+	"postAttachCommand": "npm ci && ./generate-keys.sh && cp .env.example -r .env && npx prisma db push && npx prisma db seed",
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"dbaeumer.vscode-eslint",
-				"VisualStudioExptTeam.vscodeintellicode",
-				"esbenp.prettier-vscode",
+				"biomejs.biome",
 				"Prisma.prisma"
 			]
 		}

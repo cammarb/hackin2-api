@@ -1,26 +1,26 @@
-import { SessionData } from 'express-session'
+import type { SessionData } from 'express-session'
 import prisma from '../utils/client'
 import hashToken from '../utils/hash'
 import { generateRandomPassword } from '../utils/passwordGenerator'
-import { CompanyMember, CompanyRole, Role } from '@prisma/client'
+import { type CompanyMember, CompanyRole, Role } from '@prisma/client'
 
 export const getCompanyMembers = async (session: SessionData['user']) => {
   const user = session.username
-  const companyId = session.company
+  const companyId = session.company?.id
 
   const companyMembers = await prisma.companyMember.findMany({
     where: {
-      companyId: companyId,
+      companyId: companyId
     },
     include: {
       User: {
         select: {
           email: true,
           firstName: true,
-          lastName: true,
-        },
-      },
-    },
+          lastName: true
+        }
+      }
+    }
   })
 
   return companyMembers
@@ -28,9 +28,9 @@ export const getCompanyMembers = async (session: SessionData['user']) => {
 
 export const addCompanyMember = async (
   email: string,
-  session: SessionData['user'],
+  session: SessionData['user']
 ) => {
-  const companyId = session.company
+  const companyId = session.company?.id
 
   if (!companyId) throw new Error('Missing companyId')
 
@@ -45,16 +45,16 @@ export const addCompanyMember = async (
       firstName: '',
       lastName: '',
       password: password,
-      role: 'ENTERPRISE',
-    },
+      role: 'ENTERPRISE'
+    }
   })
 
   const companyMember: CompanyMember = await prisma.companyMember.create({
     data: {
       companyId: companyId,
       companyRole: 'MEMBER',
-      userId: user.id,
-    },
+      userId: user.id
+    }
   })
 
   return companyMember
@@ -63,17 +63,17 @@ export const addCompanyMember = async (
 export const getCompanyMemberById = async (id: string) => {
   const companyMember = await prisma.companyMember.findUnique({
     where: {
-      userId: id,
+      userId: id
     },
     include: {
       User: {
         select: {
           email: true,
           firstName: true,
-          lastName: true,
-        },
-      },
-    },
+          lastName: true
+        }
+      }
+    }
   })
 
   return companyMember
@@ -87,11 +87,11 @@ export const editCompanyMember = async (id: string, role: CompanyRole) => {
 
   const companyMember = await prisma.companyMember.update({
     where: {
-      userId: id,
+      userId: id
     },
     data: {
-      companyRole: companyRole,
-    },
+      companyRole: companyRole
+    }
   })
 
   return companyMember
@@ -100,8 +100,8 @@ export const editCompanyMember = async (id: string, role: CompanyRole) => {
 export const deleteCompanyMember = async (id: string) => {
   const companyMember = await prisma.companyMember.findUnique({
     where: {
-      userId: id,
-    },
+      userId: id
+    }
   })
 
   return companyMember

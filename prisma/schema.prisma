@@ -26,21 +26,26 @@ enum CompanyRole {
 }
 
 model User {
-  id        String   @id @unique @default(uuid())
-  firstName String
-  lastName  String
-  username  String   @unique
-  email     String   @unique
-  password  String
-  mfa       Boolean  @default(false)
-  confirmed Boolean  @default(false) // User must confirm the account through email
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  role      Role
+  id              String   @id @unique @default(uuid())
+  firstName       String
+  lastName        String
+  username        String   @unique
+  email           String   @unique
+  password        String
+  mfa             Boolean  @default(false)
+  confirmed       Boolean  @default(false) // User must confirm the account through email
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  role            Role
+  stripeAccountId String?  @unique
 
-  RefreshToken  RefreshToken[]
+  RefreshToken RefreshToken[]
+
   CompanyMember CompanyMember?
-  Submissions   Submissions[]
+  Program       Program[]
+
+  Application      Application[]
+  BountyAssignment BountyAssignment[]
 }
 
 model RefreshToken {
@@ -54,9 +59,11 @@ model RefreshToken {
 }
 
 model Company {
-  id      String  @id @unique @default(uuid())
-  name    String  @unique
-  website String?
+  id              String  @id @unique @default(uuid())
+  name            String  @unique
+  website         String?
+  email           String
+  stripeAccountId String  @unique
 
   CompanyMember CompanyMember[]
   Program       Program[]
@@ -72,6 +79,7 @@ model CompanyMember {
   companyRole CompanyRole
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  Payments    Payments[]
 
   @@id([userId, companyId])
 }
@@ -97,41 +105,21 @@ model Program {
   Scope          Scope[]
   Bounty         Bounty[]
   SeverityReward SeverityReward[]
-  Submissions    Submissions[]
-}
 
-model Submissions {
-  id               String           @id @unique @default(uuid())
-  programId        String
-  Program          Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
-  userId           String
-  User             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  asset            String
-  Severity         SeverityReward   @relation(fields: [severityRewardId], references: [id], onDelete: Cascade)
-  severityRewardId String
-  evidence         String
-  impact           String
-  findings         String[]
-  status           SubmissionStatus @default(PENDING)
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  User     User?      @relation(fields: [userId], references: [id])
+  userId   String?
+  Payments Payments[]
 
-  @@unique([programId, userId])
-}
-
-enum SubmissionStatus {
-  PENDING
-  REVIEWED
-  RESOLVED
-  REJECTED
+  @@index([programStatus])
 }
 
 model Scope {
-  id          String  @id @unique @default(uuid())
+  id          String   @id @unique @default(uuid())
   name        String
   description String
   programId   String
-  Program     Program @relation(fields: [programId], references: [id])
+  Program     Program  @relation(fields: [programId], references: [id])
+  Bounty      Bounty[]
 }
 
 enum Severity {
@@ -142,24 +130,140 @@ enum Severity {
 }
 
 model SeverityReward {
-  id          String        @id @unique @default(uuid())
-  severity    Severity
-  min         Decimal
-  max         Decimal
-  programId   String
-  Program     Program       @relation(fields: [programId], references: [id])
-  Bounty      Bounty[]
-  Submissions Submissions[]
+  id        String   @id @unique @default(uuid())
+  severity  Severity
+  min       Decimal
+  max       Decimal
+  programId String
+  Program   Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  Bounty    Bounty[]
 
   @@unique([programId, severity])
 }
 
+model Application {
+  id        String            @id @unique @default(uuid())
+  User      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  Bounty    Bounty            @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  bountyId  String
+  status    ApplicationStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  BountyAssignment BountyAssignment?
+
+  @@unique([bountyId, userId])
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 model Bounty {
-  id               String         @id @unique @default(uuid())
-  title            String
-  description      String
+  id          String @id @unique @default(uuid())
+  title       String
+  description String
+  notes       String
+
   severityRewardId String
   SeverityReward   SeverityReward @relation(fields: [severityRewardId], references: [id])
-  programId        String
-  Program          Program        @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  programId String
+  Program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  status BountyStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Scope   Scope?  @relation(fields: [scopeId], references: [id])
+  scopeId String?
+
+  assignedUsers BountyAssignment[]
+  Application   Application[]
+
+  @@unique([title, programId])
+}
+
+enum BountyStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+}
+
+model BountyAssignment {
+  bountyId String
+  Bounty   Bounty @relation(fields: [bountyId], references: [id], onDelete: Cascade)
+  userId   String
+  User     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status BountyStatus @default(IN_PROGRESS)
+
+  assignedAt DateTime @default(now())
+
+  applicationId String      @unique
+  Application   Application @relation(fields: [applicationId], references: [id])
+
+  Submission Submission?
+
+  Payment Payments?
+
+  @@id([bountyId, userId])
+  @@index([status])
+}
+
+model Submission {
+  id               String           @id @unique @default(uuid())
+  bountyId         String
+  userId           String
+  BountyAssignment BountyAssignment @relation(fields: [bountyId, userId], references: [bountyId, userId], onDelete: Cascade)
+
+  asset    String
+  evidence String
+  impact   String
+  findings String[]
+  status   SubmissionStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([bountyId, userId])
+}
+
+enum SubmissionStatus {
+  PENDING
+  IN_REVIEW
+  REVIEWED
+  RESOLVED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAYED
+}
+
+model Payments {
+  id               String        @id @unique @default(uuid())
+  stripeCheckoutId String        @unique
+  amount           Int
+  status           PaymentStatus @default(PENDING)
+
+  programId String
+  Program   Program @relation(fields: [programId], references: [id])
+
+  bountyId         String
+  userId           String
+  BountyAssignment BountyAssignment @relation(fields: [bountyId, userId], references: [bountyId, userId], onDelete: Cascade)
+
+  companyId            String
+  memberId             String
+  PayedByCompanyMember CompanyMember @relation(fields: [companyId, memberId], references: [companyId, userId])
+
+  payedAt DateTime @default(now())
+
+  @@unique([bountyId, userId])
+  @@index([stripeCheckoutId, bountyId, userId, programId])
 }

@@ -1,5 +1,21 @@
-import { Request, Response } from 'express'
+import type { NextFunction, Request, Response } from 'express'
 import { editCompany, getCompanies, getCompanyById } from './company.service'
+
+export const newCompanyController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const company = await getCompanies()
+
+    if (!company) return res.status(404).json({ error: 'Resource not found' })
+
+    return res.status(200).json({ company: company })
+  } catch (error) {
+    next(error)
+  }
+}
 
 export const getCompaniesController = async (req: Request, res: Response) => {
   try {
@@ -25,7 +41,7 @@ export const getCompanyByIdController = async (req: Request, res: Response) => {
     if (!company) return res.status(404).json({ error: 'Resource not found' })
 
     return res.status(200).json({
-      message: `Welcome to Company ${company?.name}.`,
+      message: `Welcome to Company ${company?.name}.`
     })
   } catch (error) {
     return res.status(500).json({ error: 'Internal Server Error' })
@@ -45,7 +61,7 @@ export const editCompanyController = async (req: Request, res: Response) => {
     const company = await editCompany(id, body)
 
     return res.status(200).json({
-      company,
+      company
     })
   } catch (error) {
     return res.status(500).json({ error: 'Internal Server Error' })

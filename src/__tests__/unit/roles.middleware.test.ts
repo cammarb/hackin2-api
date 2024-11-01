@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express'
+import type { Request, Response, NextFunction } from 'express'
 import { checkEnterprise } from '../../middleware/roles.middleware'
 import { allowedRoles } from '../../middleware/roles.middleware'
 import { prismaMock } from '../__mocks__/prismaMock'
@@ -16,13 +16,13 @@ describe('CheckEnterprise middleware function', () => {
           id: 1,
           logged_in: true,
           username: 'username',
-          role: Role.ENTERPRISE,
-        },
-      },
+          role: Role.ENTERPRISE
+        }
+      }
     }
     res = {
       status: jest.fn(() => res),
-      json: jest.fn(),
+      json: jest.fn()
     }
     next = jest.fn()
   })
@@ -40,6 +40,7 @@ describe('CheckEnterprise middleware function', () => {
       confirmed: false,
       createdAt: new Date(),
       updatedAt: new Date(),
+      stripeAccountId: 'testStripeAccountId'
     }
 
     prismaMock.user.findUnique.mockResolvedValueOnce(null)
@@ -61,13 +62,14 @@ describe('CheckEnterprise middleware function', () => {
       confirmed: false,
       createdAt: new Date(),
       updatedAt: new Date(),
+      stripeAccountId: 'testStripeAccountId'
     }
     const companyMember = {
       userId: '1',
       companyId: '1',
       companyRole: CompanyRole.ADMIN,
       createdAt: new Date(),
-      updatedAt: new Date(),
+      updatedAt: new Date()
     }
     prismaMock.user.findUnique.mockResolvedValue(user)
     prismaMock.companyMember.findUnique.mockResolvedValue(companyMember)
@@ -92,6 +94,7 @@ describe('CheckEnterprise middleware function', () => {
       confirmed: false,
       createdAt: new Date(),
       updatedAt: new Date(),
+      stripeAccountId: 'testStripeAccountId'
     }
     prismaMock.user.findUnique.mockResolvedValue(user)
 
@@ -106,13 +109,17 @@ describe('allowedRoles middleware function', () => {
   let next: NextFunction
   beforeAll(() => {
     req = {
-      userId: '1',
-      companyId: '1',
-      companyRole: CompanyRole.ADMIN,
+      session: {
+        user: {
+          userId: '1',
+          companyId: '1',
+          companyRole: CompanyRole.ADMIN
+        }
+      }
     }
     res = {
       status: jest.fn(() => res),
-      json: jest.fn(),
+      json: jest.fn()
     }
     next = jest.fn()
   })
@@ -123,7 +130,7 @@ describe('allowedRoles middleware function', () => {
       companyId: '1',
       companyRole: CompanyRole.ADMIN,
       createdAt: new Date(),
-      updatedAt: new Date(),
+      updatedAt: new Date()
     }
 
     prismaMock.companyMember.findUnique.mockResolvedValue(companyMember)
@@ -139,7 +146,7 @@ describe('allowedRoles middleware function', () => {
       companyId: '1',
       companyRole: CompanyRole.MEMBER,
       createdAt: new Date(),
-      updatedAt: new Date(),
+      updatedAt: new Date()
     }
 
     prismaMock.companyMember.findUnique.mockResolvedValue(companyMember)
@@ -148,7 +155,7 @@ describe('allowedRoles middleware function', () => {
     await middleware(req, res, next)
     expect(res.status).toHaveBeenCalledWith(403)
     expect(res.status().json).toHaveBeenCalledWith({
-      error: 'Unauthorized',
+      error: 'Unauthorized'
     })
   })
 
@@ -159,7 +166,7 @@ describe('allowedRoles middleware function', () => {
     await middleware(req, res, next)
     expect(res.status).toHaveBeenCalledWith(400)
     expect(res.status().json).toHaveBeenCalledWith({
-      error: 'Error getting authorization.',
+      error: 'Error getting authorization.'
     })
   })
 })

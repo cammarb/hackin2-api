@@ -1,10 +1,12 @@
 import {
+  ApplicationStatus,
+  BountyStatus,
   CompanyRole,
   PrismaClient,
   ProgramStatus,
   Role,
   Severity,
-  User,
+  User
 } from '@prisma/client'
 import hashToken from '../../src/utils/hash'
 
@@ -13,7 +15,7 @@ const prisma = new PrismaClient()
 async function main() {
   // Default password. On first login we can change the password
   const password = 'Welcome2Hackin2!'
-  let hashedPassword = await hashToken(password)
+  const hashedPassword = await hashToken(password)
 
   const adminUser = await prisma.user.upsert({
     where: { username: 'user.admin' },
@@ -24,8 +26,8 @@ async function main() {
       username: 'user.admin',
       email: 'user.admin@code.berlin',
       password: hashedPassword,
-      role: Role.ENTERPRISE,
-    },
+      role: Role.ENTERPRISE
+    }
   })
 
   const memberUser = await prisma.user.upsert({
@@ -37,92 +39,8 @@ async function main() {
       username: 'user.member',
       email: 'user.member@code.berlin',
       password: hashedPassword,
-      role: Role.ENTERPRISE,
-    },
-  })
-
-  const company = await prisma.company.upsert({
-    where: { name: 'Hackin2' },
-    update: {},
-    create: {
-      name: 'Hackin2',
-      website: 'hackin2.com',
-      CompanyMember: {
-        create: [
-          {
-            userId: adminUser.id,
-            companyRole: CompanyRole.OWNER,
-          },
-          {
-            userId: memberUser.id,
-            companyRole: CompanyRole.MEMBER,
-          },
-        ],
-      },
-      Program: {
-        create: [
-          {
-            name: 'Program A',
-            description: 'This is the description for Program A',
-            location: 'Berlin',
-            SeverityReward: {
-              create: [
-                {
-                  severity: Severity.LOW,
-                  min: 50,
-                  max: 200,
-                },
-                {
-                  severity: Severity.MEDIUM,
-                  min: 250,
-                  max: 1000,
-                },
-                {
-                  severity: Severity.HIGH,
-                  min: 1500,
-                  max: 4000,
-                },
-                {
-                  severity: Severity.CRITICAL,
-                  min: 5000,
-                  max: 10000,
-                },
-              ],
-            },
-          },
-          {
-            name: 'Program B',
-            description: 'This is the description for Program B',
-            location: 'Berlin',
-            programStatus: ProgramStatus.ACTIVE,
-            SeverityReward: {
-              create: [
-                {
-                  severity: Severity.LOW,
-                  min: 50,
-                  max: 200,
-                },
-                {
-                  severity: Severity.MEDIUM,
-                  min: 250,
-                  max: 1000,
-                },
-                {
-                  severity: Severity.HIGH,
-                  min: 1500,
-                  max: 4000,
-                },
-                {
-                  severity: Severity.CRITICAL,
-                  min: 5000,
-                  max: 10000,
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
+      role: Role.ENTERPRISE
+    }
   })
 
   const pentesterUser = await prisma.user.upsert({
@@ -133,10 +51,156 @@ async function main() {
       lastName: 'Pentester',
       username: 'user.pentester',
       email: 'user.pentester@code.berlin',
+      stripeAccountId: 'acct_1Q2xjUQtZSE0pPgU',
       password: hashedPassword,
-      role: Role.PENTESTER,
-    },
+      role: Role.PENTESTER
+    }
   })
+
+  const company = await prisma.company.upsert({
+    where: { name: 'Hackin2' },
+    update: {},
+    create: {
+      name: 'Hackin2',
+      website: 'hackin2.com',
+      stripeAccountId: 'cus_QwZW1fxF5sdkHz',
+      email: 'user.admin@code.berlin',
+      CompanyMember: {
+        create: [
+          {
+            userId: adminUser.id,
+            companyRole: CompanyRole.OWNER
+          },
+          {
+            userId: memberUser.id,
+            companyRole: CompanyRole.MEMBER
+          }
+        ]
+      },
+      Program: {
+        create: [
+          {
+            name: 'Program A',
+            description: 'This is the description for Program A',
+            location: 'Berlin',
+            programStatus: ProgramStatus.ACTIVE,
+            SeverityReward: {
+              create: [
+                {
+                  severity: Severity.LOW,
+                  min: 50,
+                  max: 200
+                },
+                {
+                  severity: Severity.MEDIUM,
+                  min: 250,
+                  max: 1000
+                },
+                {
+                  severity: Severity.HIGH,
+                  min: 1500,
+                  max: 4000
+                },
+                {
+                  severity: Severity.CRITICAL,
+                  min: 5000,
+                  max: 10000
+                }
+              ]
+            }
+          },
+          {
+            name: 'Program B',
+            description: 'This is the description for Program B',
+            location: 'Berlin',
+
+            SeverityReward: {
+              create: [
+                {
+                  severity: Severity.LOW,
+                  min: 50,
+                  max: 200
+                },
+                {
+                  severity: Severity.MEDIUM,
+                  min: 250,
+                  max: 1000
+                },
+                {
+                  severity: Severity.HIGH,
+                  min: 1500,
+                  max: 4000
+                },
+                {
+                  severity: Severity.CRITICAL,
+                  min: 5000,
+                  max: 10000
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  })
+
+  const program = await prisma.program.findFirst({
+    include: {
+      SeverityReward: {
+        select: {
+          id: true
+        }
+      }
+    }
+  })
+
+  if (program && program.SeverityReward.length > 0) {
+    const bounty = await prisma.bounty.upsert({
+      where: {
+        title_programId: {
+          title: 'Retrieve folder',
+          programId: program.id
+        }
+      },
+      update: {},
+      create: {
+        title: 'Retrieve folder',
+        description: 'Retrieve folder in second floor room.',
+        notes:
+          'Take into consideration that taking pictures of individuals is not permitted.',
+        programId: program?.id,
+        status: BountyStatus.IN_PROGRESS,
+        severityRewardId: program?.SeverityReward[0].id
+      }
+    })
+
+    const bountyApplication = await prisma.application.upsert({
+      where: {
+        bountyId_userId: {
+          bountyId: bounty.id,
+          userId: pentesterUser.id
+        }
+      },
+      update: {},
+      create: {
+        userId: pentesterUser.id,
+        bountyId: bounty.id,
+        status: ApplicationStatus.ACCEPTED
+      }
+    })
+
+    const bountyAssignment = await prisma.bountyAssignment.upsert({
+      where: {
+        bountyId_userId: { bountyId: bounty.id, userId: pentesterUser.id }
+      },
+      update: {},
+      create: {
+        userId: pentesterUser.id,
+        bountyId: bounty.id,
+        applicationId: bountyApplication.id
+      }
+    })
+  }
 }
 
 main()

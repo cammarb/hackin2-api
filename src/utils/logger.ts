@@ -1,10 +1,10 @@
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 import morgan from 'morgan'
 
 export const logger = () => {
   morgan.token('id', (req: Request) => req.id || '-')
   morgan.token('status', (req: Request, res: Response) =>
-    res.statusCode.toString(),
+    res.statusCode.toString()
   )
   morgan.token('error', (req: Request, res: Response) => req.err || 'null')
 

@@ -1,18 +1,39 @@
 import { Router } from 'express'
 import {
-  handleLogOut,
-  handleLogin,
-  handleRefreshToken,
-  handleRegistration,
-  handleSession,
-  validateOTP,
+  validateBody,
+  validateCookies,
+  ValidationCriteria
+} from '../middleware/params.middleware'
+import type { LoginUserBody, NewUserBody } from '../user/user.dto'
+import {
+  loginController,
+  logoutController,
+  refreshTokenController,
+  registrationController,
+  sessionController,
+  validateOTP
 } from './auth.controller'
 
 export const authRouter: Router = Router()
 
-authRouter.post('/login', handleLogin)
-authRouter.post('/register', handleRegistration)
-authRouter.post('/logout', handleLogOut)
-authRouter.get('/refresh', handleRefreshToken)
-authRouter.get('/session', handleSession)
+authRouter.post(
+  '/login',
+  validateBody<LoginUserBody>(['username', 'password'], ValidationCriteria.ALL),
+  loginController
+)
+authRouter.post(
+  '/register',
+  validateBody<NewUserBody>(
+    ['firstName', 'lastName', 'email', 'username', 'role', 'password'],
+    ValidationCriteria.ALL
+  ),
+  registrationController
+)
+authRouter.get(
+  '/refresh',
+  validateCookies(['jwt'], ValidationCriteria.ALL),
+  refreshTokenController
+)
+authRouter.post('/logout', logoutController)
+authRouter.get('/session', sessionController)
 authRouter.get('/validateOTP', validateOTP)

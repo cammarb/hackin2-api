@@ -18,7 +18,7 @@ Repository for the Hackin2 API, built using `Express.js` with `Typescript`. The 
 
 ## Introduction
 
-Hackin2 is a platform that helps companies and cybersecurity freelancers connect.
+Hackin2 is a platform that helps companies and physical pentesters connect.
 This repository contains the backend API, which provides the necessary endpoints for the Hackin2 web application to interact with the database, cache storage, handle user authentication, authorization and manage security-related tasks.
 
 ![diagram](docs/current-infrastructure.drawio.svg)
@@ -28,6 +28,7 @@ This repository contains the backend API, which provides the necessary endpoints
 - User authentication and authorization with `JWT` and `Sessions`.
 - Role base access control: `COMPANY`, `PENTESTER`.
 - Programs management and tracking.
+- Bounty creating and management.
 - Findings reporting and management.
 - Security event logging and monitoring (TBD)
 - User activity and access control.
@@ -66,25 +67,17 @@ You can setup the project manually or by opening the devcontainer enviroment
 
 This section assumes **you know how to work with docker.**
 
-1. Generate private/public keys
+1. Run the dev-starter script
 
-   - MacOS/Linux
-     ```bash
-     .generate_keys.sh
-     ```
+```bash
+./dev-starter.sh
+```
 
-2. Create docker images with compose
-   
-   Run this command in your terminal
+If you open the file you'll see that this is creating the .env file from the .env.example. 
+To make the app run, the contents in the .env file are sufficient, however to be able to send e-mails,
+save images to Cloudinary and make payments with Stripe, you'll need your API keys.
 
-   ```bash
-   docker compose up -d
-   ```
-
-3. Create .env file
-
-   Before running the API, you need to set up the configuration.
-   Copy the .env.example file and rename it to .env, then fill in the appropriate values for the environment variables
+If you encounter an error or problem, please create an issue.
 
 #### Dev Container
 

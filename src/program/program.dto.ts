@@ -1,4 +1,4 @@
-import { ProgramStatus } from '@prisma/client'
+import type { ProgramStatus } from '@prisma/client'
 
 export interface ProgramQueryParams {
   status?: string

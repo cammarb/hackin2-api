@@ -6,7 +6,7 @@ export const generateRandomPassword = async () => {
     numbers: true,
     uppercase: true,
     lowercase: true,
-    symbols: true,
+    symbols: true
   })
 
   return password

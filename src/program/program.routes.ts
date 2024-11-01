@@ -1,23 +1,23 @@
 import { Router } from 'express'
 import {
+  validateBody,
+  validateParams,
+  validateQuery,
+  ValidationCriteria
+} from '../middleware/params.middleware'
+import { checkEnterprise } from '../middleware/roles.middleware'
+import {
   addProgramController,
   deleteProgramController,
   editProgramController,
   getProgramByIdController,
-  getProgramsController,
+  getProgramsController
 } from './program.controller'
-import { checkEnterprise } from '../middleware/roles.middleware'
-import {
-  validateBody,
-  validateParams,
-  validateQuery,
-  ValidationCriteria,
-} from '../middleware/params.middleware'
-import {
+import type {
   NewProgramBody,
   NewProgramQuery,
   ProgramQueryParams,
-  UpdateProgramBody,
+  UpdateProgramBody
 } from './program.dto'
 
 export const programRouter: Router = Router()
@@ -25,21 +25,21 @@ export const programRouter: Router = Router()
 programRouter.get(
   '/',
   validateQuery<ProgramQueryParams>(['company', 'status']),
-  getProgramsController,
+  getProgramsController
 )
 programRouter.post(
   '/new',
-  validateParams<NewProgramQuery>(['company'], ValidationCriteria.ALL),
+  validateQuery<NewProgramQuery>(['company'], ValidationCriteria.ALL),
   validateBody<NewProgramBody>(
     ['name', 'location', 'description'],
-    ValidationCriteria.ALL,
+    ValidationCriteria.ALL
   ),
-  addProgramController,
+  addProgramController
 )
 programRouter.get(
   '/:id',
   validateParams(['id'], ValidationCriteria.ALL),
-  getProgramByIdController,
+  getProgramByIdController
 )
 programRouter.put(
   '/:id/edit',
@@ -47,13 +47,13 @@ programRouter.put(
   validateParams(['id'], ValidationCriteria.ALL),
   validateBody<UpdateProgramBody>(
     ['name', 'description', 'location', 'programStatus'],
-    ValidationCriteria.AT_LEAST_ONE,
+    ValidationCriteria.AT_LEAST_ONE
   ),
-  editProgramController,
+  editProgramController
 )
 programRouter.put(
   '/:id/edit',
   checkEnterprise,
   validateParams(['id'], ValidationCriteria.ALL),
-  deleteProgramController,
+  deleteProgramController
 )

@@ -36,15 +36,15 @@ describe('Send OTP email', () => {
       service: process.env.OTP_SERVICE,
       auth: {
         user: process.env.OTP_USER,
-        pass: process.env.OTP_PASS,
-      },
+        pass: process.env.OTP_PASS
+      }
     })
 
     expect(mockSendMail).toHaveBeenCalledWith({
       from: process.env.OTP_USER,
       to: email,
       subject: 'Hackin2 - Verification Code',
-      text: `Your OTP code is: ${otp}`,
+      text: `Your OTP code is: ${otp}`
     })
   })
 })
