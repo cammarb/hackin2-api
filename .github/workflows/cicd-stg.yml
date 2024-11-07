@@ -41,8 +41,8 @@ jobs:
           context: .
           push: true
           tags: |
-            type=sha,format=short
-            type=ref,ref=main,label=latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha::7 }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
 
   deploy:
