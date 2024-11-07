@@ -40,8 +40,9 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            type=sha,format=short
+            type=ref,ref=main,label=latest
 
 
   deploy:
