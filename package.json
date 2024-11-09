@@ -17,7 +17,7 @@
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "start": "node dist/app.js",
-    "start:migrate": "prisma migrate deploy && npm run start:prod"
+    "start:migrate": "prisma migrate deploy && prisma db seed && npm run start"
   },
   "prisma": {
     "seed": "ts-node prisma/seeds/seed.ts"
