@@ -1,9 +1,12 @@
 import RedisStore from 'connect-redis'
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 import session, { Session } from 'express-session'
 import { createClient } from 'redis'
 
-const redisClient = createClient()
+const redisClient = createClient({
+  url: `redis://${process.env.CACHE_HOSTNAME}:${process.env.CACHE_PORT}`,
+  password: process.env.CACHE_PASS
+})
 
 redisClient.on('error', (err) => console.log('Redis Client Error', err))
 
