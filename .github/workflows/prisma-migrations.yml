@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - prisma/migrations/**
+      - .github/workflows/prisma-migrations.yml
     branches: [ "**" ]
 
 jobs:
