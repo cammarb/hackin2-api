@@ -5,7 +5,7 @@
   "repository": {
     "url": "https://github.com/cammarb/hackin2-api"
   },
-  "main": "server.ts",
+  "main": "app.ts",
   "scripts": {
     "start:dev_env": "./dev-starter.sh",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
@@ -15,9 +15,7 @@
     "test:e2e": "dotenv -e .env.test -- jest e2e --forceExit --detectOpenHandles",
     "build": "tsc",
     "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "start": "node dist/src/app.js",
-    "start:migrate": "prisma migrate deploy && node dist/prisma/seeds/seed.js && npm run start"
+    "docker:down": "docker-compose down"
   },
   "prisma": {
     "seed": "ts-node prisma/seeds/seed.ts"
