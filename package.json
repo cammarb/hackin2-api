@@ -16,8 +16,8 @@
     "build": "tsc",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
-    "start": "node dist/app.js",
-    "start:migrate": "prisma migrate deploy && prisma db seed && npm run start"
+    "start": "node dist/src/app.js",
+    "start:migrate": "prisma migrate deploy && node dist/prisma/seeds/seed.js && npm run start"
   },
   "prisma": {
     "seed": "ts-node prisma/seeds/seed.ts"

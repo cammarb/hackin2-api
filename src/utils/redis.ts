@@ -3,9 +3,13 @@ import { randomUUID } from 'node:crypto'
 import session, { Session } from 'express-session'
 import { createClient } from 'redis'
 
+const host = process.env.CACHE_HOSTNAME || 'localhost'
+const port = process.env.CACHE_PORT || '6379'
+const password = process.env.CACHE_PASS || ''
+
 const redisClient = createClient({
-  url: `redis://${process.env.CACHE_HOSTNAME}:${process.env.CACHE_PORT}`,
-  password: process.env.CACHE_PASS
+  url: `redis://${host}:${port}`,
+  password: password
 })
 
 redisClient.on('error', (err) => console.log('Redis Client Error', err))
