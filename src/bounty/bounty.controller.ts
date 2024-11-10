@@ -11,6 +11,7 @@ import {
 import type { BountyAssignmentsQuery } from './bounty.dto'
 import { MissingParameterError, ResourceNotFoundError } from '../error/apiError'
 import type { SessionData } from 'express-session'
+import { redisClient } from '../utils/redis'
 
 export const getBountiesController = async (
   req: Request,
@@ -20,12 +21,21 @@ export const getBountiesController = async (
   try {
     const user = req.session.user as SessionData['user']
     const queryParams = req.query
+    const cacheKey = `bounties${req.url.split('/')[1]}`
+
+    const cachedBounties = await redisClient.get(cacheKey)
+    if (cachedBounties)
+      return res
+        .status(200)
+        .json({ bounties: JSON.parse(cachedBounties), cache: true })
 
     const bounties = await getBounties(queryParams, user)
-
     if (bounties.length <= 0)
       return res.status(200).json({ message: 'No bounties yet' })
-    res.status(200).json({ bounties: bounties })
+
+    await redisClient.set(cacheKey, JSON.stringify(bounties), { EX: 500 })
+
+    return res.status(200).json({ bounties: bounties })
   } catch (error) {
     next(error)
   }
