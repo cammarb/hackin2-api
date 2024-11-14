@@ -1,4 +1,6 @@
 import {
+  ApplicationStatus,
+  BountyStatus,
   CompanyRole,
   PrismaClient,
   ProgramStatus,
@@ -121,6 +123,64 @@ async function main() {
       stripeAccountId: 'jane.doeStripeAccountId'
     }
   })
+
+  const program = await prisma.program.findFirst({
+    include: {
+      SeverityReward: {
+        select: {
+          id: true
+        }
+      }
+    }
+  })
+
+  if (program && program.SeverityReward.length > 0) {
+    const bounty = await prisma.bounty.upsert({
+      where: {
+        title_programId: {
+          title: 'Retrieve folder',
+          programId: program.id
+        }
+      },
+      update: {},
+      create: {
+        title: 'Retrieve folder',
+        description: 'Retrieve folder in second floor room.',
+        notes:
+          'Take into consideration that taking pictures of individuals is not permitted.',
+        programId: program?.id,
+        status: BountyStatus.IN_PROGRESS,
+        severityRewardId: program?.SeverityReward[0].id
+      }
+    })
+
+    const bountyApplication = await prisma.application.upsert({
+      where: {
+        bountyId_userId: {
+          bountyId: bounty.id,
+          userId: pentesterUser.id
+        }
+      },
+      update: {},
+      create: {
+        userId: pentesterUser.id,
+        bountyId: bounty.id,
+        status: ApplicationStatus.ACCEPTED
+      }
+    })
+
+    const bountyAssignment = await prisma.bountyAssignment.upsert({
+      where: {
+        bountyId_userId: { bountyId: bounty.id, userId: pentesterUser.id }
+      },
+      update: {},
+      create: {
+        userId: pentesterUser.id,
+        bountyId: bounty.id,
+        applicationId: bountyApplication.id
+      }
+    })
+  }
 }
 
 main()

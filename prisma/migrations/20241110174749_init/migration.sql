@@ -19,6 +19,9 @@ CREATE TYPE "BountyStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'DONE');
 -- CreateEnum
 CREATE TYPE "SubmissionStatus" AS ENUM ('PENDING', 'IN_REVIEW', 'REVIEWED', 'RESOLVED');
 
+-- CreateEnum
+CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'PAYED');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
@@ -32,6 +35,7 @@ CREATE TABLE "User" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "role" "Role" NOT NULL,
+    "stripeAccountId" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -53,6 +57,8 @@ CREATE TABLE "Company" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "website" TEXT,
+    "email" TEXT NOT NULL,
+    "stripeAccountId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -123,11 +129,10 @@ CREATE TABLE "Bounty" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "notes" TEXT,
+    "notes" TEXT NOT NULL,
     "severityRewardId" TEXT NOT NULL,
     "programId" TEXT NOT NULL,
     "status" "BountyStatus" NOT NULL DEFAULT 'PENDING',
-    "scope" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "scopeId" TEXT,
@@ -137,20 +142,19 @@ CREATE TABLE "Bounty" (
 
 -- CreateTable
 CREATE TABLE "BountyAssignment" (
-    "id" TEXT NOT NULL,
     "bountyId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "status" "BountyStatus" NOT NULL DEFAULT 'IN_PROGRESS',
     "assignedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "applicationId" TEXT NOT NULL,
 
-    CONSTRAINT "BountyAssignment_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "BountyAssignment_pkey" PRIMARY KEY ("bountyId","userId")
 );
 
 -- CreateTable
-CREATE TABLE "Submissions" (
+CREATE TABLE "Submission" (
     "id" TEXT NOT NULL,
-    "bountyAssignmentId" TEXT NOT NULL,
+    "bountyId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "asset" TEXT NOT NULL,
     "evidence" TEXT NOT NULL,
@@ -159,9 +163,24 @@ CREATE TABLE "Submissions" (
     "status" "SubmissionStatus" NOT NULL DEFAULT 'PENDING',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "programId" TEXT,
 
-    CONSTRAINT "Submissions_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Submission_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Payments" (
+    "id" TEXT NOT NULL,
+    "stripeCheckoutId" TEXT NOT NULL,
+    "amount" INTEGER NOT NULL,
+    "status" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
+    "programId" TEXT NOT NULL,
+    "bountyId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "companyId" TEXT NOT NULL,
+    "memberId" TEXT NOT NULL,
+    "payedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Payments_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -172,6 +191,9 @@ CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_stripeAccountId_key" ON "User"("stripeAccountId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "RefreshToken_id_key" ON "RefreshToken"("id");
@@ -186,6 +208,9 @@ CREATE UNIQUE INDEX "Company_id_key" ON "Company"("id");
 CREATE UNIQUE INDEX "Company_name_key" ON "Company"("name");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Company_stripeAccountId_key" ON "Company"("stripeAccountId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "CompanyMember_userId_key" ON "CompanyMember"("userId");
 
 -- CreateIndex
@@ -193,6 +218,9 @@ CREATE UNIQUE INDEX "Program_id_key" ON "Program"("id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Program_name_key" ON "Program"("name");
+
+-- CreateIndex
+CREATE INDEX "Program_programStatus_idx" ON "Program"("programStatus");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Scope_id_key" ON "Scope"("id");
@@ -213,16 +241,31 @@ CREATE UNIQUE INDEX "Application_bountyId_userId_key" ON "Application"("bountyId
 CREATE UNIQUE INDEX "Bounty_id_key" ON "Bounty"("id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "BountyAssignment_id_key" ON "BountyAssignment"("id");
+CREATE UNIQUE INDEX "Bounty_title_programId_key" ON "Bounty"("title", "programId");
 
 -- CreateIndex
-CREATE INDEX "BountyAssignment_bountyId_userId_idx" ON "BountyAssignment"("bountyId", "userId");
+CREATE UNIQUE INDEX "BountyAssignment_applicationId_key" ON "BountyAssignment"("applicationId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Submissions_id_key" ON "Submissions"("id");
+CREATE INDEX "BountyAssignment_status_idx" ON "BountyAssignment"("status");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Submissions_bountyAssignmentId_userId_key" ON "Submissions"("bountyAssignmentId", "userId");
+CREATE UNIQUE INDEX "Submission_id_key" ON "Submission"("id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Submission_bountyId_userId_key" ON "Submission"("bountyId", "userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Payments_id_key" ON "Payments"("id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Payments_stripeCheckoutId_key" ON "Payments"("stripeCheckoutId");
+
+-- CreateIndex
+CREATE INDEX "Payments_stripeCheckoutId_bountyId_userId_programId_idx" ON "Payments"("stripeCheckoutId", "bountyId", "userId", "programId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Payments_bountyId_userId_key" ON "Payments"("bountyId", "userId");
 
 -- AddForeignKey
 ALTER TABLE "RefreshToken" ADD CONSTRAINT "RefreshToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -243,7 +286,7 @@ ALTER TABLE "Program" ADD CONSTRAINT "Program_userId_fkey" FOREIGN KEY ("userId"
 ALTER TABLE "Scope" ADD CONSTRAINT "Scope_programId_fkey" FOREIGN KEY ("programId") REFERENCES "Program"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SeverityReward" ADD CONSTRAINT "SeverityReward_programId_fkey" FOREIGN KEY ("programId") REFERENCES "Program"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "SeverityReward" ADD CONSTRAINT "SeverityReward_programId_fkey" FOREIGN KEY ("programId") REFERENCES "Program"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Application" ADD CONSTRAINT "Application_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -270,10 +313,13 @@ ALTER TABLE "BountyAssignment" ADD CONSTRAINT "BountyAssignment_userId_fkey" FOR
 ALTER TABLE "BountyAssignment" ADD CONSTRAINT "BountyAssignment_applicationId_fkey" FOREIGN KEY ("applicationId") REFERENCES "Application"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Submissions" ADD CONSTRAINT "Submissions_bountyAssignmentId_fkey" FOREIGN KEY ("bountyAssignmentId") REFERENCES "BountyAssignment"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Submission" ADD CONSTRAINT "Submission_bountyId_userId_fkey" FOREIGN KEY ("bountyId", "userId") REFERENCES "BountyAssignment"("bountyId", "userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Submissions" ADD CONSTRAINT "Submissions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Payments" ADD CONSTRAINT "Payments_programId_fkey" FOREIGN KEY ("programId") REFERENCES "Program"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Submissions" ADD CONSTRAINT "Submissions_programId_fkey" FOREIGN KEY ("programId") REFERENCES "Program"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Payments" ADD CONSTRAINT "Payments_bountyId_userId_fkey" FOREIGN KEY ("bountyId", "userId") REFERENCES "BountyAssignment"("bountyId", "userId") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Payments" ADD CONSTRAINT "Payments_companyId_memberId_fkey" FOREIGN KEY ("companyId", "memberId") REFERENCES "CompanyMember"("companyId", "userId") ON DELETE RESTRICT ON UPDATE CASCADE;

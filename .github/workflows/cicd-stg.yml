@@ -11,8 +11,50 @@ on:
   workflow_dispatch:
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Clean install node packages
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Generate key-pair
+        run: ./generate-keys.sh
+
+      - name: Set up Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Start test containers and run migrations
+        run: ./integration-starter.sh
+
+      - name: Run tests
+        run: npm test
+
+      - name: Tear down Docker services
+        if: always()
+        run: docker compose -f test-compose.yml down
+
   build:
     runs-on: ubuntu-latest
+    needs: test
 
     permissions:
       contents: read
