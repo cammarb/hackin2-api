@@ -4,7 +4,7 @@ import prisma from '../../utils/client'
 import { redisClient } from '../../utils/redis'
 import { getBounties } from '../../bounty/bounty.service'
 import request from 'supertest'
-import type { Program, User } from '@prisma/client'
+import type { Program, Role, User } from '@prisma/client'
 import type { SessionData } from 'express-session'
 
 jest.setTimeout(30000)
@@ -14,7 +14,6 @@ let app: Application
 let user: any
 let bounties: any
 let program: Program
-let role: string
 let loginResponse: any
 let userSession: SessionData['user']
 
@@ -27,7 +26,7 @@ describe('GET Bounties from a Program', () => {
       logged_in: true,
       id: user.id,
       username: user.username,
-      role: user.role,
+      role: user.role as Role,
       company: {
         id: user.CompanyMember?.companyId,
         role: user.CompanyMember?.companyRole
