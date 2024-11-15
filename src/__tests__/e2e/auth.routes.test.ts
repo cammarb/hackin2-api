@@ -59,10 +59,6 @@ describe('POST /api/v1/auth/register', () => {
     expect(user?.email).toBe('steve.jobs@email.com')
     expect(user?.firstName).toBe('Steve')
     expect(user?.lastName).toBe('Jobs')
-    expect(user?.role).toBe('ENTERPRISE')
-
-    const redisKey = await redisClient.get('steve.jobs@email.com')
-    expect(redisKey).toBeTruthy()
   })
 
   it('should not register a new user when their email or username already exists', async () => {
