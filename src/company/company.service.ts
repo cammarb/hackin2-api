@@ -7,9 +7,8 @@ export const newCompany = async (body: {
   name: string
   website: string
   email: string
-  stripeAccountId: string
 }) => {
-  const { name, website, email, stripeAccountId } = body
+  const { name, website, email } = body
 
   const customerAccount = await stripeNewCustomerAccount({ email, name })
 

@@ -1,5 +1,11 @@
 import type { NextFunction, Request, Response } from 'express'
-import { editCompany, getCompanies, getCompanyById } from './company.service'
+import {
+  editCompany,
+  getCompanies,
+  getCompanyById,
+  newCompany
+} from './company.service'
+import { addCompanyMember } from '../companyMember/companyMember.service'
 
 export const newCompanyController = async (
   req: Request,
@@ -7,8 +13,8 @@ export const newCompanyController = async (
   next: NextFunction
 ) => {
   try {
-    const company = await getCompanies()
-
+    const body = req.body
+    const company = await newCompany(body)
     if (!company) return res.status(404).json({ error: 'Resource not found' })
 
     return res.status(200).json({ company: company })
