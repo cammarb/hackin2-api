@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express'
 import {
-  addCompanyMember,
+  inviteCompanyMember,
   deleteCompanyMember,
   editCompanyMember,
   getCompanyMemberById,
@@ -31,23 +31,23 @@ export const getCompanyMembersController = async (
   }
 }
 
-export const addCompanyMembersController = async (
+export const inviteCompanyMembersController = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const session = req.session.user as SessionData['user']
     const email = req.body.email
+    const companyId = req.body.companyId
 
-    if (!email || !session)
+    if (!email || !companyId)
       return res
         .status(400)
         .json({ error: 'Request parameters or body missing' })
 
-    const companyMember = await addCompanyMember(email, session)
+    const companyMember = await inviteCompanyMember(email, companyId)
 
-    res.status(200).json({ message: `Invitation sent` })
+    res.status(200).json({ message: 'Invitation sent' })
   } catch (error) {
     next(error)
   }
@@ -79,7 +79,7 @@ export const getCompanyMemberByIdController = async (
 }
 
 export const editCompanyMemberController = async (
-  req: Request | any,
+  req: Request,
   res: Response
 ) => {
   try {
@@ -105,7 +105,7 @@ export const editCompanyMemberController = async (
 }
 
 export const deleteCompanyMemberController = async (
-  req: Request | any,
+  req: Request,
   res: Response
 ) => {
   try {
@@ -119,7 +119,7 @@ export const deleteCompanyMemberController = async (
     const member = await deleteCompanyMember(id)
 
     res.status(200).json({
-      message: `Member was successfully removed.`
+      message: 'Member was successfully removed.'
     })
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })

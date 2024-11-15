@@ -23,6 +23,11 @@ export interface NewUserBody {
   email: string
   password: string
   role: Role
+  company?: {
+    name: string
+    website: string
+    email: string
+  }
 }
 
 export interface LoginUserBody {

@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { allowedRoles } from '../middleware/roles.middleware'
 import {
-  addCompanyMembersController,
+  inviteCompanyMembersController,
   deleteCompanyMemberController,
   editCompanyMemberController,
   getCompanyMemberByIdController,
@@ -16,9 +16,9 @@ companyMemberRouter.get(
   getCompanyMembersController
 )
 companyMemberRouter.post(
-  '/new',
+  '/invite',
   allowedRoles(['OWNER', 'ADMIN']),
-  addCompanyMembersController
+  inviteCompanyMembersController
 )
 companyMemberRouter.get(
   '/:id',

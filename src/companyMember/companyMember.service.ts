@@ -27,13 +27,24 @@ export const getCompanyMembers = async (session: SessionData['user']) => {
 }
 
 export const addCompanyMember = async (
-  email: string,
-  session: SessionData['user']
+  company: string,
+  body: { email: string; name: string; website: string },
+  user: string
 ) => {
-  const companyId = session.company?.id
+  const { email, name, website } = body
 
-  if (!companyId) throw new Error('Missing companyId')
+  const companyMember: CompanyMember = await prisma.companyMember.create({
+    data: {
+      companyId: company,
+      companyRole: CompanyRole.OWNER,
+      userId: user
+    }
+  })
 
+  return companyMember
+}
+
+export const inviteCompanyMember = async (email: string, companyId: string) => {
   const username = email.split('@')[0]
   const randomPassword = await generateRandomPassword()
   const password = await hashToken(randomPassword)
