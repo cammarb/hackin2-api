@@ -25,6 +25,8 @@ import hashToken from '../utils/hash'
 import { generateOTP, sendOTPEmail } from '../utils/otp'
 import { redisClient } from '../utils/redis'
 import { loginService, refreshTokenCycleService } from './auth.service'
+import { newCompany } from '../company/company.service'
+import { addCompanyMember } from '../companyMember/companyMember.service'
 
 export const registrationController = async (
   req: Request,
@@ -39,8 +41,19 @@ export const registrationController = async (
     const otp = generateOTP()
 
     const user: User = await createUser(body)
-    await sendOTPEmail(user.email, otp)
+    // await sendOTPEmail(user.email, otp)
     await redisClient.set(user.email, otp, { EX: 300 })
+
+    if (body.company) {
+      const company = await newCompany(body.company)
+      if (!company) return res.status(404).json({ error: 'Resource not found' })
+
+      const companyMember = await addCompanyMember(
+        company.id,
+        body.company,
+        user.id
+      )
+    }
 
     return res.status(201).json({ success: 'User created successfully' })
   } catch (err) {
