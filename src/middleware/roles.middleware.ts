@@ -5,7 +5,7 @@ import prisma from '../utils/client'
 import type { SessionData } from 'express-session'
 
 const checkPentester = async (
-  req: Request | any,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
@@ -41,7 +41,7 @@ const checkPentester = async (
 }
 
 const checkEnterprise = async (
-  req: Request | any,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
@@ -83,7 +83,7 @@ const checkEnterprise = async (
 
 const allowedRoles =
   (roles: string[]) =>
-  async (req: Request | any, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userSession = req.session.user as SessionData['user']
 
