@@ -12,6 +12,7 @@ on:
 
 jobs:
   test:
+    name: 'lint and test'
     runs-on: ubuntu-latest
 
     strategy:
@@ -31,26 +32,14 @@ jobs:
       - name: Clean install node packages
         run: npm ci
 
-      - name: Build
-        run: npm run build
-
-      - name: Generate key-pair
-        run: ./generate-keys.sh
-
-      - name: Set up Docker
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose
-
-      - name: Start test containers and run migrations
-        run: ./integration-starter.sh
+      - name: Lint code with Biome
+        run: npm run lint
 
       - name: Run tests
         run: npm test
-
-      - name: Tear down Docker services
-        if: always()
-        run: docker compose -f test-compose.yml down
+      
+      - name: Build
+        run: npm run build
 
   build:
     runs-on: ubuntu-latest

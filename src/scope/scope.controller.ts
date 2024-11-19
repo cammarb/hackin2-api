@@ -2,12 +2,12 @@ import type { Request, Response } from 'express'
 import { addScope, deleteScope, getScopes } from './scope.service'
 import type { ScopeQueryParams } from './scope.dto'
 
-export const addScopeController = async (req: Request | any, res: Response) => {
+export const addScopeController = async (req: Request, res: Response) => {
   try {
-    const queryParams = req.queryParams
+    const queryParams = req.query as unknown as ScopeQueryParams
     const body = req.body
 
-    if (!queryParams || body)
+    if (!queryParams || !body)
       return res
         .status(400)
         .json({ error: 'Request parameters or body missing' })
@@ -54,10 +54,7 @@ export const getScopesController = async (req: Request, res: Response) => {
   }
 }
 
-export const deleteScopeController = async (
-  req: Request | any,
-  res: Response
-) => {
+export const deleteScopeController = async (req: Request, res: Response) => {
   try {
     const id = req.params.id
     if (!id)

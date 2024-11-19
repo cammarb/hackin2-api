@@ -22,6 +22,9 @@ declare global {
       err?: string
       username?: string
       role?: string
+      userId?: string
+      companyId?: string
+      companyRole?: string
     }
   }
 

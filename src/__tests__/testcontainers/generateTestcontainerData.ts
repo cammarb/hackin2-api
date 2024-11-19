@@ -2,17 +2,14 @@ import {
   ApplicationStatus,
   BountyStatus,
   CompanyRole,
-  PrismaClient,
   ProgramStatus,
   Role,
-  Severity,
-  User
+  Severity
 } from '@prisma/client'
-import hashToken from '../../src/utils/hash'
+import prisma from '../../utils/client'
+import hashToken from '../../utils/hash'
 
-const prisma = new PrismaClient()
-
-async function main() {
+export const generateTestcontainerData = async () => {
   const password = 'testpassword'
   const hashedPassword = await hashToken(password)
 
@@ -182,13 +179,3 @@ async function main() {
     })
   }
 }
-
-main()
-  .then(async () => {
-    await prisma.$disconnect()
-  })
-  .catch(async (e) => {
-    console.error(e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
