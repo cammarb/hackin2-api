@@ -2,28 +2,45 @@ import { type Application, json } from 'express'
 import createServer from '../../utils/server'
 import request from 'supertest'
 import { redisClient } from '../../utils/redis'
-import prisma from '../../utils/client'
 import { generateTokens } from '../../utils/auth'
-import type { User } from '@prisma/client'
+import { generateTestcontainerData } from '../testcontainers/generateTestcontainerData'
+import prisma from '../../utils/client'
+import { Prisma, Program, Role, User } from '@prisma/client'
 
 jest.setTimeout(30000)
 jest.unmock('../../utils/client')
 
-let app: Application
-let user: User
-let programs: any
-let companyId: string
-let tokens = {
-  accessToken: '',
-  refreshToken: ''
-}
+const programWithCompanyInclude = Prisma.validator<Prisma.ProgramInclude>()({
+  Company: {
+    select: {
+      name: true
+    }
+  }
+})
+type ProgramWithCompany = Prisma.ProgramGetPayload<{
+  include: typeof programWithCompanyInclude
+}>
 
 describe('GET /programs', () => {
+  let app: Application
+  let tokens: {
+    accessToken: string
+    refreshToken: string
+  }
+
+  let jsonPrograms: ProgramWithCompany[]
+
   beforeAll(async () => {
+    await generateTestcontainerData()
+
     app = await createServer()
-    const users = await prisma.user.findMany()
-    user = users[0]
-    const prismaPrograms = await prisma.program.findMany({
+    const user = await prisma.user.findFirst({
+      where: {
+        role: Role.ENTERPRISE
+      }
+    })
+    if (user) tokens = await generateTokens(user)
+    const programs = await prisma.program.findMany({
       include: {
         Company: {
           select: {
@@ -32,9 +49,7 @@ describe('GET /programs', () => {
         }
       }
     })
-    companyId = prismaPrograms[0].companyId
-    programs = JSON.parse(JSON.stringify(prismaPrograms))
-    tokens = await generateTokens(user)
+    jsonPrograms = JSON.parse(JSON.stringify(programs))
   })
 
   afterAll(async () => {
@@ -47,7 +62,9 @@ describe('GET /programs', () => {
       .set('Authorization', `Bearer ${tokens.accessToken}`)
 
     expect(response.status).toBe(200)
-    expect(response.body).toStrictEqual({ programs: programs })
+    expect(response.body).toStrictEqual({
+      programs: jsonPrograms
+    })
   })
 
   it('should GET ACTIVE programs', async () => {
@@ -56,15 +73,17 @@ describe('GET /programs', () => {
       .set('Authorization', `Bearer ${tokens.accessToken}`)
 
     expect(response.status).toBe(200)
-    expect(response.body).toStrictEqual({ programs: [programs[1]] })
+    expect(response.body).toStrictEqual({ programs: [jsonPrograms[1]] })
   })
 
   it('should GET Company programs', async () => {
+    const companyId = jsonPrograms[0].companyId
+
     const response = await request(app)
       .get(`/api/v1/programs?company=${companyId}`)
       .set('Authorization', `Bearer ${tokens.accessToken}`)
 
     expect(response.status).toBe(200)
-    expect(response.body).toStrictEqual({ programs: programs })
+    expect(response.body).toStrictEqual({ programs: jsonPrograms })
   })
 })
