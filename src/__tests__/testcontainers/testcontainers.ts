@@ -18,11 +18,6 @@ export const startPostgresContainer = async () => {
           target: '/docker-entrypoint-initdb.d/migration.sql'
         }
       ])
-      .withLogConsumer((stream) => {
-        stream.on('data', (line) => console.log(line))
-        stream.on('err', (line) => console.error(line))
-        stream.on('end', () => console.log('Postgres stream closed'))
-      })
       .withReuse()
 
     postgresContainer = await container.start()
@@ -35,11 +30,6 @@ export const startRedisContainer = async () => {
   if (!redisContainer) {
     const container = new GenericContainer('redis')
       .withExposedPorts({ container: 6379, host: 6379 })
-      .withLogConsumer((stream) => {
-        stream.on('data', (line) => console.log(line))
-        stream.on('err', (line) => console.error(line))
-        stream.on('end', () => console.log('Redis stream closed'))
-      })
       .withReuse()
 
     redisContainer = await container.start()
