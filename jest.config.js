@@ -5,7 +5,7 @@ module.exports = {
   roots: ['<rootDir>/src/'],
   testMatch: [
     '**/__tests__/**/*.test.ts',
-    '**/__tests__/e2e/*.test.ts',
+    '**/__tests__/integration/*.test.ts',
     '**/__tests__/unit/*.test.ts'
   ],
   transform: {
