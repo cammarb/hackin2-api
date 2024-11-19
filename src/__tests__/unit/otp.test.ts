@@ -13,7 +13,7 @@ describe('Generate OTP code', () => {
 jest.mock('nodemailer')
 
 describe('Send OTP email', () => {
-  let mockSendMail: jest.Mock<any, any, any>
+  let mockSendMail: jest.Mock
 
   beforeEach(() => {
     mockSendMail = jest.fn().mockResolvedValue('mocked response')
