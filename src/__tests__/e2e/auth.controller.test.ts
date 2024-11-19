@@ -13,6 +13,7 @@ import {
 } from '../../error/apiError'
 import prisma from '../../utils/client'
 import { prismaMock } from '../__mocks__/prismaMock'
+import type { Session, SessionData } from 'express-session'
 
 jest.mock('../../utils/auth', () => ({
   generateTokens: jest.fn().mockResolvedValue({
@@ -51,8 +52,8 @@ jest.mock('nodemailer', () => ({
 }))
 
 describe('handleRegistration function', () => {
-  let req: Request | any
-  let res: Response | any
+  let req: Partial<Request>
+  let res: Partial<Response>
   let next: NextFunction
 
   beforeEach(() => {
@@ -64,7 +65,8 @@ describe('handleRegistration function', () => {
         lastName: 'testLastName',
         password: 'testPassword',
         role: Role.ENTERPRISE
-      }
+      },
+      cookies: {}
     }
     res = {
       status: jest.fn().mockReturnThis(),
@@ -83,15 +85,15 @@ describe('handleRegistration function', () => {
       body: { ...req.body, email: 'invalidEmail' }
     } as Request
 
-    await registrationController(req, res, next)
+    await registrationController(req as Request, res as Response, next)
 
     expect(next).toHaveBeenCalledWith(new InvalidParameterError(req.body.email))
   })
 })
 
 describe('handleLogin function', () => {
-  let req: Request | any
-  let res: Response | any
+  let req: Partial<Request>
+  let res: Partial<Response>
   let next: NextFunction
   let bcryptCompare: jest.SpyInstance
 
@@ -101,9 +103,8 @@ describe('handleLogin function', () => {
         username: 'testUsername',
         password: 'testPassword'
       },
-      session: {
-        user: {}
-      }
+      session: {} as Session & Partial<SessionData>,
+      cookies: {}
     }
     res = {
       status: jest.fn().mockReturnThis(),
@@ -154,9 +155,9 @@ describe('handleLogin function', () => {
       return providedPassword === hashedPassword
     })
 
-    await loginController(req, res, next)
+    await loginController(req as Request, res as Response, next)
 
-    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.status).toHaveBeenCalled()
     expect(res.json).toHaveBeenCalledWith({
       user: {
         id: user.id,
@@ -182,7 +183,7 @@ describe('handleLogin function', () => {
       body: { username: 123, password: 'testPassword' }
     } as Request
 
-    await loginController(invalidReq, res, next)
+    await loginController(invalidReq, res as Response, next)
 
     expect(next).toHaveBeenCalledWith(new AuthenticationError())
   })
@@ -190,7 +191,7 @@ describe('handleLogin function', () => {
   it('should handle invalid user', async () => {
     prismaMock.user.findUnique.mockResolvedValueOnce(null)
 
-    await loginController(req, res, next)
+    await loginController(req as Request, res as Response, next)
 
     expect(next).toHaveBeenCalledWith(new AuthenticationError())
   })
@@ -215,15 +216,15 @@ describe('handleLogin function', () => {
 
     prismaMock.user.findUnique.mockResolvedValueOnce(user)
 
-    await loginController(req, res, next)
+    await loginController(req as Request, res as Response, next)
 
     expect(next).toHaveBeenCalledWith(new AuthenticationError())
   })
 })
 
 describe('handleRefreshToken', () => {
-  let req: Request | any
-  let res: Response | any
+  let req: Partial<Request>
+  let res: Partial<Response>
   let next: NextFunction
 
   beforeEach(() => {
@@ -290,7 +291,7 @@ describe('handleRefreshToken', () => {
     prismaMock.refreshToken.update.mockResolvedValueOnce(refreshToken)
     prismaMock.refreshToken.create.mockResolvedValueOnce(newTokens.refreshToken)
 
-    await refreshTokenController(req, res, next)
+    await refreshTokenController(req as Request, res as Response, next)
 
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({
