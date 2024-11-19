@@ -3,9 +3,8 @@ import createServer from '../../utils/server'
 import request from 'supertest'
 import { redisClient } from '../../utils/redis'
 import { generateTokens } from '../../utils/auth'
-import { generateTestcontainerData } from '../testcontainers/generateTestcontainerData'
 import prisma from '../../utils/client'
-import { Prisma, Program, Role, User } from '@prisma/client'
+import { Prisma, Role } from '@prisma/client'
 
 jest.setTimeout(30000)
 jest.unmock('../../utils/client')
