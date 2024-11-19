@@ -4,24 +4,7 @@ import {
   getCompanyByIdController
 } from '../../company/company.controller'
 import { prismaMock } from '../__mocks__/prismaMock'
-import { type Company, CompanyRole } from '@prisma/client'
-
-const mockCompanyMembers = [
-  {
-    userId: '1',
-    companyId: 'testCompanyId',
-    companyRole: CompanyRole.OWNER,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  },
-  {
-    userId: '2',
-    companyId: 'testCompanyId',
-    companyRole: CompanyRole.MEMBER,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  }
-]
+import type { Company } from '@prisma/client'
 
 const mockCompany: Company = {
   id: 'testId',
@@ -34,8 +17,8 @@ const mockCompany: Company = {
 }
 
 describe('getCompany function', () => {
-  let req: Request | any
-  let res: Response | any
+  let req: Partial<Request>
+  let res: Partial<Response>
 
   beforeEach(() => {
     req = {
@@ -77,8 +60,8 @@ describe('getCompany function', () => {
 })
 
 describe('editCompany function', () => {
-  let req: Request | any
-  let res: Response | any
+  let req: Partial<Request>
+  let res: Partial<Response>
 
   beforeEach(() => {
     req = {
