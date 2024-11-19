@@ -6,11 +6,7 @@ export const addScope = async (
   body: ScopeBody
 ) => {
   const { name, description } = body
-  let programId: string | undefined
-
-  if (!queryParams.program) throw new Error('Missing query params')
-
-  programId = queryParams.program
+  const programId = queryParams.program
 
   const scope = await prisma.scope.create({
     data: {

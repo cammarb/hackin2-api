@@ -10,7 +10,7 @@ export const logger = () => {
 
   morgan.format('custom', (tokens, req: Request, res: Response) => {
     const id = req.id
-    const time = tokens['date'](req, res, 'clf')
+    const time = tokens.date(req, res, 'clf')
     const method = tokens.method(req, res)
     const url = tokens.url(req, res)
     const status = tokens.status(req, res)
