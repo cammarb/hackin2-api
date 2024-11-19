@@ -8,7 +8,7 @@ import createServer from '../../utils/server'
 
 jest.setTimeout(60000)
 jest.mock('nodemailer')
-let mockSendMail: jest.Mock<any, any, any>
+let mockSendMail: jest.Mock
 jest.unmock('../../utils/client')
 
 const userData = {

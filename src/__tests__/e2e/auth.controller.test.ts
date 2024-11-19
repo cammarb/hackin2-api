@@ -8,8 +8,7 @@ import {
 } from '../../auth/auth.controller'
 import {
   AuthenticationError,
-  InvalidParameterError,
-  ResourceNotFoundError
+  InvalidParameterError
 } from '../../error/apiError'
 import prisma from '../../utils/client'
 import { prismaMock } from '../__mocks__/prismaMock'
