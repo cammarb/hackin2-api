@@ -51,7 +51,7 @@ describe('CheckEnterprise middleware function', () => {
 
     prismaMock.user.findUnique.mockResolvedValueOnce(null)
 
-    await checkEnterprise(req, res as Response, next)
+    await checkEnterprise(req as Request, res as Response, next)
     expect(next).toHaveBeenCalledWith(new ResourceNotFoundError())
   })
 
@@ -80,7 +80,7 @@ describe('CheckEnterprise middleware function', () => {
     prismaMock.user.findUnique.mockResolvedValue(user)
     prismaMock.companyMember.findUnique.mockResolvedValue(companyMember)
 
-    await checkEnterprise(req, res as Response, next)
+    await checkEnterprise(req as Request, res as Response, next)
     expect(next).toHaveBeenCalled()
     expect(req.session?.user).toBeDefined()
     expect(req.session?.user?.id).toBe('1')
@@ -105,7 +105,7 @@ describe('CheckEnterprise middleware function', () => {
     }
     prismaMock.user.findUnique.mockResolvedValue(user)
 
-    await checkEnterprise(req, res as Response, next)
+    await checkEnterprise(req as Request, res as Response, next)
     expect(next).toHaveBeenCalled()
   })
 })
@@ -149,7 +149,7 @@ describe('allowedRoles middleware function', () => {
     prismaMock.companyMember.findUnique.mockResolvedValue(companyMember)
 
     const middleware = allowedRoles([CompanyRole.ADMIN])
-    await middleware(req, res as Response, next)
+    await middleware(req as Request, res as Response, next)
     expect(next).toHaveBeenCalled()
   })
 
@@ -165,7 +165,7 @@ describe('allowedRoles middleware function', () => {
     prismaMock.companyMember.findUnique.mockResolvedValue(companyMember)
 
     const middleware = allowedRoles([CompanyRole.ADMIN])
-    await middleware(req, res as Response, next)
+    await middleware(req as Request, res as Response, next)
     expect(res.status).toHaveBeenCalledWith(403)
   })
 
@@ -173,7 +173,7 @@ describe('allowedRoles middleware function', () => {
     prismaMock.companyMember.findUnique.mockResolvedValue(null)
 
     const middleware = allowedRoles([CompanyRole.ADMIN])
-    await middleware(req, res as Response, next)
+    await middleware(req as Request, res as Response, next)
     expect(res.status).toHaveBeenCalledWith(400)
   })
 })
