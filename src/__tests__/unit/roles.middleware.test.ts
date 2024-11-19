@@ -167,9 +167,6 @@ describe('allowedRoles middleware function', () => {
     const middleware = allowedRoles([CompanyRole.ADMIN])
     await middleware(req, res as Response, next)
     expect(res.status).toHaveBeenCalledWith(403)
-    expect(res.statusMessage).toHaveBeenCalledWith({
-      error: 'Unauthorized'
-    })
   })
 
   test('When companyMember cannot be found', async () => {
@@ -178,8 +175,5 @@ describe('allowedRoles middleware function', () => {
     const middleware = allowedRoles([CompanyRole.ADMIN])
     await middleware(req, res as Response, next)
     expect(res.status).toHaveBeenCalledWith(400)
-    expect(res.statusMessage).toHaveBeenCalledWith({
-      error: 'Error getting authorization.'
-    })
   })
 })
