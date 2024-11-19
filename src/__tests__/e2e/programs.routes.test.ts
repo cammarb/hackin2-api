@@ -31,8 +31,6 @@ describe('GET /programs', () => {
   let jsonPrograms: ProgramWithCompany[]
 
   beforeAll(async () => {
-    await generateTestcontainerData()
-
     app = await createServer()
     const user = await prisma.user.findFirst({
       where: {

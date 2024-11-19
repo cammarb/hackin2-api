@@ -4,33 +4,34 @@ import prisma from '../../utils/client'
 import { redisClient } from '../../utils/redis'
 import { getBounties } from '../../bounty/bounty.service'
 import request from 'supertest'
-import type { Program, Role, User } from '@prisma/client'
+import { type Bounty, type Program, Role } from '@prisma/client'
 import type { SessionData } from 'express-session'
+import type supertest from 'supertest'
 
 jest.setTimeout(30000)
 jest.unmock('../../utils/client')
 
-let app: Application
-let user: any
-let bounties: any
-let program: Program
-let loginResponse: any
-let userSession: SessionData['user']
-
 describe('GET Bounties from a Program', () => {
+  let app: Application
+  let bounties: Bounty[]
+  let program: Program
+  let loginResponse: supertest.Response
+  let userSession: SessionData['user']
+
   beforeAll(async () => {
     app = await createServer()
-    const users = await prisma.user.findMany()
-    user = users[0]
+    const user = await prisma.user.findFirst({
+      where: {
+        role: Role.PENTESTER
+      }
+    })
+    if (!user) return
+
     userSession = {
       logged_in: true,
       id: user.id,
       username: user.username,
-      role: user.role as Role,
-      company: {
-        id: user.CompanyMember?.companyId,
-        role: user.CompanyMember?.companyRole
-      }
+      role: user.role as Role
     } as SessionData['user']
 
     loginResponse = await request(app)
